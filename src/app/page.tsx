@@ -51,20 +51,6 @@ export default function HomePage() {
 
   return (
     <div>
-      {/* Top Announcement Bar */}
-      <div style={{ background: 'var(--bf-primary-dark)', color: '#cbd5e1', padding: '0.6rem 0', fontSize: '0.85rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <div className="container flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="live-indicator"></span>
-            <span style={{ fontWeight: 600, color: '#ffffff' }}>LIVE EVENT NOW:</span>
-            <span>Pitch Rounds & Booth Evaluations in Progress at IMSciences Main Auditorium</span>
-          </div>
-          <Link href="/leaderboard" style={{ color: 'var(--bf-accent-gold)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-            Live Leaderboard <ArrowRight size={14} />
-          </Link>
-        </div>
-      </div>
-
       {/* Hero Section */}
       <section style={{
         background: 'linear-gradient(180deg, var(--bf-primary) 0%, var(--bf-primary-light) 60%, var(--bf-bg-page) 100%)',
@@ -81,7 +67,7 @@ export default function HomePage() {
           width: '600px',
           height: '600px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, rgba(11, 37, 69, 0) 70%)',
+          background: 'radial-gradient(circle, rgba(0, 71, 255, 0.15) 0%, rgba(10, 10, 10, 0) 70%)',
           pointerEvents: 'none',
         }}></div>
 
@@ -91,13 +77,13 @@ export default function HomePage() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.5rem',
-              background: 'rgba(212, 175, 55, 0.15)',
-              border: '1px solid rgba(212, 175, 55, 0.35)',
+              background: 'rgba(255, 210, 51, 0.15)',
+              border: '1px solid rgba(255, 210, 51, 0.35)',
               borderRadius: '9999px',
               padding: '0.4rem 1.1rem',
               fontSize: '0.88rem',
               fontWeight: 700,
-              color: 'var(--bf-accent-gold)',
+              color: '#ffd233',
               marginBottom: '1.5rem',
               letterSpacing: '0.04em',
             }}>
@@ -106,22 +92,25 @@ export default function HomePage() {
             </div>
 
             <h1 style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+              fontSize: 'clamp(2.5rem, 5.5vw, 4.4rem)',
               fontWeight: 900,
               color: '#ffffff',
               letterSpacing: '-0.02em',
               marginBottom: '1.25rem',
               lineHeight: 1.15,
+              textTransform: 'uppercase',
             }}>
-              BUSINESS FEST <span style={{ color: 'var(--bf-accent-gold)' }}>2027</span>
+              BUSINESS FEST <span style={{ color: '#0047ff' }}>2027</span>
             </h1>
 
             <p style={{
               fontSize: 'clamp(1.1rem, 2vw, 1.35rem)',
-              color: '#e2e8f0',
+              color: '#cbd5e1',
               marginBottom: '2.5rem',
               fontWeight: 400,
               lineHeight: 1.6,
+              maxWidth: '750px',
+              margin: '0 auto 2.5rem',
             }}>
               The centralized innovation showcase, venture competition, and investor platform uniting Peshawar’s boldest student founders, industry judges, and tech leaders.
             </p>
@@ -132,11 +121,11 @@ export default function HomePage() {
                 <Compass size={20} />
                 Explore Startups
               </Link>
-              <Link href="/leaderboard" className="btn btn-primary btn-lg" style={{ background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)', backdropFilter: 'blur(8px)' }}>
-                <Trophy size={20} color="var(--bf-accent-gold)" />
+              <Link href="/leaderboard" className="btn btn-primary btn-lg">
+                <Trophy size={20} color="#ffd233" />
                 Live Leaderboard
               </Link>
-              <Link href="/register" className="btn btn-secondary btn-lg" style={{ background: '#ffffff', color: 'var(--bf-primary)', border: 'none' }}>
+              <Link href="/register" className="btn btn-secondary btn-lg">
                 <PlusCircle size={20} />
                 Register Startup
               </Link>

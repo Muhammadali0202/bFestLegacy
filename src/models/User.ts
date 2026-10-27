@@ -49,5 +49,10 @@ const UserSchema = new Schema<IUser>(
   }
 );
 
-export const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+// Force refresh model schema during Next.js hot module reloads
+if (mongoose.models && mongoose.models.User) {
+  delete (mongoose.models as any).User;
+}
+
+export const User: Model<IUser> = mongoose.model<IUser>('User', UserSchema);
 export default User;

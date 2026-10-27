@@ -102,5 +102,9 @@ const StartupSchema = new Schema<IStartup>(
 StartupSchema.index({ isPublished: 1, status: 1, compositeScore: -1 });
 StartupSchema.index({ sector: 1, isPublished: 1 });
 
-export const Startup: Model<IStartup> = mongoose.models.Startup || mongoose.model<IStartup>('Startup', StartupSchema);
+if (mongoose.models && mongoose.models.Startup) {
+  delete (mongoose.models as any).Startup;
+}
+
+export const Startup: Model<IStartup> = mongoose.model<IStartup>('Startup', StartupSchema);
 export default Startup;

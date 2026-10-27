@@ -35,7 +35,9 @@ const EventConfigSchema = new Schema<IEventConfig>(
   }
 );
 
-export const EventConfig: Model<IEventConfig> = 
-  mongoose.models.EventConfig || mongoose.model<IEventConfig>('EventConfig', EventConfigSchema);
+if (mongoose.models && mongoose.models.EventConfig) {
+  delete (mongoose.models as any).EventConfig;
+}
 
+export const EventConfig: Model<IEventConfig> = mongoose.model<IEventConfig>('EventConfig', EventConfigSchema);
 export default EventConfig;

@@ -53,14 +53,20 @@ export default function Navbar() {
 
   return (
     <header className="navbar">
-      <div className="container navbar-container">
+      <div className="navbar-container">
         {/* Brand */}
-        <Link href="/" className="navbar-brand">
+        <Link href="/" className="navbar-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none', whiteSpace: 'nowrap' }}>
           <div className="navbar-logo-badge">BF</div>
-          <div className="navbar-brand-text">
-            <span className="navbar-brand-title">BUSINESS FEST 2027</span>
-            <span className="navbar-brand-sub">IMSciences Peshawar</span>
-          </div>
+          <span style={{ 
+            fontFamily: 'var(--font-display)', 
+            fontWeight: 900, 
+            fontSize: '1.15rem', 
+            color: '#ffffff', 
+            letterSpacing: '-0.01em',
+            whiteSpace: 'nowrap'
+          }}>
+            BUSINESS FEST <span style={{ color: '#ffd233' }}>2027</span>
+          </span>
         </Link>
 
         {/* Desktop Navigation Links */}
@@ -75,16 +81,22 @@ export default function Navbar() {
                     href={item.href}
                     className={`nav-link ${isActive ? 'active' : ''}`}
                     style={{
-                      display: 'flex',
+                      display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.4rem',
+                      gap: '0.35rem',
+                      whiteSpace: 'nowrap',
+                      padding: '0.32rem 0.55rem',
+                      borderRadius: '8px',
+                      fontSize: '0.84rem',
+                      fontWeight: 600,
                       color: isActive ? '#ffffff' : '#cbd5e1',
-                      borderBottom: isActive ? '2px solid var(--bf-accent-gold)' : 'none',
-                      borderRadius: isActive ? '4px 4px 0 0' : '6px',
+                      background: isActive ? 'rgba(0, 71, 255, 0.2)' : 'transparent',
+                      border: isActive ? '1px solid rgba(0, 71, 255, 0.4)' : '1px solid transparent',
+                      transition: 'all 0.2s ease',
                     }}
                   >
-                    {Icon && <Icon size={16} />}
-                    {item.label}
+                    {Icon && <Icon size={14} />}
+                    <span>{item.label}</span>
                   </Link>
                 </li>
               );
@@ -97,16 +109,22 @@ export default function Navbar() {
                   href={rolePortal.href}
                   className={`nav-link ${pathname === rolePortal.href ? 'active' : ''}`}
                   style={{
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '0.4rem',
-                    color: pathname === rolePortal.href ? '#ffffff' : '#d4af37',
+                    gap: '0.35rem',
+                    whiteSpace: 'nowrap',
+                    padding: '0.32rem 0.55rem',
+                    borderRadius: '8px',
+                    fontSize: '0.84rem',
                     fontWeight: 700,
-                    borderBottom: pathname === rolePortal.href ? '2px solid var(--bf-accent-gold)' : 'none',
+                    color: pathname === rolePortal.href ? '#ffffff' : '#ffd233',
+                    background: pathname === rolePortal.href ? 'rgba(255, 210, 51, 0.15)' : 'transparent',
+                    border: pathname === rolePortal.href ? '1px solid rgba(255, 210, 51, 0.4)' : '1px solid transparent',
+                    transition: 'all 0.2s ease',
                   }}
                 >
-                  <rolePortal.icon size={16} />
-                  {rolePortal.label}
+                  <rolePortal.icon size={14} />
+                  <span>{rolePortal.label}</span>
                 </Link>
               </li>
             )}
@@ -118,14 +136,22 @@ export default function Navbar() {
                   href="/register"
                   className={`nav-link ${pathname === '/register' ? 'active' : ''}`}
                   style={{
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '0.4rem',
+                    gap: '0.35rem',
+                    whiteSpace: 'nowrap',
+                    padding: '0.32rem 0.55rem',
+                    borderRadius: '8px',
+                    fontSize: '0.84rem',
+                    fontWeight: 600,
                     color: pathname === '/register' ? '#ffffff' : '#cbd5e1',
+                    background: pathname === '/register' ? 'rgba(0, 71, 255, 0.2)' : 'transparent',
+                    border: pathname === '/register' ? '1px solid rgba(0, 71, 255, 0.4)' : '1px solid transparent',
+                    transition: 'all 0.2s ease',
                   }}
                 >
-                  <PlusCircle size={16} />
-                  Register Startup
+                  <PlusCircle size={14} />
+                  <span>Register Startup</span>
                 </Link>
               </li>
             )}
@@ -137,14 +163,22 @@ export default function Navbar() {
                   href="/investor"
                   className={`nav-link ${pathname === '/investor' ? 'active' : ''}`}
                   style={{
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '0.4rem',
+                    gap: '0.35rem',
+                    whiteSpace: 'nowrap',
+                    padding: '0.32rem 0.55rem',
+                    borderRadius: '8px',
+                    fontSize: '0.84rem',
+                    fontWeight: 600,
                     color: pathname === '/investor' ? '#ffffff' : '#cbd5e1',
+                    background: pathname === '/investor' ? 'rgba(0, 71, 255, 0.2)' : 'transparent',
+                    border: pathname === '/investor' ? '1px solid rgba(0, 71, 255, 0.4)' : '1px solid transparent',
+                    transition: 'all 0.2s ease',
                   }}
                 >
-                  <Briefcase size={16} />
-                  Investor Hub
+                  <Briefcase size={14} />
+                  <span>Investor Hub</span>
                 </Link>
               </li>
             )}
@@ -156,14 +190,22 @@ export default function Navbar() {
                   href="/judge"
                   className={`nav-link ${pathname === '/judge' ? 'active' : ''}`}
                   style={{
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '0.4rem',
+                    gap: '0.35rem',
+                    whiteSpace: 'nowrap',
+                    padding: '0.32rem 0.55rem',
+                    borderRadius: '8px',
+                    fontSize: '0.84rem',
+                    fontWeight: 600,
                     color: pathname === '/judge' ? '#ffffff' : '#cbd5e1',
+                    background: pathname === '/judge' ? 'rgba(0, 71, 255, 0.2)' : 'transparent',
+                    border: pathname === '/judge' ? '1px solid rgba(0, 71, 255, 0.4)' : '1px solid transparent',
+                    transition: 'all 0.2s ease',
                   }}
                 >
-                  <Award size={16} />
-                  Judge Portal
+                  <Award size={14} />
+                  <span>Judge Portal</span>
                 </Link>
               </li>
             )}
@@ -171,21 +213,29 @@ export default function Navbar() {
         </nav>
 
         {/* Action Controls & User Auth Section */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0, whiteSpace: 'nowrap' }}>
           {/* Stage Shortcut */}
           <Link
             href="/leaderboard/stage"
             className="btn btn-outline-gold btn-sm"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '0.35rem', 
+              whiteSpace: 'nowrap',
+              padding: '0.32rem 0.65rem',
+              fontSize: '0.82rem',
+              fontWeight: 700
+            }}
             title="Open Fullscreen Stage & Auditorium Mode"
           >
-            <MonitorPlay size={15} />
+            <MonitorPlay size={14} />
             <span className="hide-on-mobile">Stage</span>
           </Link>
 
           {/* User Auth Buttons / Profile Badge */}
           {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', whiteSpace: 'nowrap' }}>
               <Link
                 href={
                   user.role === 'student' ? '/student' :
@@ -193,22 +243,23 @@ export default function Navbar() {
                   user.role === 'judge' ? '/judge' : '/admin'
                 }
                 style={{
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.4rem',
                   background: 'rgba(255,255,255,0.1)',
-                  padding: '0.35rem 0.65rem',
+                  padding: '0.3rem 0.6rem',
                   borderRadius: '10px',
                   color: '#ffffff',
                   fontSize: '0.82rem',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 <div style={{
                   width: '24px',
                   height: '24px',
                   borderRadius: '50%',
-                  background: user.role === 'investor' ? '#10b981' : user.role === 'judge' ? '#d4af37' : user.role === 'admin' ? '#ef4444' : '#3b82f6',
-                  color: '#ffffff',
+                  background: user.role === 'investor' ? '#10b981' : user.role === 'judge' ? '#ffd233' : user.role === 'admin' ? '#ef4444' : '#0047ff',
+                  color: user.role === 'judge' ? '#0a0a0a' : '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -229,28 +280,42 @@ export default function Navbar() {
                 onClick={() => logout()}
                 className="btn btn-secondary btn-sm"
                 title="Log Out"
-                style={{ padding: '0.4rem 0.6rem', color: '#cbd5e1' }}
+                style={{ padding: '0.35rem 0.55rem', color: '#cbd5e1' }}
               >
-                <LogOut size={16} />
+                <LogOut size={15} />
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', whiteSpace: 'nowrap' }}>
               <Link
                 href="/login"
                 className="btn btn-secondary btn-sm"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem' }}
+                style={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '0.35rem', 
+                  fontSize: '0.82rem', 
+                  padding: '0.32rem 0.7rem',
+                  whiteSpace: 'nowrap' 
+                }}
               >
-                <LogIn size={15} />
+                <LogIn size={14} />
                 <span>Log In</span>
               </Link>
               <Link
                 href="/signup"
                 className="btn btn-primary btn-sm"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem' }}
+                style={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '0.35rem', 
+                  fontSize: '0.82rem', 
+                  padding: '0.32rem 0.7rem',
+                  whiteSpace: 'nowrap' 
+                }}
               >
-                <UserPlus size={15} />
-                <span className="hide-on-mobile">Sign Up</span>
+                <UserPlus size={14} />
+                <span>Sign Up</span>
               </Link>
             </div>
           )}
@@ -260,9 +325,9 @@ export default function Navbar() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="btn btn-secondary btn-sm mobile-menu-toggle"
             aria-label="Toggle navigation menu"
-            style={{ padding: '0.4rem', display: 'flex' }}
+            style={{ padding: '0.35rem 0.45rem', display: 'flex' }}
           >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </div>
@@ -399,12 +464,30 @@ export default function Navbar() {
       )}
 
       <style jsx>{`
-        @media (min-width: 900px) {
+        @media (min-width: 1024px) {
           .desktop-nav {
             display: block !important;
           }
           .mobile-menu-toggle {
             display: none !important;
+          }
+        }
+        @media (max-width: 1023px) {
+          .desktop-nav {
+            display: none !important;
+          }
+          .mobile-menu-toggle {
+            display: flex !important;
+          }
+        }
+        @media (min-width: 1024px) and (max-width: 1220px) {
+          .desktop-nav :global(.nav-link) {
+            padding: 0.28rem 0.45rem !important;
+            font-size: 0.78rem !important;
+            gap: 0.25rem !important;
+          }
+          .desktop-nav :global(.nav-links) {
+            gap: 0.15rem !important;
           }
         }
         @media (max-width: 600px) {

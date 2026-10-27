@@ -1,0 +1,24 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Next.js build output
+/.next/
+/out/
+/build
+
+# Environment files
+.env*.local
+.env
+
+# TypeScript
+*.tsbuildinfo
+
+# OS & IDE files
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/

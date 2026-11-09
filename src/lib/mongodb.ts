@@ -1,4 +1,11 @@
 import mongoose from 'mongoose';
+import dns from 'dns';
+
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch (_) {
+  // Ignore if DNS servers cannot be overridden in restricted runtime
+}
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/bfest_db';
 

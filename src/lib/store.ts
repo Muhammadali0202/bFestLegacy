@@ -32,6 +32,8 @@ let memUsers: (User & { passwordHash: string })[] = initialUsers.map(u => ({
   passwordHash: hashPassword(
     u.role === 'admin' ? 'admin123' :
     u.role === 'judge' ? 'judge123' :
+    u.role === 'student_affairs' ? 'affairs123' :
+    u.role === 'registration_team' ? 'reg123' :
     u.role === 'investor' ? 'investor123' : 'student123'
   )
 }));
@@ -952,6 +954,39 @@ export const UserRepository = {
     }
 
     return memUsers.filter(u => u.role === 'judge').map(toUserObject);
+  },
+
+  getAllManagedAccounts: async (): Promise<User[]> => {
+    const hasDb = await initDb();
+
+    if (hasDb) {
+      try {
+        const docs = await UserModel.find({}).sort({ createdAt: -1 });
+        return docs.map(toUserObject);
+      } catch (e) {
+        console.error('Error fetching managed accounts from MongoDB:', e);
+      }
+    }
+
+    return memUsers.map(toUserObject);
+  },
+
+  deleteUser: async (id: string): Promise<{ success: boolean; error?: string }> => {
+    const hasDb = await initDb();
+
+    if (hasDb) {
+      try {
+        await UserModel.findByIdAndDelete(id);
+        return { success: true };
+      } catch (e: any) {
+        console.error('Error deleting user in MongoDB:', e);
+      }
+    }
+
+    const idx = memUsers.findIndex(u => u.id === id);
+    if (idx === -1) return { success: false, error: 'User not found.' };
+    memUsers.splice(idx, 1);
+    return { success: true };
   }
 };
 

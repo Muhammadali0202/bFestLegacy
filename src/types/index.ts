@@ -1,6 +1,6 @@
 export type StartupStatus = 'pending' | 'approved' | 'rejected';
 
-export type UserRole = 'admin' | 'student' | 'investor' | 'judge';
+export type UserRole = 'admin' | 'student' | 'investor' | 'judge' | 'student_affairs' | 'registration_team';
 
 export interface User {
   id: string;

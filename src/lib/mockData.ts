@@ -71,6 +71,26 @@ export const initialUsers: (User & { passwordHash: string })[] = [
     institution: 'IMSciences Peshawar (BS Software Engineering)',
     createdAt: '2027-01-15T00:00:00Z',
   },
+  {
+    id: 'user-sa-1',
+    fullName: 'Student Affairs Office (IMSciences)',
+    email: 'studentaffairs@imsciences.edu.pk',
+    passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', // affairs123
+    role: 'student_affairs',
+    isApproved: true,
+    institution: 'IMSciences Peshawar - Student Affairs',
+    createdAt: '2027-01-08T00:00:00Z',
+  },
+  {
+    id: 'user-reg-1',
+    fullName: 'Registration Team (IMSciences)',
+    email: 'registration@imsciences.edu.pk',
+    passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', // reg123
+    role: 'registration_team',
+    isApproved: true,
+    institution: 'IMSciences Peshawar - Registration Desk',
+    createdAt: '2027-01-09T00:00:00Z',
+  },
 ];
 
 export const initialStartups: Startup[] = [

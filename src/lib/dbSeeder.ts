@@ -107,6 +107,22 @@ export async function seedDatabaseIfEmpty() {
       teamName: 'Khyber Innovators Team',
       institution: 'IMSciences Peshawar (BS Software Engineering)',
     },
+    {
+      fullName: 'Student Affairs Office (IMSciences)',
+      email: 'studentaffairs@imsciences.edu.pk',
+      passwordHash: hashPassword('affairs123'),
+      role: 'student_affairs',
+      isApproved: true,
+      institution: 'IMSciences Peshawar - Student Affairs',
+    },
+    {
+      fullName: 'Registration Team (IMSciences)',
+      email: 'registration@imsciences.edu.pk',
+      passwordHash: hashPassword('reg123'),
+      role: 'registration_team',
+      isApproved: true,
+      institution: 'IMSciences Peshawar - Registration Desk',
+    },
   ];
 
   for (const u of seedUsersList) {

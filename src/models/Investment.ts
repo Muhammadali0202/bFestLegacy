@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface IInvestment extends Document {
   startupId: mongoose.Types.ObjectId;
   startupName: string;
-  investorId: mongoose.Types.ObjectId;
+  investorId: string;
   investorName: string;
   firmName?: string;
   amount: number; // In PKR
@@ -18,7 +18,7 @@ const InvestmentSchema = new Schema<IInvestment>(
   {
     startupId: { type: Schema.Types.ObjectId, ref: 'Startup', required: true, index: true },
     startupName: { type: String, required: true },
-    investorId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    investorId: { type: String, required: true, index: true },
     investorName: { type: String, required: true },
     firmName: { type: String },
     amount: { type: Number, required: true, min: 0 },

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { UserRepository } from '@/lib/store';
 import { UserRole } from '@/types';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const users = await UserRepository.getAllManagedAccounts();

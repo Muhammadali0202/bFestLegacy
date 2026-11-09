@@ -9,7 +9,7 @@ import {
   Investment 
 } from '@/types';
 import { initialStartups, initialEventConfig, initialUsers, initialInvestments } from './mockData';
-import connectToDatabase from './mongodb';
+import connectToDatabase, { isMongoConnected } from './mongodb';
 import { 
   Startup as StartupModel, 
   JudgeEvaluation as JudgeEvalModel, 
@@ -40,19 +40,50 @@ let memUsers: (User & { passwordHash: string })[] = initialUsers.map(u => ({
 let memInvestments: Investment[] = [...initialInvestments];
 
 let isDbInitialized = false;
+let lastDbError: string | null = null;
 
-async function initDb(): Promise<boolean> {
-  if (isDbInitialized) return true;
+export async function initDb(): Promise<boolean> {
+  if (isDbInitialized && isMongoConnected()) return true;
   try {
     await connectToDatabase();
-    await seedDatabaseIfEmpty();
-    isDbInitialized = true;
-    console.log('✓ Successfully connected to MongoDB.');
+    if (!isDbInitialized) {
+      await seedDatabaseIfEmpty();
+      isDbInitialized = true;
+    }
+    lastDbError = null;
     return true;
   } catch (err) {
-    console.warn('⚠️ MongoDB connection not available. Operating in in-memory fallback mode.', (err as Error).message);
+    lastDbError = (err as Error).message;
+    console.warn('⚠️ MongoDB connection not available. Operating in in-memory fallback mode.', lastDbError);
     return false;
   }
+}
+
+export async function getStorageDiagnostics() {
+  const connected = await initDb();
+  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/bfest_db';
+  const isCloudAtlas = uri.startsWith('mongodb+srv://');
+  if (connected) {
+    const [startupCount, userCount, investmentCount] = await Promise.all([
+      StartupModel.countDocuments(),
+      UserModel.countDocuments(),
+      InvestmentModel.countDocuments(),
+    ]);
+    return {
+      connected: true,
+      mode: isCloudAtlas ? 'MongoDB Atlas (Cloud Real-Time)' : 'MongoDB (Persistent)',
+      isCloudAtlas,
+      counts: { startups: startupCount, users: userCount, investments: investmentCount },
+      error: null,
+    };
+  }
+  return {
+    connected: false,
+    mode: 'In-Memory Fallback (Local Only - Set MONGODB_URI for Cloud Persistence)',
+    isCloudAtlas,
+    counts: { startups: memStartups.length, users: memUsers.length, investments: memInvestments.length },
+    error: lastDbError,
+  };
 }
 
 // Convert Mongoose Doc to Startup Type

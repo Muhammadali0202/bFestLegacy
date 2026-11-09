@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { StartupRepository } from '@/lib/store';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const config = await StartupRepository.getEventConfig();

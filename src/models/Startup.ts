@@ -22,8 +22,8 @@ export interface IStartup extends Document {
   boothNumber?: string;
   status: StartupStatus;
   isPublished: boolean;
-  submittedBy?: mongoose.Types.ObjectId;
-  reviewedBy?: mongoose.Types.ObjectId;
+  submittedBy?: string;
+  reviewedBy?: string;
   reviewedAt?: Date;
   
   // Aggregate Performance Metrics
@@ -58,9 +58,9 @@ const StartupSchema = new Schema<IStartup>(
   {
     name: { type: String, required: true, trim: true },
     tagline: { type: String, required: true, trim: true },
-    description: { type: String, required: true },
-    problem: { type: String },
-    solution: { type: String },
+    description: { type: String, default: '' },
+    problem: { type: String, default: '' },
+    solution: { type: String, default: '' },
     sector: { type: String, required: true, index: true },
     logo: { type: String, default: '🚀' },
     website: { type: String, trim: true },
@@ -75,8 +75,8 @@ const StartupSchema = new Schema<IStartup>(
       index: true,
     },
     isPublished: { type: Boolean, default: false, index: true },
-    submittedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    reviewedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    submittedBy: { type: String },
+    reviewedBy: { type: String },
     reviewedAt: { type: Date },
 
     publicRating: { type: Number, default: 0 },

@@ -77,7 +77,7 @@ export default function Footer() {
               </h4>
             </div>
             <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '1rem', lineHeight: 1.45 }}>
-              Admin registration & sign-in for Student Affairs, Registration Team, Jury, and Organizers.
+              Sign-in portal for Student Affairs, Registration Team, Official Jury, and Fest Admin.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
               <Link
@@ -122,45 +122,26 @@ export default function Footer() {
                 <span style={{ fontSize: '0.75rem', color: 'var(--bf-accent-gold)' }}>Sign In →</span>
               </Link>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.45rem' }}>
-                <Link
-                  href="/login?role=admin"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.35rem',
-                    padding: '0.45rem 0.5rem',
-                    borderRadius: '8px',
-                    background: 'rgba(239, 68, 68, 0.14)',
-                    border: '1px solid rgba(239, 68, 68, 0.35)',
-                    color: '#ffffff',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                  }}
-                >
-                  <ShieldCheck size={13} color="#f87171" /> Admin Sign In
-                </Link>
-
-                <Link
-                  href="/signup"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.35rem',
-                    padding: '0.45rem 0.5rem',
-                    borderRadius: '8px',
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: '#ffd233',
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                  }}
-                >
-                  Admin Sign Up →
-                </Link>
-              </div>
+              <Link
+                href="/login?role=admin"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.45rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'rgba(239, 68, 68, 0.14)',
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                  color: '#ffffff',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                }}
+              >
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+                  <ShieldCheck size={14} color="#f87171" /> Organizer / Admin Console
+                </span>
+                <span style={{ fontSize: '0.75rem', color: '#fca5a5' }}>Sign In →</span>
+              </Link>
             </div>
           </div>
         </div>
@@ -182,10 +163,6 @@ export default function Footer() {
             <span>•</span>
             <Link href="/login?role=admin" style={{ color: 'var(--bf-accent-gold)', fontWeight: 700 }}>
               Organizer Sign-in
-            </Link>
-            <span>•</span>
-            <Link href="/signup" style={{ color: '#cbd5e1', fontWeight: 600 }}>
-              Admin Registration
             </Link>
           </div>
         </div>

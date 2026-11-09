@@ -400,17 +400,14 @@ function LoginContent() {
           </div>
         </div>
 
-        {/* Admin Registration Link */}
+        {/* Managed Access Note */}
         <div style={{
           marginTop: '1.5rem',
           textAlign: 'center',
-          fontSize: '0.85rem',
+          fontSize: '0.82rem',
           color: '#64748b',
         }}>
-          Accounts are provisioned by the Fest Admin. Need to register an Organizer / Admin account?{' '}
-          <Link href="/signup" style={{ color: '#0066cc', fontWeight: 700 }}>
-            Admin Registration →
-          </Link>
+          All participant, jury, and staff accounts are provisioned directly by the Business Fest Administrator.
         </div>
       </div>
     </div>

@@ -271,19 +271,30 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* IMS Badge on Right (Per Wireframe) */}
-          <div style={{
-            background: 'rgba(0, 153, 204, 0.18)',
-            border: '1.5px solid rgba(0, 153, 204, 0.55)',
-            color: '#38bdf8',
-            fontWeight: 900,
-            fontFamily: 'var(--font-display)',
-            fontSize: '0.85rem',
-            padding: '0.32rem 0.65rem',
-            borderRadius: '8px',
-            letterSpacing: '0.06em',
-          }} title="Institute of Management Sciences (IMSciences) Peshawar">
-            IMS
+          {/* IMSciences Logo on Right */}
+          <div
+            style={{
+              background: '#ffffff',
+              padding: '4px 8px',
+              borderRadius: '8px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.25)',
+              flexShrink: 0,
+            }}
+            title="Institute of Management Sciences (IMSciences) Peshawar"
+          >
+            <img
+              src="/imsciences-logo.png"
+              alt="IMSciences Peshawar"
+              style={{
+                height: '28px',
+                width: 'auto',
+                objectFit: 'contain',
+                display: 'block',
+              }}
+            />
           </div>
 
           {/* Mobile hamburger toggle */}

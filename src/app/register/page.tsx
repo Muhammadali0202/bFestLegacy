@@ -118,6 +118,42 @@ export default function RegisterStartupPage() {
     }
   };
 
+  if (!user || (user.role !== 'student' && user.role !== 'registration_team' && user.role !== 'admin')) {
+    return (
+      <div className="container" style={{ padding: '5rem 1.5rem', maxWidth: '580px' }}>
+        <div className="card" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
+          <div style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            background: '#eff6ff',
+            color: '#0047ff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1rem',
+          }}>
+            <PlusCircle size={28} />
+          </div>
+          <h2 style={{ fontSize: '1.6rem', color: 'var(--bf-primary)', marginBottom: '0.5rem' }}>
+            Student Team or Registration Team Access Required
+          </h2>
+          <p style={{ color: 'var(--bf-text-secondary)', fontSize: '0.95rem', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+            Startup registration is available to authorized <strong>Student Teams</strong> and the <strong>Registration Team</strong> whose accounts have been created by the Fest Admin.
+          </p>
+          <div className="flex gap-3 justify-center flex-wrap">
+            <Link href="/login?role=student" className="btn btn-primary">
+              Student Team Sign In <ArrowRight size={16} />
+            </Link>
+            <Link href="/login?role=registration_team" className="btn btn-secondary">
+              Registration Team Sign In
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container" style={{ padding: '3rem 1.5rem 5rem', maxWidth: '850px' }}>
       {/* Header */}

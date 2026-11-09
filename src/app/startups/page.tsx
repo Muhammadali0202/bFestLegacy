@@ -271,7 +271,7 @@ function StartupsDirectoryContent() {
                     </span>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--bf-text-muted)', display: 'block' }}>Audience Rating</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--bf-text-muted)', display: 'block' }}>Student Affairs Rating</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                       <Star size={13} fill="#f59e0b" color="#f59e0b" />
                       <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{startup.publicRating.toFixed(1)}</span>

@@ -96,6 +96,37 @@ function JudgePortalContent() {
 
   const selectedStartup = startups.find((s) => s.id === selectedStartupId);
 
+  if (!user || (user.role !== 'judge' && user.role !== 'admin')) {
+    return (
+      <div className="container" style={{ padding: '5rem 1.5rem', maxWidth: '580px' }}>
+        <div className="card" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
+          <div style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            background: 'rgba(212, 175, 55, 0.15)',
+            color: '#b8860b',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1rem',
+          }}>
+            <Award size={28} />
+          </div>
+          <h2 style={{ fontSize: '1.6rem', color: 'var(--bf-primary)', marginBottom: '0.5rem' }}>
+            Official Jury Access Required
+          </h2>
+          <p style={{ color: 'var(--bf-text-secondary)', fontSize: '0.95rem', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+            Jury accounts are provisioned by the Fest Administrator and granted to official panel members only. Please sign in with your assigned jury credentials.
+          </p>
+          <Link href="/login?mode=staff&role=judge" className="btn btn-gold">
+            Jury Sign In <ArrowRight size={16} />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container" style={{ padding: '3rem 1.5rem 5rem', maxWidth: '850px' }}>
       {/* Header */}

@@ -104,11 +104,11 @@ export default function LeaderboardPage() {
               </span>
             )}
           </div>
-          <h1 style={{ fontSize: '2.5rem', color: 'var(--bf-primary)', marginBottom: '0.5rem' }}>
+          <h1 style={{ fontSize: '2.1rem', color: 'var(--bf-primary)', marginBottom: '0.4rem' }}>
             Live Event Leaderboard
           </h1>
-          <p style={{ color: 'var(--bf-text-secondary)', fontSize: '1rem', maxWidth: '750px' }}>
-            Composite rankings calculated dynamically from official jury rubrics (50%), accredited investor ratings & capital (30%), and audience endorsements (20%).
+          <p style={{ color: 'var(--bf-text-secondary)', fontSize: '0.92rem', maxWidth: '750px' }}>
+            Composite rankings calculated dynamically from official jury rubrics (50%), accredited investor ratings & capital (30%), and Student Affairs ratings (20%).
           </p>
         </div>
 
@@ -130,10 +130,6 @@ export default function LeaderboardPage() {
             />
             Auto-sync (8s)
           </label>
-
-          <Link href="/leaderboard/stage" className="btn btn-gold btn-sm">
-            <MonitorPlay size={16} /> Auditorium Stage Mode
-          </Link>
         </div>
       </div>
 
@@ -170,171 +166,24 @@ export default function LeaderboardPage() {
         </div>
       ) : (
         <>
-          {/* Top 3 Podium Cards */}
-          <div style={{ marginBottom: '3.5rem' }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '1.5rem',
-              alignItems: 'end',
-            }}>
-              {/* 2nd Place */}
-              {top3[1] && (
-                <div className="card" style={{
-                  textAlign: 'center',
-                  padding: '2rem 1.5rem',
-                  borderTop: '5px solid #a0a0a0',
-                  background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
-                }}>
-                  <div style={{
-                    width: '46px',
-                    height: '46px',
-                    borderRadius: '50%',
-                    background: '#e2e8f0',
-                    color: '#475569',
-                    fontWeight: 900,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 1rem',
-                    fontSize: '1.25rem',
-                  }}>
-                    2
-                  </div>
-                  <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>{top3[1].logo}</span>
-                  <h3 style={{ fontSize: '1.2rem', color: 'var(--bf-primary)', marginBottom: '0.25rem' }}>
-                    {top3[1].name}
-                  </h3>
-                  <span className="badge badge-sector" style={{ marginBottom: '0.75rem' }}>{top3[1].sector}</span>
-                  <div style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--bf-primary)', fontFamily: 'var(--font-display)' }}>
-                    {top3[1].compositeScore.toFixed(1)} <span style={{ fontSize: '0.9rem', color: 'var(--bf-text-muted)' }}>PTS</span>
-                  </div>
-                  <div style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 700, marginTop: '0.3rem' }}>
-                    Investor: {top3[1].investorRating ? `${top3[1].investorRating}★` : '—'} • Jury: {top3[1].judgeScore > 0 ? top3[1].judgeScore : '—'}
-                  </div>
-                  <Link href={`/startups/${top3[1].id}`} className="btn btn-secondary btn-sm" style={{ marginTop: '1rem', width: '100%' }}>
-                    View Profile
-                  </Link>
-                </div>
-              )}
-
-              {/* 1st Place (Elevated Podium) */}
-              {top3[0] && (
-                <div className="card" style={{
-                  textAlign: 'center',
-                  padding: '2.5rem 1.5rem',
-                  borderTop: '6px solid var(--bf-accent-gold)',
-                  boxShadow: 'var(--bf-shadow-lg)',
-                  background: 'linear-gradient(180deg, #ffffff 0%, #fffdf5 100%)',
-                  position: 'relative',
-                }}>
-                  <div style={{
-                    position: 'absolute',
-                    top: '-14px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    background: 'var(--bf-accent-gold)',
-                    color: '#06172e',
-                    fontWeight: 800,
-                    fontSize: '0.75rem',
-                    padding: '0.25rem 1rem',
-                    borderRadius: '9999px',
-                  }}>
-                    GOLD MEDALIST
-                  </div>
-                  <div style={{
-                    width: '56px',
-                    height: '56px',
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #ffd700 0%, #d4af37 100%)',
-                    color: '#06172e',
-                    fontWeight: 900,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0.5rem auto 1rem',
-                    fontSize: '1.5rem',
-                    boxShadow: '0 4px 12px rgba(212, 175, 55, 0.4)',
-                  }}>
-                    1
-                  </div>
-                  <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.5rem' }}>{top3[0].logo}</span>
-                  <h3 style={{ fontSize: '1.4rem', color: 'var(--bf-primary)', marginBottom: '0.25rem' }}>
-                    {top3[0].name}
-                  </h3>
-                  <span className="badge badge-gold" style={{ marginBottom: '0.75rem' }}>{top3[0].sector}</span>
-                  <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#b8860b', fontFamily: 'var(--font-display)' }}>
-                    {top3[0].compositeScore.toFixed(1)} <span style={{ fontSize: '1rem', color: 'var(--bf-text-muted)' }}>PTS</span>
-                  </div>
-                  <div style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: 700, marginTop: '0.3rem' }}>
-                    Investor: {top3[0].investorRating ? `${top3[0].investorRating}★ Backed` : '—'} • Jury: {top3[0].judgeScore > 0 ? top3[0].judgeScore : '—'}
-                  </div>
-                  <Link href={`/startups/${top3[0].id}`} className="btn btn-gold btn-sm" style={{ marginTop: '1rem', width: '100%' }}>
-                    View Profile
-                  </Link>
-                </div>
-              )}
-
-              {/* 3rd Place */}
-              {top3[2] && (
-                <div className="card" style={{
-                  textAlign: 'center',
-                  padding: '2rem 1.5rem',
-                  borderTop: '5px solid #cd7f32',
-                  background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
-                }}>
-                  <div style={{
-                    width: '46px',
-                    height: '46px',
-                    borderRadius: '50%',
-                    background: '#f1e2d3',
-                    color: '#8b4513',
-                    fontWeight: 900,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 1rem',
-                    fontSize: '1.25rem',
-                  }}>
-                    3
-                  </div>
-                  <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>{top3[2].logo}</span>
-                  <h3 style={{ fontSize: '1.2rem', color: 'var(--bf-primary)', marginBottom: '0.25rem' }}>
-                    {top3[2].name}
-                  </h3>
-                  <span className="badge badge-sector" style={{ marginBottom: '0.75rem' }}>{top3[2].sector}</span>
-                  <div style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--bf-primary)', fontFamily: 'var(--font-display)' }}>
-                    {top3[2].compositeScore.toFixed(1)} <span style={{ fontSize: '0.9rem', color: 'var(--bf-text-muted)' }}>PTS</span>
-                  </div>
-                  <div style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 700, marginTop: '0.3rem' }}>
-                    Investor: {top3[2].investorRating ? `${top3[2].investorRating}★` : '—'} • Jury: {top3[2].judgeScore > 0 ? top3[2].judgeScore : '—'}
-                  </div>
-                  <Link href={`/startups/${top3[2].id}`} className="btn btn-secondary btn-sm" style={{ marginTop: '1rem', width: '100%' }}>
-                    View Profile
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Full Ranked Table */}
+          {/* Compact Ranked Table */}
           <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-            <div style={{ padding: '1.25rem 1.5rem', background: '#f8fafc', borderBottom: '1px solid var(--bf-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: '1.15rem', color: 'var(--bf-primary)' }}>Official Competition Standings</h3>
-              <span style={{ fontSize: '0.8rem', color: 'var(--bf-text-muted)' }}>Last synced: {lastRefreshed}</span>
+            <div style={{ padding: '1rem 1.25rem', background: '#f8fafc', borderBottom: '1px solid var(--bf-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '1.05rem', color: 'var(--bf-primary)' }}>Official Competition Standings</h3>
+              <span style={{ fontSize: '0.78rem', color: 'var(--bf-text-muted)' }}>Last synced: {lastRefreshed}</span>
             </div>
 
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.92rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
                 <thead>
-                  <tr style={{ background: '#f1f5f9', borderBottom: '1px solid var(--bf-border)', color: 'var(--bf-text-secondary)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    <th style={{ padding: '0.9rem 1.5rem', width: '70px' }}>Rank</th>
-                    <th style={{ padding: '0.9rem 1.5rem' }}>Startup Venture</th>
-                    <th style={{ padding: '0.9rem 1rem' }}>Sector</th>
-                    <th style={{ padding: '0.9rem 1rem', textAlign: 'center' }}>Jury Rubrics (50%)</th>
-                    <th style={{ padding: '0.9rem 1rem', textAlign: 'center' }}>Investor Backing (30%)</th>
-                    <th style={{ padding: '0.9rem 1rem', textAlign: 'center' }}>Audience (20%)</th>
-                    <th style={{ padding: '0.9rem 1.5rem', textAlign: 'right' }}>Composite Total</th>
+                  <tr style={{ background: '#f1f5f9', borderBottom: '1px solid var(--bf-border)', color: 'var(--bf-text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    <th style={{ padding: '0.7rem 1.25rem', width: '60px' }}>Rank</th>
+                    <th style={{ padding: '0.7rem 1rem' }}>Title</th>
+                    <th style={{ padding: '0.7rem 1rem' }}>Sector</th>
+                    <th style={{ padding: '0.7rem 0.75rem', textAlign: 'center' }}>Jury (50%)</th>
+                    <th style={{ padding: '0.7rem 0.75rem', textAlign: 'center' }}>Investor (30%)</th>
+                    <th style={{ padding: '0.7rem 0.75rem', textAlign: 'center' }}>Student Affairs (20%)</th>
+                    <th style={{ padding: '0.7rem 1.25rem', textAlign: 'right' }}>Points</th>
                   </tr>
                 </thead>
                 <tbody>

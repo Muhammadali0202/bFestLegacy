@@ -93,9 +93,10 @@ export default function StartupProfilePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           startupId: id,
-          voterToken,
+          voterToken: user?.id ? `sa_${user.id}` : voterToken,
           rating: selectedRating,
           feedback,
+          userRole: user?.role,
         }),
       });
 
@@ -489,14 +490,14 @@ export default function StartupProfilePage() {
             )}
           </div>
 
-          {/* Audience Voting Box */}
+          {/* Student Affairs Rating Box (Rate Access Restricted to Student Affairs Only) */}
           <div className="card" style={{ marginBottom: '1.5rem', border: '1.5px solid var(--bf-border)' }}>
             <div className="flex items-center gap-2" style={{ marginBottom: '0.5rem' }}>
               <Star size={20} color="var(--bf-accent-gold)" fill="var(--bf-accent-gold)" />
-              <h3 style={{ fontSize: '1.25rem', color: 'var(--bf-primary)' }}>Audience Endorsement</h3>
+              <h3 style={{ fontSize: '1.25rem', color: 'var(--bf-primary)' }}>Student Affairs Rating</h3>
             </div>
             <p style={{ fontSize: '0.88rem', color: 'var(--bf-text-secondary)', marginBottom: '1.25rem' }}>
-              Cast your vote to support this startup. Public ratings contribute 20% to the final ranking score.
+              Official Student Affairs ratings contribute 20% to the composite leaderboard standing.
             </p>
 
             <div style={{
@@ -516,127 +517,153 @@ export default function StartupProfilePage() {
                 </span>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)', display: 'block' }}>Total Votes</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)', display: 'block' }}>Ratings Recorded</span>
                 <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--bf-text-secondary)' }}>
                   {startup.totalPublicVotes}
                 </span>
               </div>
             </div>
 
-            {voteSubmitted ? (
+            {user && (user.role === 'student_affairs' || user.role === 'admin') ? (
+              voteSubmitted ? (
+                <div style={{
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  borderRadius: '8px',
+                  padding: '1rem',
+                  textAlign: 'center',
+                  color: '#047857',
+                }}>
+                  <CheckCircle size={28} style={{ margin: '0 auto 0.5rem' }} />
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700 }}>Rating Recorded!</h4>
+                  <p style={{ fontSize: '0.82rem' }}>Student Affairs rating submitted for {startup.name}.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleVoteSubmit}>
+                  {votingError && (
+                    <div style={{
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      borderRadius: '6px',
+                      padding: '0.6rem',
+                      fontSize: '0.82rem',
+                      color: '#b91c1c',
+                      marginBottom: '1rem',
+                    }}>
+                      {votingError}
+                    </div>
+                  )}
+
+                  <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.5rem' }}>
+                      Select Student Affairs Rating:
+                    </label>
+                    <div className="flex gap-2 justify-center" style={{ padding: '0.5rem 0' }}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setSelectedRating(star)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '0.2rem',
+                            transform: selectedRating >= star ? 'scale(1.15)' : 'scale(1)',
+                            transition: 'transform 0.15s',
+                          }}
+                        >
+                          <Star
+                            size={28}
+                            color="#f59e0b"
+                            fill={selectedRating >= star ? '#f59e0b' : 'transparent'}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: '1.25rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--bf-text-secondary)', marginBottom: '0.4rem' }}>
+                      Student Affairs Remarks (Optional):
+                    </label>
+                    <textarea
+                      rows={2}
+                      placeholder="Official remarks for the founding team..."
+                      value={feedback}
+                      onChange={(e) => setFeedback(e.target.value)}
+                      style={{
+                        width: '100%',
+                        border: '1px solid var(--bf-border)',
+                        borderRadius: '8px',
+                        padding: '0.6rem',
+                        fontSize: '0.85rem',
+                        fontFamily: 'var(--font-body)',
+                        outline: 'none',
+                        resize: 'none',
+                      }}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmittingVote}
+                    className="btn btn-primary"
+                    style={{ width: '100%' }}
+                  >
+                    <Send size={15} />
+                    {isSubmittingVote ? 'Submitting Rating...' : 'Submit Student Affairs Rating'}
+                  </button>
+                </form>
+              )
+            ) : (
               <div style={{
-                background: 'rgba(16, 185, 129, 0.1)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-                borderRadius: '8px',
+                background: '#f8fafc',
+                border: '1px dashed #cbd5e1',
+                borderRadius: '10px',
                 padding: '1rem',
                 textAlign: 'center',
-                color: '#047857',
               }}>
-                <CheckCircle size={28} style={{ margin: '0 auto 0.5rem' }} />
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700 }}>Vote Recorded!</h4>
-                <p style={{ fontSize: '0.82rem' }}>You have voted for {startup.name}. Thank you for supporting student entrepreneurship.</p>
-              </div>
-            ) : (
-              <form onSubmit={handleVoteSubmit}>
-                {votingError && (
-                  <div style={{
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
-                    borderRadius: '6px',
-                    padding: '0.6rem',
-                    fontSize: '0.82rem',
-                    color: '#b91c1c',
-                    marginBottom: '1rem',
-                  }}>
-                    {votingError}
-                  </div>
-                )}
-
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.5rem' }}>
-                    Select Your Rating:
-                  </label>
-                  <div className="flex gap-2 justify-center" style={{ padding: '0.5rem 0' }}>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => setSelectedRating(star)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          padding: '0.2rem',
-                          transform: selectedRating >= star ? 'scale(1.15)' : 'scale(1)',
-                          transition: 'transform 0.15s',
-                        }}
-                      >
-                        <Star
-                          size={28}
-                          color="#f59e0b"
-                          fill={selectedRating >= star ? '#f59e0b' : 'transparent'}
-                        />
-                      </button>
-                    ))}
-                  </div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.3rem' }}>
+                  🔒 Rate Access: Student Affairs Only
                 </div>
-
-                <div style={{ marginBottom: '1.25rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--bf-text-secondary)', marginBottom: '0.4rem' }}>
-                    Optional Feedback for Founders:
-                  </label>
-                  <textarea
-                    rows={2}
-                    placeholder="What impressed you? Any questions?"
-                    value={feedback}
-                    onChange={(e) => setFeedback(e.target.value)}
-                    style={{
-                      width: '100%',
-                      border: '1px solid var(--bf-border)',
-                      borderRadius: '8px',
-                      padding: '0.6rem',
-                      fontSize: '0.85rem',
-                      fontFamily: 'var(--font-body)',
-                      outline: 'none',
-                      resize: 'none',
-                    }}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmittingVote}
-                  className="btn btn-primary"
+                <p style={{ fontSize: '0.8rem', color: 'var(--bf-text-secondary)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
+                  Only authorized IMSciences Student Affairs accounts provisioned by the Fest Admin can rate startups.
+                </p>
+                <Link
+                  href="/login?mode=staff&role=student_affairs"
+                  className="btn btn-secondary btn-sm"
                   style={{ width: '100%' }}
                 >
-                  <Send size={15} />
-                  {isSubmittingVote ? 'Submitting Vote...' : 'Submit Endorsement'}
-                </button>
-              </form>
+                  Student Affairs Sign In
+                </Link>
+              </div>
             )}
           </div>
 
-          {/* Quick Link for Official Judges */}
-          <div className="card" style={{
-            background: 'var(--bf-primary-dark)',
-            color: '#ffffff',
-            border: '1px solid rgba(212, 175, 55, 0.3)',
-          }}>
-            <div className="flex items-center gap-2" style={{ marginBottom: '0.5rem' }}>
-              <Award size={20} color="var(--bf-accent-gold)" />
-              <h4 style={{ color: '#ffffff', fontSize: '1.1rem' }}>Are You an Official Judge?</h4>
+          {/* Quick Link for Official Judges (only shown if logged in as judge/admin) */}
+          {user && (user.role === 'judge' || user.role === 'admin') && (
+            <div className="card" style={{
+              background: 'var(--bf-primary-dark)',
+              color: '#ffffff',
+              border: '1px solid rgba(212, 175, 55, 0.3)',
+            }}>
+              <div className="flex items-center gap-2" style={{ marginBottom: '0.5rem' }}>
+                <Award size={20} color="var(--bf-accent-gold)" />
+                <h4 style={{ color: '#ffffff', fontSize: '1.1rem' }}>Official Jury Panel</h4>
+              </div>
+              <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1.25rem', lineHeight: 1.5 }}>
+                Evaluate this startup across Innovation, Market Viability, Team Execution, and Pitch Delivery (50% weight).
+              </p>
+              <Link
+                href={`/judge?startupId=${startup.id}`}
+                className="btn btn-gold btn-sm"
+                style={{ width: '100%' }}
+              >
+                Open Rubrics Evaluation
+              </Link>
             </div>
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1.25rem', lineHeight: 1.5 }}>
-              Jury members score across Innovation, Market Viability, Team Execution, and Pitch Delivery (50% weight).
-            </p>
-            <Link
-              href={`/judge?startupId=${startup.id}`}
-              className="btn btn-gold btn-sm"
-              style={{ width: '100%' }}
-            >
-              Open Rubrics Evaluation
-            </Link>
-          </div>
+          )}
         </div>
       </div>
 

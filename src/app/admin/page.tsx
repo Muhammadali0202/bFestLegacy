@@ -39,6 +39,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [actionMessage, setActionMessage] = useState('');
   const [accountError, setAccountError] = useState('');
+  const [dbHealth, setDbHealth] = useState<{ connected: boolean; mode: string } | null>(null);
 
   // New Account Form State (Student, Judge, Student Affairs, Registration Team, Investor, Admin)
   const [newAccName, setNewAccName] = useState('');
@@ -51,17 +52,19 @@ export default function AdminDashboardPage() {
 
   const loadData = async () => {
     try {
-      const [startupsRes, configRes, investorsRes, accountsRes] = await Promise.all([
+      const [startupsRes, configRes, investorsRes, accountsRes, healthRes] = await Promise.all([
         fetch('/api/startups?status=all'),
         fetch('/api/event-config'),
         fetch('/api/admin/investors?status=all'),
         fetch('/api/admin/users'),
+        fetch('/api/health'),
       ]);
 
       const startupsData = await startupsRes.json();
       const configData = await configRes.json();
       const investorsData = await investorsRes.json();
       const accountsData = await accountsRes.json();
+      const healthData = await healthRes.json();
 
       if (startupsData.success) {
         setStartups(startupsData.startups);
@@ -74,6 +77,9 @@ export default function AdminDashboardPage() {
       }
       if (accountsData.success) {
         setManagedAccounts(accountsData.users);
+      }
+      if (healthData.success) {
+        setDbHealth({ connected: healthData.connected, mode: healthData.mode });
       }
     } catch (e) {
       console.error(e);
@@ -244,8 +250,24 @@ export default function AdminDashboardPage() {
         }}
       >
         <div>
-          <div className="badge badge-gold" style={{ marginBottom: '0.5rem' }}>
-            <ShieldCheck size={14} /> Organizer Console
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+            <div className="badge badge-gold">
+              <ShieldCheck size={14} /> Organizer Console
+            </div>
+            {dbHealth && (
+              <div className={`badge ${dbHealth.connected ? 'badge-emerald' : 'badge-amber'}`}>
+                <span
+                  style={{
+                    width: '7px',
+                    height: '7px',
+                    borderRadius: '50%',
+                    background: dbHealth.connected ? '#10b981' : '#f59e0b',
+                    display: 'inline-block',
+                  }}
+                />
+                {dbHealth.connected ? 'Real-Time DB Connected' : 'In-Memory Mode (Set MONGODB_URI)'}
+              </div>
+            )}
           </div>
           <h1 style={{ fontSize: '2.25rem', color: 'var(--bf-primary)', marginBottom: '0.35rem' }}>
             Admin Command Center
@@ -958,9 +980,86 @@ export default function AdminDashboardPage() {
                 <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#0066cc' }}>
                   {Math.round(config.publicWeight * 100)}%
                 </div>
-                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Attendee 1-5 Star Ratings</div>
+                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Student Affairs 1-5 Star Ratings</div>
               </div>
             </div>
+          </div>
+
+          {/* Google Forms Direct Registration Webhook */}
+          <div style={{
+            marginTop: '2rem',
+            background: '#f8fafc',
+            border: '1px solid var(--bf-border)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.75rem' }}>
+              <div>
+                <h4 style={{ fontSize: '1.1rem', color: 'var(--bf-primary)', fontWeight: 800 }}>
+                  📋 Google Forms Direct Registration Webhook
+                </h4>
+                <p style={{ color: 'var(--bf-text-secondary)', fontSize: '0.85rem' }}>
+                  Connect your student registration Google Form so responses automatically appear in the Startup Applications moderation queue.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={async () => {
+                  const res = await fetch('/api/webhooks/google-form', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      name: `Google Form Venture #${Math.floor(100 + Math.random() * 900)}`,
+                      tagline: 'Submitted directly via Google Form Webhook',
+                      sector: 'AI & Smart Systems',
+                      contactEmail: 'student.form@imsciences.edu.pk',
+                      description: 'Automated student startup registration received from Google Form.',
+                      founders: [{ name: 'Student Team Lead', role: 'Founder' }],
+                    }),
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    setActionMessage('Test Google Form submission received! Check Startup Applications tab.');
+                    loadData();
+                  }
+                }}
+              >
+                Send Test Form Submission
+              </button>
+            </div>
+
+            <div style={{ fontSize: '0.82rem', color: 'var(--bf-text-secondary)', marginBottom: '0.5rem' }}>
+              <strong>Webhook Endpoint URL:</strong>{' '}
+              <code style={{ background: '#e2e8f0', padding: '0.2rem 0.5rem', borderRadius: '6px', color: '#0f172a' }}>
+                {typeof window !== 'undefined' ? `${window.location.origin}/api/webhooks/google-form` : '/api/webhooks/google-form'}
+              </code>
+            </div>
+
+            <details style={{ marginTop: '0.75rem' }}>
+              <summary style={{ cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', color: 'var(--bf-accent)' }}>
+                View Google Apps Script (Copy & Paste into Google Form / Linked Sheet → Extensions → Apps Script)
+              </summary>
+              <pre style={{
+                marginTop: '0.75rem',
+                background: '#0f172a',
+                color: '#f8fafc',
+                padding: '1rem',
+                borderRadius: '10px',
+                fontSize: '0.78rem',
+                overflowX: 'auto',
+                lineHeight: 1.5,
+              }}>{`function onFormSubmit(e) {
+  var url = "${typeof window !== 'undefined' ? window.location.origin : 'https://YOUR-VERCEL-URL.vercel.app'}/api/webhooks/google-form";
+  var options = {
+    method: "post",
+    contentType: "application/json",
+    headers: { "x-webhook-secret": "bfest_google_form_2027" },
+    payload: JSON.stringify({ namedValues: e.namedValues })
+  };
+  UrlFetchApp.fetch(url, options);
+}`}</pre>
+            </details>
           </div>
         </div>
       )}

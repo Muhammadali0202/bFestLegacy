@@ -20,9 +20,18 @@ export default function Footer() {
           {/* Col 1: About */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
-              <div className="navbar-logo-badge" style={{ width: '36px', height: '36px', fontSize: '0.95rem' }}>
-                BF
-              </div>
+              <img
+                src="/bfest-logo.jpg"
+                alt="Business Fest Logo"
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '10px',
+                  objectFit: 'contain',
+                  background: '#ffffff',
+                  padding: '2px',
+                }}
+              />
               <h3 style={{ color: '#ffffff', fontSize: '1.2rem', fontFamily: 'var(--font-display)' }}>
                 BUSINESS FEST 2027
               </h3>

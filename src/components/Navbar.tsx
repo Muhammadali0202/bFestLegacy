@@ -67,7 +67,20 @@ export default function Navbar() {
         {/* Left: Logo + Core Nav Links */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
           <Link href="/" className="navbar-brand" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-            <div className="navbar-logo-badge">BF</div>
+            <img
+              src="/bfest-logo.jpg"
+              alt="Business Fest Logo"
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
+                objectFit: 'contain',
+                background: '#ffffff',
+                padding: '2px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.25)',
+                flexShrink: 0,
+              }}
+            />
           </Link>
 
           <nav style={{ display: 'none' }} className="desktop-nav">

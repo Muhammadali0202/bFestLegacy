@@ -3,14 +3,17 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Search, Filter, Star, ArrowRight, ExternalLink, Users, Award, Sparkles } from 'lucide-react';
-import { Startup, BusinessSector } from '@/types';
+import { Search, Filter, Star, ArrowRight, ExternalLink, Users, Award, Sparkles, FileSpreadsheet } from 'lucide-react';
+import { Startup, BusinessSector, EventConfig } from '@/types';
+import { useAuth } from '@/context/AuthContext';
 
 function StartupsDirectoryContent() {
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const initialSector = searchParams.get('sector') || 'All';
 
   const [startups, setStartups] = useState<Startup[]>([]);
+  const [config, setConfig] = useState<EventConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSector, setSelectedSector] = useState(initialSector);
@@ -28,11 +31,16 @@ function StartupsDirectoryContent() {
   ];
 
   useEffect(() => {
-    fetch('/api/startups?onlyPublished=true')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setStartups(data.startups);
+    Promise.all([
+      fetch('/api/startups?onlyPublished=true').then((res) => res.json()),
+      fetch('/api/event-config').then((res) => res.json()),
+    ])
+      .then(([startupsData, configData]) => {
+        if (startupsData.success) {
+          setStartups(startupsData.startups);
+        }
+        if (configData.success) {
+          setConfig(configData.config);
         }
       })
       .catch((err) => console.error(err))
@@ -62,7 +70,7 @@ function StartupsDirectoryContent() {
   return (
     <div className="container" style={{ padding: '3rem 1.5rem 5rem' }}>
       {/* Header */}
-      <div style={{ marginBottom: '2.5rem' }}>
+      <div style={{ marginBottom: '2rem' }}>
         <div className="badge badge-gold" style={{ marginBottom: '0.5rem' }}>
           Exhibitor Directory
         </div>
@@ -73,6 +81,49 @@ function StartupsDirectoryContent() {
           Explore validated student ventures, innovative commercial prototypes, and high-impact business models competing at Business Fest 2027.
         </p>
       </div>
+
+      {/* Shared Google Sheet Bar for Student Affairs, Registration Team, and Admin */}
+      {user && (user.role === 'student_affairs' || user.role === 'registration_team' || user.role === 'admin') && (
+        <div
+          style={{
+            background: '#f0fdf4',
+            border: '1px solid #86efac',
+            borderRadius: '14px',
+            padding: '1rem 1.25rem',
+            marginBottom: '1.75rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '1rem',
+          }}
+        >
+          <div>
+            <strong style={{ color: '#065f46', fontSize: '0.92rem', display: 'block' }}>
+              📊 Student Affairs & Registration Team — Shared Stall Sheet
+            </strong>
+            <span style={{ color: '#047857', fontSize: '0.82rem' }}>
+              View the shared Google Form response sheet or sync new stalls directly into the directory.
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+            {config?.googleSheetUrl && (
+              <a
+                href={config.googleSheetUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-secondary btn-sm"
+                style={{ background: '#ffffff', color: '#065f46' }}
+              >
+                <FileSpreadsheet size={15} /> Open Shared Google Sheet <ExternalLink size={13} />
+              </a>
+            )}
+            <Link href="/register" className="btn btn-primary btn-sm">
+              Google Form & Sheet Sync Hub <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Search & Filter Controls */}
       <div style={{

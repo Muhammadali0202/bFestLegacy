@@ -50,6 +50,11 @@ export default function AdminDashboardPage() {
   const [newAccPin, setNewAccPin] = useState('2027');
   const [creatingAcc, setCreatingAcc] = useState(false);
 
+  // Google Sheet 1-Click Sync State
+  const [sheetUrl, setSheetUrl] = useState('');
+  const [syncingSheet, setSyncingSheet] = useState(false);
+  const [sheetError, setSheetError] = useState('');
+
   const loadData = async () => {
     try {
       const [startupsRes, configRes, investorsRes, accountsRes, healthRes] = await Promise.all([
@@ -71,6 +76,9 @@ export default function AdminDashboardPage() {
       }
       if (configData.success) {
         setConfig(configData.config);
+        if (configData.config.googleSheetUrl) {
+          setSheetUrl((prev) => prev || configData.config.googleSheetUrl);
+        }
       }
       if (investorsData.success) {
         setInvestors(investorsData.investors);
@@ -466,6 +474,65 @@ export default function AdminDashboardPage() {
             <Link href="/register" className="btn btn-secondary btn-sm">
               + Add Startup Entry
             </Link>
+          </div>
+
+          {/* Google Form / Google Sheet Direct Sync Bar */}
+          <div style={{ padding: '1rem 1.5rem', background: '#eff6ff', borderBottom: '1px solid #bfdbfe' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div style={{ flex: '1 1 280px' }}>
+                <strong style={{ fontSize: '0.88rem', color: '#1e3a8a', display: 'block' }}>
+                  📊 Sync Stalls from Shared Google Form / Google Sheet
+                </strong>
+                <span style={{ fontSize: '0.78rem', color: '#3b82f6' }}>
+                  Paste the Google Sheet link (set sharing to &ldquo;Anyone with the link can view&rdquo;) to import all registered stalls directly into the website database.
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: '2 1 360px' }}>
+                <input
+                  type="url"
+                  className="form-input"
+                  placeholder="https://docs.google.com/spreadsheets/d/..."
+                  value={sheetUrl}
+                  onChange={(e) => setSheetUrl(e.target.value)}
+                  style={{ flex: 1, background: '#ffffff', fontSize: '0.84rem', padding: '0.5rem 0.75rem' }}
+                />
+                <button
+                  type="button"
+                  disabled={syncingSheet || !sheetUrl.trim()}
+                  className="btn btn-primary btn-sm"
+                  onClick={async () => {
+                    setSyncingSheet(true);
+                    setSheetError('');
+                    try {
+                      const res = await fetch('/api/webhooks/google-sheet', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sheetUrl: sheetUrl.trim(), autoApprove: true }),
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        setActionMessage(data.message);
+                        setTimeout(() => setActionMessage(''), 5000);
+                        loadData();
+                      } else {
+                        setSheetError(data.error || 'Failed to sync sheet.');
+                      }
+                    } catch (_) {
+                      setSheetError('Network error syncing Google Sheet.');
+                    } finally {
+                      setSyncingSheet(false);
+                    }
+                  }}
+                >
+                  {syncingSheet ? 'Syncing...' : 'Sync Google Sheet'}
+                </button>
+              </div>
+            </div>
+            {sheetError && (
+              <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#dc2626', fontWeight: 600 }}>
+                ⚠️ {sheetError}
+              </div>
+            )}
           </div>
 
           <div style={{ overflowX: 'auto' }}>

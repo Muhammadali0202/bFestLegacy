@@ -747,6 +747,8 @@ export const StartupRepository = {
             judgeWeight: config.judgeWeight,
             investorWeight: config.investorWeight || 0.30,
             publicWeight: config.publicWeight,
+            googleFormUrl: config.googleFormUrl || '',
+            googleSheetUrl: config.googleSheetUrl || '',
           };
         }
       } catch (e) {
@@ -784,6 +786,8 @@ export const StartupRepository = {
           judgeWeight: updated.judgeWeight,
           investorWeight: updated.investorWeight || 0.30,
           publicWeight: updated.publicWeight,
+          googleFormUrl: updated.googleFormUrl || '',
+          googleSheetUrl: updated.googleSheetUrl || '',
         };
       } catch (e) {
         console.error('Error updating event config in MongoDB:', e);

@@ -112,4 +112,6 @@ export interface EventConfig {
   judgeWeight: number;    // default: 0.50
   investorWeight: number; // default: 0.30
   publicWeight: number;   // default: 0.20
+  googleFormUrl?: string;
+  googleSheetUrl?: string;
 }

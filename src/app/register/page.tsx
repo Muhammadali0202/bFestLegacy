@@ -1,21 +1,33 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { 
-  Building2, 
-  Sparkles, 
-  PlusCircle, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  PlusCircle,
+  CheckCircle,
+  AlertCircle,
   ArrowRight,
-  Info
+  ExternalLink,
+  RefreshCw,
+  FileSpreadsheet,
+  ClipboardList,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
-import { BusinessSector } from '@/types';
+import { BusinessSector, EventConfig } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 
 export default function RegisterStartupPage() {
   const { user } = useAuth();
+  const [config, setConfig] = useState<EventConfig | null>(null);
+  const [googleFormUrl, setGoogleFormUrl] = useState('');
+  const [googleSheetUrl, setGoogleSheetUrl] = useState('');
+  const [syncing, setSyncing] = useState(false);
+  const [savingLinks, setSavingLinks] = useState(false);
+  const [syncMessage, setSyncMessage] = useState('');
+  const [syncError, setSyncError] = useState('');
+  const [showManualForm, setShowManualForm] = useState(false);
+
   const [formData, setFormData] = useState({
     name: '',
     tagline: '',
@@ -28,24 +40,128 @@ export default function RegisterStartupPage() {
     contactEmail: user?.email || '',
     founder1Name: user?.fullName || '',
     founder1Role: 'Founder & CEO',
-    founder2Name: '',
-    founder2Role: 'Technical Lead',
-    consentGranted: false,
+    boothNumber: 'Pending Allocation',
   });
+  const [manualLoading, setManualLoading] = useState(false);
+  const [manualSuccess, setManualSuccess] = useState(false);
+  const [manualError, setManualError] = useState('');
 
-  React.useEffect(() => {
-    if (user) {
-      setFormData(prev => ({
-        ...prev,
-        contactEmail: prev.contactEmail || user.email,
-        founder1Name: prev.founder1Name || user.fullName,
-      }));
+  useEffect(() => {
+    fetch('/api/event-config')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.config) {
+          setConfig(data.config);
+          setGoogleFormUrl(data.config.googleFormUrl || '');
+          setGoogleSheetUrl(data.config.googleSheetUrl || '');
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const isStaff =
+    user &&
+    (user.role === 'admin' ||
+      user.role === 'registration_team' ||
+      user.role === 'student_affairs');
+
+  const handleSaveLinks = async () => {
+    setSavingLinks(true);
+    setSyncError('');
+    setSyncMessage('');
+    try {
+      const res = await fetch('/api/event-config', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          googleFormUrl: googleFormUrl.trim(),
+          googleSheetUrl: googleSheetUrl.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setConfig(data.config);
+        setSyncMessage('Google Form & Shared Google Sheet links saved for all teams!');
+      } else {
+        setSyncError(data.error || 'Failed to save links.');
+      }
+    } catch (_) {
+      setSyncError('Network error saving links.');
+    } finally {
+      setSavingLinks(false);
     }
-  }, [user]);
+  };
 
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const handleSyncSheet = async () => {
+    if (!googleSheetUrl.trim()) {
+      setSyncError('Please paste the shared Google Sheet URL first.');
+      return;
+    }
+    setSyncing(true);
+    setSyncError('');
+    setSyncMessage('');
+    try {
+      const res = await fetch('/api/webhooks/google-sheet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sheetUrl: googleSheetUrl.trim(),
+          googleFormUrl: googleFormUrl.trim(),
+          autoApprove: true,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSyncMessage(data.message);
+      } else {
+        setSyncError(data.error || 'Failed to sync stalls from Google Sheet.');
+      }
+    } catch (_) {
+      setSyncError('Network error syncing Google Sheet.');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const handleManualSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setManualError('');
+    if (!formData.name || !formData.tagline || !formData.contactEmail) {
+      setManualError('Please fill in stall name, tagline, and contact email.');
+      return;
+    }
+    setManualLoading(true);
+    try {
+      const res = await fetch('/api/startups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          tagline: formData.tagline,
+          description: formData.description || formData.tagline,
+          problem: formData.problem,
+          solution: formData.solution,
+          sector: formData.sector,
+          logo: formData.logo,
+          website: formData.website,
+          contactEmail: formData.contactEmail,
+          boothNumber: formData.boothNumber,
+          founders: [{ name: formData.founder1Name || 'Student Founder', role: formData.founder1Role }],
+          submittedBy: user?.id,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setManualSuccess(true);
+      } else {
+        setManualError(data.error || 'Failed to register stall.');
+      }
+    } catch (_) {
+      setManualError('Network error submitting stall.');
+    } finally {
+      setManualLoading(false);
+    }
+  };
 
   const sectors: BusinessSector[] = [
     'FinTech & Banking',
@@ -57,460 +173,329 @@ export default function RegisterStartupPage() {
     'E-Commerce & Logistics',
   ];
 
-  const emojis = ['🚀', '🌱', '💳', '🩺', '📚', '☀️', '🚚', '🤖', '💡', '🔬'];
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!formData.name || !formData.tagline || !formData.contactEmail) {
-      setError('Please fill in company name, tagline, and contact email.');
-      return;
-    }
-
-    if (!formData.consentGranted) {
-      setError('You must consent to publishing approved details on the public directory.');
-      return;
-    }
-
-    setLoading(true);
-
-    const founders = [];
-    if (formData.founder1Name) {
-      founders.push({ name: formData.founder1Name, role: formData.founder1Role });
-    }
-    if (formData.founder2Name) {
-      founders.push({ name: formData.founder2Name, role: formData.founder2Role });
-    }
-    if (founders.length === 0) {
-      founders.push({ name: 'Founding Team', role: 'Team Lead' });
-    }
-
-    try {
-      const res = await fetch('/api/startups', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          tagline: formData.tagline,
-          description: formData.description,
-          problem: formData.problem,
-          solution: formData.solution,
-          sector: formData.sector,
-          logo: formData.logo,
-          website: formData.website,
-          contactEmail: formData.contactEmail,
-          founders,
-          submittedBy: user?.id,
-        }),
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        setSuccess(true);
-      } else {
-        setError(data.error || 'Failed to submit registration.');
-      }
-    } catch (err) {
-      setError('Connection error. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!user || (user.role !== 'student' && user.role !== 'registration_team' && user.role !== 'admin')) {
-    return (
-      <div className="container" style={{ padding: '5rem 1.5rem', maxWidth: '580px' }}>
-        <div className="card" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
-          <div style={{
-            width: '56px',
-            height: '56px',
-            borderRadius: '50%',
-            background: '#eff6ff',
-            color: '#0047ff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1rem',
-          }}>
-            <PlusCircle size={28} />
-          </div>
-          <h2 style={{ fontSize: '1.6rem', color: 'var(--bf-primary)', marginBottom: '0.5rem' }}>
-            Student Team or Registration Team Access Required
-          </h2>
-          <p style={{ color: 'var(--bf-text-secondary)', fontSize: '0.95rem', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-            Startup registration is available to authorized <strong>Student Teams</strong> and the <strong>Registration Team</strong> whose accounts have been created by the Fest Admin.
-          </p>
-          <div className="flex gap-3 justify-center flex-wrap">
-            <Link href="/login?role=student" className="btn btn-primary">
-              Student Team Sign In <ArrowRight size={16} />
-            </Link>
-            <Link href="/login?role=registration_team" className="btn btn-secondary">
-              Registration Team Sign In
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container" style={{ padding: '3rem 1.5rem 5rem', maxWidth: '850px' }}>
+    <div className="container" style={{ padding: '3rem 1.5rem 5rem', maxWidth: '860px' }}>
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+      <div style={{ textAlign: 'center', marginBottom: '2.25rem' }}>
         <div className="badge badge-gold" style={{ marginBottom: '0.75rem' }}>
-          Intake Portal
+          <ClipboardList size={14} /> Official Stall Registration
         </div>
-        <h1 style={{ fontSize: '2.4rem', color: 'var(--bf-primary)', marginBottom: '0.5rem' }}>
-          Register Your Startup for Business Fest 2027
+        <h1 style={{ fontSize: '2.3rem', color: 'var(--bf-primary)', marginBottom: '0.5rem' }}>
+          Business Fest 2027 Stall Registration
         </h1>
-        <p style={{ color: 'var(--bf-text-secondary)', fontSize: '1rem' }}>
-          Submit your business concept for jury review, booth allocation, and public audience voting at IMSciences Peshawar.
+        <p style={{ color: 'var(--bf-text-secondary)', fontSize: '0.98rem', maxWidth: '640px', margin: '0 auto' }}>
+          All student stalls register through our official <strong>Google Form</strong>. Responses are stored in a shared{' '}
+          <strong>Google Sheet</strong> accessible to the Registration Team, Student Affairs, and Admin, and synced directly into the website.
         </p>
       </div>
 
-      {success ? (
-        <div className="card" style={{
-          textAlign: 'center',
-          padding: '3.5rem 2rem',
-          border: '2px solid var(--bf-accent-emerald)',
-        }}>
-          <div style={{
-            width: '64px',
-            height: '64px',
-            borderRadius: '50%',
-            background: 'rgba(16, 185, 129, 0.12)',
-            color: 'var(--bf-accent-emerald)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1.25rem',
-          }}>
-            <CheckCircle size={36} />
+      {/* Card 1: Official Google Form for Student Stall Registration */}
+      <div
+        className="card"
+        style={{
+          padding: '2rem',
+          marginBottom: '1.75rem',
+          border: '2px solid rgba(0, 71, 255, 0.2)',
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem' }}>
+          <div style={{ flex: '1 1 320px' }}>
+            <span className="badge badge-sector" style={{ marginBottom: '0.5rem' }}>
+              Step 1 • Student Stall Form
+            </span>
+            <h2 style={{ fontSize: '1.4rem', color: 'var(--bf-primary)', marginBottom: '0.35rem' }}>
+              Register Your Stall via Google Form
+            </h2>
+            <p style={{ fontSize: '0.9rem', color: 'var(--bf-text-secondary)', lineHeight: 1.55 }}>
+              Fill out the official Business Fest Google Form with your Startup/Stall Name, Sector, Team Lead, and Idea summary.
+            </p>
           </div>
-          <h2 style={{ fontSize: '1.8rem', color: 'var(--bf-primary)', marginBottom: '0.75rem' }}>
-            Application Submitted Successfully!
-          </h2>
-          <p style={{ color: 'var(--bf-text-secondary)', fontSize: '1.05rem', maxWidth: '600px', margin: '0 auto 2rem', lineHeight: 1.6 }}>
-            Thank you for registering <strong>{formData.name}</strong>. Your entry has entered the administrative review queue.
-            Once approved by the IMSciences organizing committee, your profile will be published to the live directory.
-          </p>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Link href="/student" className="btn btn-primary">
-              Go to Student Dashboard
-            </Link>
-            <Link href="/startups" className="btn btn-secondary">
-              View Public Directory
-            </Link>
-            <button
-              onClick={() => {
-                setSuccess(false);
-                setFormData({
-                  name: '',
-                  tagline: '',
-                  description: '',
-                  problem: '',
-                  solution: '',
-                  sector: 'FinTech & Banking',
-                  logo: '🚀',
-                  website: '',
-                  contactEmail: '',
-                  founder1Name: '',
-                  founder1Role: 'Founder & CEO',
-                  founder2Name: '',
-                  founder2Role: 'Technical Lead',
-                  consentGranted: false,
-                });
-              }}
-              className="btn btn-secondary"
-            >
-              Register Another Venture
-            </button>
+
+          <div>
+            {config?.googleFormUrl ? (
+              <a
+                href={config.googleFormUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary"
+              >
+                Open Stall Registration Google Form <ExternalLink size={16} />
+              </a>
+            ) : (
+              <span className="badge badge-pending" style={{ padding: '0.5rem 0.9rem', fontSize: '0.82rem' }}>
+                {isStaff
+                  ? 'Paste your Google Form link below to activate this button'
+                  : 'Google Form link will be published by the Registration Team shortly'}
+              </span>
+            )}
           </div>
         </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="card" style={{ padding: '2.5rem' }}>
-          {error && (
+      </div>
+
+      {/* Card 2: Shared Google Sheet Hub (For Registration Team, Student Affairs, and Admin) */}
+      {isStaff ? (
+        <div
+          className="card"
+          style={{
+            padding: '2rem',
+            marginBottom: '1.75rem',
+            border: '2px solid rgba(16, 185, 129, 0.3)',
+            background: '#f0fdf4',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+            <div>
+              <span className="badge badge-approved" style={{ marginBottom: '0.4rem' }}>
+                <FileSpreadsheet size={13} /> Registration Team • Student Affairs • Admin Shared Hub
+              </span>
+              <h3 style={{ fontSize: '1.3rem', color: '#064e3b' }}>
+                Shared Google Sheet & 1-Click Website Sync
+              </h3>
+              <p style={{ fontSize: '0.86rem', color: '#047857' }}>
+                The same Google Sheet from the Google Form is shared between Registration Team and Student Affairs. Click{' '}
+                <strong>Sync & Publish Stalls to Website</strong> to automatically import all stalls into the live website database without manual entry.
+              </p>
+            </div>
+
+            {googleSheetUrl && (
+              <a
+                href={googleSheetUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-secondary btn-sm"
+                style={{ background: '#ffffff', color: '#065f46', borderColor: '#a7f3d0' }}
+              >
+                <FileSpreadsheet size={15} /> Open Shared Google Sheet <ExternalLink size={14} />
+              </a>
+            )}
+          </div>
+
+          {syncMessage && (
             <div style={{
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '8px',
+              background: '#dcfce7',
+              border: '1px solid #86efac',
+              color: '#166534',
               padding: '0.85rem 1rem',
-              color: '#b91c1c',
-              marginBottom: '1.5rem',
+              borderRadius: '10px',
+              marginBottom: '1rem',
+              fontSize: '0.88rem',
+              fontWeight: 600,
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              fontSize: '0.9rem',
             }}>
-              <AlertCircle size={18} />
-              <span>{error}</span>
+              <CheckCircle size={17} /> {syncMessage}
             </div>
           )}
 
-          {/* Section 1: Business Identity */}
-          <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '1.25rem', color: 'var(--bf-primary)', marginBottom: '1.25rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--bf-border)' }}>
-              1. Business Identity
-            </h3>
+          {syncError && (
+            <div style={{
+              background: '#fee2e2',
+              border: '1px solid #fca5a5',
+              color: '#991b1b',
+              padding: '0.85rem 1rem',
+              borderRadius: '10px',
+              marginBottom: '1rem',
+              fontSize: '0.88rem',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}>
+              <AlertCircle size={17} /> {syncError}
+            </div>
+          )}
 
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.4rem' }}>
-                Startup / Venture Name *
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div>
+              <label className="form-label" style={{ fontSize: '0.8rem', color: '#064e3b' }}>
+                Official Student Google Form Link
               </label>
               <input
-                type="text"
-                required
-                placeholder="e.g. KhyberAgri Smart Harvest"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  borderRadius: '8px',
-                  border: '1px solid var(--bf-border)',
-                  fontSize: '0.95rem',
-                  outline: 'none',
-                }}
+                type="url"
+                className="form-input"
+                placeholder="https://docs.google.com/forms/d/e/.../viewform"
+                value={googleFormUrl}
+                onChange={(e) => setGoogleFormUrl(e.target.value)}
+                style={{ background: '#ffffff', fontSize: '0.85rem' }}
               />
             </div>
 
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.4rem' }}>
-                Tagline / Elevator Hook (1 sentence) *
+            <div>
+              <label className="form-label" style={{ fontSize: '0.8rem', color: '#064e3b' }}>
+                Shared Responses Google Sheet Link (&ldquo;Anyone with link can view&rdquo;)
               </label>
               <input
-                type="text"
-                required
-                placeholder="e.g. IoT-enabled precision irrigation for smallholder orchards in KP"
-                value={formData.tagline}
-                onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  borderRadius: '8px',
-                  border: '1px solid var(--bf-border)',
-                  fontSize: '0.95rem',
-                  outline: 'none',
-                }}
+                type="url"
+                className="form-input"
+                placeholder="https://docs.google.com/spreadsheets/d/.../edit"
+                value={googleSheetUrl}
+                onChange={(e) => setGoogleSheetUrl(e.target.value)}
+                style={{ background: '#ffffff', fontSize: '0.85rem' }}
               />
             </div>
-
-            <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1.25rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.4rem' }}>
-                  Industry Track / Sector *
-                </label>
-                <select
-                  value={formData.sector}
-                  onChange={(e: any) => setFormData({ ...formData, sector: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid var(--bf-border)',
-                    fontSize: '0.95rem',
-                    background: '#ffffff',
-                    outline: 'none',
-                  }}
-                >
-                  {sectors.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.4rem' }}>
-                  Brand Icon / Emoji
-                </label>
-                <select
-                  value={formData.logo}
-                  onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid var(--bf-border)',
-                    fontSize: '1rem',
-                    background: '#ffffff',
-                    outline: 'none',
-                  }}
-                >
-                  {emojis.map((em) => (
-                    <option key={em} value={em}>{em} Select Icon</option>
-                  ))}
-                </select>
-              </div>
-            </div>
           </div>
 
-          {/* Section 2: Pitch & Details */}
-          <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '1.25rem', color: 'var(--bf-primary)', marginBottom: '1.25rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--bf-border)' }}>
-              2. Problem & Value Proposition
-            </h3>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={handleSyncSheet}
+              disabled={syncing}
+              className="btn btn-primary btn-sm"
+            >
+              <RefreshCw size={15} />
+              {syncing ? 'Syncing Stalls from Google Sheet...' : 'Sync & Publish Stalls from Google Sheet'}
+            </button>
 
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.4rem' }}>
-                Executive Description
-              </label>
-              <textarea
-                rows={3}
-                placeholder="Give a brief description of what your business does..."
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  borderRadius: '8px',
-                  border: '1px solid var(--bf-border)',
-                  fontSize: '0.95rem',
-                  fontFamily: 'var(--font-body)',
-                  outline: 'none',
-                }}
-              />
-            </div>
+            <button
+              type="button"
+              onClick={handleSaveLinks}
+              disabled={savingLinks}
+              className="btn btn-secondary btn-sm"
+              style={{ background: '#ffffff' }}
+            >
+              {savingLinks ? 'Saving...' : 'Save Shared Form & Sheet Links'}
+            </button>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.4rem' }}>
-                  The Problem Being Solved
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="What is the critical pain point or market inefficiency?"
-                  value={formData.problem}
-                  onChange={(e) => setFormData({ ...formData, problem: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid var(--bf-border)',
-                    fontSize: '0.92rem',
-                    fontFamily: 'var(--font-body)',
-                    outline: 'none',
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.4rem' }}>
-                  Your Innovative Solution
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="How does your product/service resolve it?"
-                  value={formData.solution}
-                  onChange={(e) => setFormData({ ...formData, solution: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid var(--bf-border)',
-                    fontSize: '0.92rem',
-                    fontFamily: 'var(--font-body)',
-                    outline: 'none',
-                  }}
-                />
-              </div>
-            </div>
+            <Link href="/startups" className="btn btn-secondary btn-sm" style={{ background: '#ffffff' }}>
+              View Live Stalls Directory <ArrowRight size={14} />
+            </Link>
           </div>
-
-          {/* Section 3: Team & Contact */}
-          <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '1.25rem', color: 'var(--bf-primary)', marginBottom: '1.25rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--bf-border)' }}>
-              3. Team & Contact Info
-            </h3>
-
-            <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1.25rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.4rem' }}>
-                  Founder / Lead Name *
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Hamza Khattak"
-                  value={formData.founder1Name}
-                  onChange={(e) => setFormData({ ...formData, founder1Name: e.target.value })}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--bf-border)', outline: 'none' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.4rem' }}>
-                  Official Contact Email *
-                </label>
-                <input
-                  type="email"
-                  required
-                  placeholder="founders@startup.pk"
-                  value={formData.contactEmail}
-                  onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--bf-border)', outline: 'none' }}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.4rem' }}>
-                  Co-Founder / Technical Lead Name (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Dr. Ayesha Shinwari"
-                  value={formData.founder2Name}
-                  onChange={(e) => setFormData({ ...formData, founder2Name: e.target.value })}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--bf-border)', outline: 'none' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.4rem' }}>
-                  Website or Demo Video URL (Optional)
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://..."
-                  value={formData.website}
-                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--bf-border)', outline: 'none' }}
-                />
-              </div>
-            </div>
+        </div>
+      ) : (
+        <div className="card" style={{ padding: '1.5rem', textAlign: 'center', marginBottom: '1.75rem' }}>
+          <p style={{ fontSize: '0.9rem', color: 'var(--bf-text-secondary)', marginBottom: '0.75rem' }}>
+            Are you part of the <strong>Registration Team</strong>, <strong>Student Affairs</strong>, or <strong>Fest Admin</strong>? Sign in to access the shared Google Sheet and 1-click website stall sync.
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <Link href="/login?role=registration_team" className="btn btn-secondary btn-sm">
+              Registration Team Sign In
+            </Link>
+            <Link href="/login?role=student_affairs" className="btn btn-secondary btn-sm">
+              Student Affairs Sign In
+            </Link>
+            <Link href="/login?role=admin" className="btn btn-secondary btn-sm">
+              Admin Sign In
+            </Link>
           </div>
+        </div>
+      )}
 
-          {/* Section 4: Publication Consent */}
-          <div style={{
-            background: '#f8fafc',
-            border: '1px solid var(--bf-border)',
-            borderRadius: 'var(--bf-radius-sm)',
-            padding: '1.25rem',
-            marginBottom: '2rem',
-          }}>
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={formData.consentGranted}
-                onChange={(e) => setFormData({ ...formData, consentGranted: e.target.checked })}
-                style={{ marginTop: '0.25rem', width: '18px', height: '18px' }}
-              />
-              <span style={{ fontSize: '0.88rem', color: 'var(--bf-text-primary)', lineHeight: 1.5 }}>
-                <strong>Consent to Public Display:</strong> I represent this venture and consent to the publication of the submitted business description, founder names, and booth details on the Business Fest 2027 public directory upon organizer approval.
-              </span>
-            </label>
-          </div>
-
+      {/* Optional Collapsible Manual Entry for Staff */}
+      {isStaff && (
+        <div className="card" style={{ padding: '1.25rem 1.5rem' }}>
           <button
-            type="submit"
-            disabled={loading}
-            className="btn btn-primary btn-lg"
-            style={{ width: '100%' }}
+            type="button"
+            onClick={() => setShowManualForm(!showManualForm)}
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--bf-primary)',
+              fontWeight: 700,
+              fontSize: '0.95rem',
+            }}
           >
-            {loading ? 'Submitting Registration...' : 'Submit Venture for Review'}
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+              <PlusCircle size={17} /> Need to add a single stall manually without Google Form?
+            </span>
+            {showManualForm ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </button>
-        </form>
+
+          {showManualForm && (
+            <form onSubmit={handleManualSubmit} style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid var(--bf-border)' }}>
+              {manualSuccess && (
+                <div style={{ background: '#dcfce7', color: '#166534', padding: '0.75rem 1rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.88rem', fontWeight: 600 }}>
+                  ✓ Stall added to database!
+                </div>
+              )}
+              {manualError && (
+                <div style={{ background: '#fee2e2', color: '#991b1b', padding: '0.75rem 1rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.88rem', fontWeight: 600 }}>
+                  ⚠️ {manualError}
+                </div>
+              )}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                <div>
+                  <label className="form-label">Stall / Startup Name *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g. KhyberAgri Smart Harvest"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Sector *</label>
+                  <select
+                    className="form-select"
+                    value={formData.sector}
+                    onChange={(e) => setFormData({ ...formData, sector: e.target.value as BusinessSector })}
+                  >
+                    {sectors.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                <div>
+                  <label className="form-label">Short Tagline / Idea *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
+                    value={formData.tagline}
+                    onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
+                    placeholder="One-line summary of the stall"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Contact Email *</label>
+                  <input
+                    type="email"
+                    className="form-input"
+                    required
+                    value={formData.contactEmail}
+                    onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
+                    placeholder="student@imsciences.edu.pk"
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                <div>
+                  <label className="form-label">Team Lead / Founder Name</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={formData.founder1Name}
+                    onChange={(e) => setFormData({ ...formData, founder1Name: e.target.value })}
+                    placeholder="Student Name"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Stall / Booth Number</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={formData.boothNumber}
+                    onChange={(e) => setFormData({ ...formData, boothNumber: e.target.value })}
+                    placeholder="e.g. Stall A-12"
+                  />
+                </div>
+              </div>
+              <button type="submit" disabled={manualLoading} className="btn btn-primary btn-sm">
+                {manualLoading ? 'Saving...' : 'Add Single Stall'}
+              </button>
+            </form>
+          )}
+        </div>
       )}
     </div>
   );

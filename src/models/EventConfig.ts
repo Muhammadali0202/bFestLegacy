@@ -12,6 +12,8 @@ export interface IEventConfig extends Document {
   judgeWeight: number;
   investorWeight: number;
   publicWeight: number;
+  googleFormUrl?: string;
+  googleSheetUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,6 +31,8 @@ const EventConfigSchema = new Schema<IEventConfig>(
     judgeWeight: { type: Number, default: 0.50 },
     investorWeight: { type: Number, default: 0.30 },
     publicWeight: { type: Number, default: 0.20 },
+    googleFormUrl: { type: String, default: '' },
+    googleSheetUrl: { type: String, default: '' },
   },
   {
     timestamps: true,

@@ -28,23 +28,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validRoles: UserRole[] = ['admin', 'student', 'investor', 'judge'];
-    if (!validRoles.includes(role)) {
+    // Public signup is restricted to Admin registration only; Admin creates all other accounts
+    if (role !== 'admin') {
       return NextResponse.json(
-        { success: false, error: 'Invalid role selected.' },
-        { status: 400 }
+        { success: false, error: 'Self-registration is available for Fest Administrators only. Student, Judge, Student Affairs, and Registration Team accounts are created by the Admin.' },
+        { status: 403 }
       );
     }
 
-    // Admin passcode check
-    if (role === 'admin') {
-      const validAdminKey = process.env.ADMIN_SIGNUP_KEY || 'BFEST2027_ADMIN';
-      if (adminKey !== validAdminKey && adminKey !== 'admin123') {
-        return NextResponse.json(
-          { success: false, error: 'Invalid Admin Authorization Passkey. Contact the Fest Organizing Committee.' },
-          { status: 403 }
-        );
-      }
+    const validAdminKey = process.env.ADMIN_SIGNUP_KEY || 'BFEST2027_ADMIN';
+    if (adminKey !== validAdminKey && adminKey !== 'admin123') {
+      return NextResponse.json(
+        { success: false, error: 'Invalid Admin Authorization Passkey. Contact the Fest Organizing Committee.' },
+        { status: 403 }
+      );
     }
 
     const regResult = await UserRepository.register({

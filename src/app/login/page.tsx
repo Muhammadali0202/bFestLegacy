@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   GraduationCap, 
   Briefcase, 
@@ -16,16 +16,28 @@ import {
   Sparkles,
   Zap,
   Eye,
-  EyeOff
+  EyeOff,
+  Star,
+  ClipboardList
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/types';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
 
-  const [selectedRole, setSelectedRole] = useState<UserRole>('student');
+  const urlRole = searchParams.get('role') as UserRole | null;
+
+  const [selectedRole, setSelectedRole] = useState<UserRole>(urlRole || 'student');
+
+  useEffect(() => {
+    if (urlRole) {
+      setSelectedRole(urlRole);
+    }
+  }, [urlRole]);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -44,15 +56,6 @@ export default function LoginPage() {
       defaultEmail: 'student@imsciences.edu.pk',
       defaultPass: 'student123',
     },
-    investor: {
-      label: 'Investor',
-      icon: Briefcase,
-      color: '#10b981',
-      desc: 'Pledge capital, rate startups, & boost leaderboard rankings',
-      redirect: '/investor',
-      defaultEmail: 'investor@venturekp.com',
-      defaultPass: 'investor123',
-    },
     judge: {
       label: 'Jury / Judge',
       icon: Award,
@@ -62,16 +65,52 @@ export default function LoginPage() {
       defaultEmail: 'jury.irfan@imsciences.edu.pk',
       defaultPass: 'judge123',
     },
+    student_affairs: {
+      label: 'Student Affairs',
+      icon: Star,
+      color: '#0047ff',
+      desc: 'Authorized IMSciences Student Affairs portal to rate participating startups',
+      redirect: '/startups',
+      defaultEmail: 'studentaffairs@imsciences.edu.pk',
+      defaultPass: 'affairs123',
+    },
+    registration_team: {
+      label: 'Registration Team',
+      icon: ClipboardList,
+      color: '#8b5cf6',
+      desc: 'Official intake desk to register student startups and manage entries',
+      redirect: '/register',
+      defaultEmail: 'registration@imsciences.edu.pk',
+      defaultPass: 'reg123',
+    },
+    investor: {
+      label: 'Investor',
+      icon: Briefcase,
+      color: '#10b981',
+      desc: 'Pledge capital, rate startups, & boost leaderboard rankings',
+      redirect: '/investor',
+      defaultEmail: 'investor@venturekp.com',
+      defaultPass: 'investor123',
+    },
     admin: {
-      label: 'Admin',
+      label: 'Organizer / Admin',
       icon: ShieldCheck,
       color: '#ef4444',
-      desc: 'Approve startups, verify investors, & configure event',
+      desc: 'Create Student, Judge, Student Affairs & Registration Team accounts and manage event',
       redirect: '/admin',
       defaultEmail: 'admin@imsciences.edu.pk',
       defaultPass: 'admin123',
     },
   };
+
+  const allRoles: UserRole[] = [
+    'student',
+    'judge',
+    'student_affairs',
+    'registration_team',
+    'investor',
+    'admin',
+  ];
 
   const handleRoleChange = (role: UserRole) => {
     setSelectedRole(role);
@@ -100,10 +139,10 @@ export default function LoginPage() {
     try {
       const res = await login(email, password, selectedRole);
       if (res.success && res.user) {
-        setSuccessMsg(`Welcome, ${res.user.fullName}! Redirecting to ${rolesConfig[res.user.role].label} dashboard...`);
+        setSuccessMsg(`Welcome, ${res.user.fullName}! Redirecting to ${rolesConfig[res.user.role].label}...`);
         setTimeout(() => {
           router.push(rolesConfig[res.user!.role].redirect);
-        }, 1000);
+        }, 900);
       } else {
         setError(res.error || 'Authentication failed. Please verify credentials.');
       }
@@ -125,7 +164,7 @@ export default function LoginPage() {
     }}>
       <div style={{
         width: '100%',
-        maxWidth: '560px',
+        maxWidth: '600px',
         background: '#ffffff',
         borderRadius: '24px',
         border: '1px solid #e2e8f0',
@@ -133,7 +172,7 @@ export default function LoginPage() {
         padding: '2.5rem',
       }}>
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -142,31 +181,31 @@ export default function LoginPage() {
             color: '#a6841c',
             padding: '0.35rem 0.9rem',
             borderRadius: '999px',
-            fontSize: '0.85rem',
+            fontSize: '0.82rem',
             fontWeight: 700,
             marginBottom: '0.75rem',
           }}>
-            <Sparkles size={14} /> Unified Portal Access
+            <Sparkles size={14} /> Unified Portal Sign In
           </div>
           <h1 style={{ fontSize: '1.9rem', color: '#0b2545', marginBottom: '0.35rem' }}>
             Sign In to Business Fest
           </h1>
-          <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
-            Select your summit role to access your dedicated dashboard
+          <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
+            Sign in with the account credentials created for your role by the Fest Admin
           </p>
         </div>
 
-        {/* Role Selector Tabs */}
+        {/* Role Selector Grid (3x2) */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '0.4rem',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '0.45rem',
           background: '#f1f5f9',
-          padding: '0.35rem',
+          padding: '0.4rem',
           borderRadius: '16px',
           marginBottom: '1.5rem',
         }}>
-          {(['student', 'investor', 'judge', 'admin'] as UserRole[]).map((role) => {
+          {allRoles.map((role) => {
             const isSelected = selectedRole === role;
             const Icon = rolesConfig[role].icon;
             return (
@@ -179,7 +218,7 @@ export default function LoginPage() {
                   flexDirection: 'column',
                   alignItems: 'center',
                   gap: '0.3rem',
-                  padding: '0.65rem 0.3rem',
+                  padding: '0.6rem 0.35rem',
                   borderRadius: '12px',
                   border: 'none',
                   cursor: 'pointer',
@@ -192,7 +231,7 @@ export default function LoginPage() {
                 }}
               >
                 <Icon size={18} color={isSelected ? rolesConfig[role].color : '#94a3b8'} />
-                <span>{rolesConfig[role].label.split(' ')[0]}</span>
+                <span>{rolesConfig[role].label}</span>
               </button>
             );
           })}
@@ -321,6 +360,7 @@ export default function LoginPage() {
               gap: '0.5rem',
               borderRadius: '12px',
               marginTop: '1.25rem',
+              width: '100%',
             }}
           >
             {loading ? 'Authenticating...' : `Log In as ${rolesConfig[selectedRole].label}`}
@@ -343,57 +383,44 @@ export default function LoginPage() {
             color: '#64748b',
             marginBottom: '0.6rem' 
           }}>
-            <Zap size={14} color="#f59e0b" /> One-Click Demo Credentials:
+            <Zap size={14} color="#f59e0b" /> Quick Demo Credentials:
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
-            <button
-              type="button"
-              onClick={() => fillQuickDemo('student')}
-              className="btn btn-secondary btn-sm"
-              style={{ fontSize: '0.75rem', justifyContent: 'flex-start', padding: '0.4rem 0.6rem' }}
-            >
-              🎓 Student Team Demo
-            </button>
-            <button
-              type="button"
-              onClick={() => fillQuickDemo('investor')}
-              className="btn btn-secondary btn-sm"
-              style={{ fontSize: '0.75rem', justifyContent: 'flex-start', padding: '0.4rem 0.6rem' }}
-            >
-              💼 Approved Investor Demo
-            </button>
-            <button
-              type="button"
-              onClick={() => fillQuickDemo('judge')}
-              className="btn btn-secondary btn-sm"
-              style={{ fontSize: '0.75rem', justifyContent: 'flex-start', padding: '0.4rem 0.6rem' }}
-            >
-              ⚖️ Official Jury Demo
-            </button>
-            <button
-              type="button"
-              onClick={() => fillQuickDemo('admin')}
-              className="btn btn-secondary btn-sm"
-              style={{ fontSize: '0.75rem', justifyContent: 'flex-start', padding: '0.4rem 0.6rem' }}
-            >
-              🛡️ Fest Admin Demo
-            </button>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem' }}>
+            {allRoles.map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => fillQuickDemo(r)}
+                className="btn btn-secondary btn-sm"
+                style={{ fontSize: '0.73rem', justifyContent: 'center', padding: '0.4rem 0.45rem' }}
+              >
+                {rolesConfig[r].label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Sign Up Redirect */}
+        {/* Admin Registration Link */}
         <div style={{
           marginTop: '1.5rem',
           textAlign: 'center',
-          fontSize: '0.9rem',
+          fontSize: '0.85rem',
           color: '#64748b',
         }}>
-          Don&apos;t have an account yet?{' '}
+          Accounts are provisioned by the Fest Admin. Need to register an Organizer / Admin account?{' '}
           <Link href="/signup" style={{ color: '#0066cc', fontWeight: 700 }}>
-            Create an Account
+            Admin Registration →
           </Link>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="container" style={{ padding: '4rem 0', textAlign: 'center' }}>Loading sign in...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

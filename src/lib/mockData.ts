@@ -11,6 +11,8 @@ export const initialEventConfig: EventConfig = {
   judgeWeight: 0.50,
   investorWeight: 0.30,
   publicWeight: 0.20,
+  googleFormUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSeGFeOX8EYzWRrchT0Wwv96b2imsU1ix5UtOOWgi0gHsfvbVA/viewform?usp=publish-editor',
+  googleSheetUrl: 'https://docs.google.com/spreadsheets/d/1Lys9DrF2n9Fos_gunDb686GM0cUjRGtTY1vazAMz_QI/edit?usp=sharing',
 };
 
 export const initialUsers: (User & { passwordHash: string })[] = [

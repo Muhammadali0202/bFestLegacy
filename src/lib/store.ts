@@ -747,8 +747,8 @@ export const StartupRepository = {
             judgeWeight: config.judgeWeight,
             investorWeight: config.investorWeight || 0.30,
             publicWeight: config.publicWeight,
-            googleFormUrl: config.googleFormUrl || '',
-            googleSheetUrl: config.googleSheetUrl || '',
+            googleFormUrl: config.googleFormUrl || initialEventConfig.googleFormUrl,
+            googleSheetUrl: config.googleSheetUrl || initialEventConfig.googleSheetUrl,
           };
         }
       } catch (e) {

@@ -31,8 +31,14 @@ const EventConfigSchema = new Schema<IEventConfig>(
     judgeWeight: { type: Number, default: 0.50 },
     investorWeight: { type: Number, default: 0.30 },
     publicWeight: { type: Number, default: 0.20 },
-    googleFormUrl: { type: String, default: '' },
-    googleSheetUrl: { type: String, default: '' },
+    googleFormUrl: {
+      type: String,
+      default: 'https://docs.google.com/forms/d/e/1FAIpQLSeGFeOX8EYzWRrchT0Wwv96b2imsU1ix5UtOOWgi0gHsfvbVA/viewform?usp=publish-editor',
+    },
+    googleSheetUrl: {
+      type: String,
+      default: 'https://docs.google.com/spreadsheets/d/1Lys9DrF2n9Fos_gunDb686GM0cUjRGtTY1vazAMz_QI/edit?usp=sharing',
+    },
   },
   {
     timestamps: true,

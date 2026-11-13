@@ -11,8 +11,8 @@ import {
 } from 'lucide-react';
 import { Startup } from '@/types';
 
-// Target date for Business Fest 2027
-const BFEST_TARGET_DATE = new Date('2027-03-15T09:00:00+05:00').getTime();
+// Target date for Business Fest (19 December 2026)
+const BFEST_TARGET_DATE = new Date('2026-12-19T09:00:00+05:00').getTime();
 
 export default function HomePage() {
   const [topStartups, setTopStartups] = useState<Startup[]>([]);
@@ -69,55 +69,55 @@ export default function HomePage() {
           {/* BFEST HAPPENING IN : Countdown Banner (Per Sketch Wireframe) */}
           <div style={{
             maxWidth: '920px',
-            margin: '0 auto 2rem',
+            margin: '0 auto 1.75rem',
             background: 'rgba(255, 255, 255, 0.06)',
             border: '1.5px solid rgba(255, 210, 51, 0.45)',
             borderRadius: '16px',
-            padding: '0.9rem 1.5rem',
+            padding: 'clamp(0.7rem, 2.5vw, 0.95rem) clamp(0.75rem, 3vw, 1.5rem)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexWrap: 'wrap',
-            gap: '1rem',
+            gap: '0.65rem 1rem',
             boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
           }}>
             <div style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem',
+              gap: '0.45rem',
               fontFamily: 'var(--font-display)',
               fontWeight: 800,
-              fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
-              letterSpacing: '0.05em',
+              fontSize: 'clamp(0.85rem, 2.5vw, 1.15rem)',
+              letterSpacing: '0.04em',
               color: '#ffd233',
               textTransform: 'uppercase',
             }}>
-              <Clock size={18} color="#ffd233" />
+              <Clock size={16} color="#ffd233" />
               <span>BFEST HAPPENING IN :</span>
             </div>
 
             <div style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem',
+              gap: '0.35rem',
               fontFamily: 'var(--font-display)',
               fontWeight: 900,
-              fontSize: 'clamp(1.05rem, 2.2vw, 1.35rem)',
+              fontSize: 'clamp(0.95rem, 3vw, 1.35rem)',
               color: '#ffffff',
             }}>
-              <span style={{ background: 'rgba(0, 71, 255, 0.35)', border: '1px solid rgba(0, 71, 255, 0.6)', padding: '0.2rem 0.6rem', borderRadius: '8px' }}>
+              <span style={{ background: 'rgba(0, 71, 255, 0.35)', border: '1px solid rgba(0, 71, 255, 0.6)', padding: '0.2rem 0.5rem', borderRadius: '8px' }}>
                 {timeLeft.days}d
               </span>
               <span style={{ color: '#ffd233' }}>:</span>
-              <span style={{ background: 'rgba(0, 71, 255, 0.35)', border: '1px solid rgba(0, 71, 255, 0.6)', padding: '0.2rem 0.6rem', borderRadius: '8px' }}>
+              <span style={{ background: 'rgba(0, 71, 255, 0.35)', border: '1px solid rgba(0, 71, 255, 0.6)', padding: '0.2rem 0.5rem', borderRadius: '8px' }}>
                 {pad(timeLeft.hours)}h
               </span>
               <span style={{ color: '#ffd233' }}>:</span>
-              <span style={{ background: 'rgba(0, 71, 255, 0.35)', border: '1px solid rgba(0, 71, 255, 0.6)', padding: '0.2rem 0.6rem', borderRadius: '8px' }}>
+              <span style={{ background: 'rgba(0, 71, 255, 0.35)', border: '1px solid rgba(0, 71, 255, 0.6)', padding: '0.2rem 0.5rem', borderRadius: '8px' }}>
                 {pad(timeLeft.minutes)}m
               </span>
               <span style={{ color: '#ffd233' }}>:</span>
-              <span style={{ background: 'rgba(0, 71, 255, 0.35)', border: '1px solid rgba(0, 71, 255, 0.6)', padding: '0.2rem 0.6rem', borderRadius: '8px' }}>
+              <span style={{ background: 'rgba(0, 71, 255, 0.35)', border: '1px solid rgba(0, 71, 255, 0.6)', padding: '0.2rem 0.5rem', borderRadius: '8px' }}>
                 {pad(timeLeft.seconds)}s
               </span>
             </div>
@@ -190,20 +190,20 @@ export default function HomePage() {
               </div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.92rem' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 'clamp(0.82rem, 2.2vw, 0.92rem)' }}>
                   <thead>
                     <tr style={{
                       background: '#f1f5f9',
                       borderBottom: '1px solid var(--bf-border)',
                       color: 'var(--bf-text-secondary)',
-                      fontSize: '0.76rem',
+                      fontSize: '0.74rem',
                       textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
+                      letterSpacing: '0.04em',
                     }}>
-                      <th style={{ padding: '0.65rem 1.25rem', width: '64px' }}>#</th>
-                      <th style={{ padding: '0.65rem 1rem' }}>Title</th>
-                      <th style={{ padding: '0.65rem 1rem' }}>Sector</th>
-                      <th style={{ padding: '0.65rem 1.25rem', textAlign: 'right' }}>Points</th>
+                      <th style={{ padding: '0.65rem clamp(0.5rem, 2vw, 1.25rem)', width: '44px' }}>#</th>
+                      <th style={{ padding: '0.65rem clamp(0.5rem, 2vw, 1rem)' }}>Title</th>
+                      <th style={{ padding: '0.65rem clamp(0.5rem, 2vw, 1rem)' }}>Sector</th>
+                      <th style={{ padding: '0.65rem clamp(0.5rem, 2vw, 1.25rem)', textAlign: 'right', whiteSpace: 'nowrap' }}>Points</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -215,43 +215,43 @@ export default function HomePage() {
                           background: idx === 0 ? 'rgba(255, 210, 51, 0.06)' : '#ffffff',
                         }}
                       >
-                        <td style={{ padding: '0.75rem 1.25rem', fontWeight: 900 }}>
+                        <td style={{ padding: '0.7rem clamp(0.5rem, 2vw, 1.25rem)', fontWeight: 900 }}>
                           <span style={{
                             display: 'inline-flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            width: '26px',
-                            height: '26px',
+                            width: '24px',
+                            height: '24px',
                             borderRadius: '6px',
-                            fontSize: '0.82rem',
+                            fontSize: '0.78rem',
                             background: idx === 0 ? 'var(--bf-accent-gold)' : idx === 1 ? '#e2e8f0' : '#f1e2d3',
                             color: idx === 0 ? '#06172e' : idx === 1 ? '#334155' : '#8b4513',
                           }}>
                             {idx + 1}
                           </span>
                         </td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
+                        <td style={{ padding: '0.7rem clamp(0.5rem, 2vw, 1rem)' }}>
                           <Link
                             href={`/startups/${startup.id}`}
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '0.55rem',
+                              gap: '0.45rem',
                               fontWeight: 700,
                               color: 'var(--bf-primary)',
                             }}
                           >
-                            <span style={{ fontSize: '1.25rem' }}>{startup.logo}</span>
-                            <span>{startup.name}</span>
+                            <span style={{ fontSize: '1.15rem', flexShrink: 0 }}>{startup.logo}</span>
+                            <span style={{ lineHeight: 1.25 }}>{startup.name}</span>
                           </Link>
                         </td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
-                          <span className="badge badge-sector" style={{ fontSize: '0.72rem', padding: '0.2rem 0.6rem' }}>
+                        <td style={{ padding: '0.7rem clamp(0.5rem, 2vw, 1rem)' }}>
+                          <span className="badge badge-sector" style={{ fontSize: '0.68rem', padding: '0.2rem 0.5rem' }}>
                             {startup.sector}
                           </span>
                         </td>
-                        <td style={{ padding: '0.75rem 1.25rem', textAlign: 'right', fontWeight: 800, fontFamily: 'var(--font-display)', color: idx === 0 ? '#b8860b' : 'var(--bf-primary)' }}>
-                          {startup.compositeScore.toFixed(1)} <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)', fontWeight: 600 }}>PTS</span>
+                        <td style={{ padding: '0.7rem clamp(0.5rem, 2vw, 1.25rem)', textAlign: 'right', fontWeight: 800, fontFamily: 'var(--font-display)', color: idx === 0 ? '#b8860b' : 'var(--bf-primary)', whiteSpace: 'nowrap' }}>
+                          {startup.compositeScore.toFixed(1)} <span style={{ fontSize: '0.7rem', color: 'var(--bf-text-muted)', fontWeight: 600 }}>PTS</span>
                         </td>
                       </tr>
                     ))}

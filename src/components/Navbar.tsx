@@ -15,7 +15,8 @@ import {
   LogOut, 
   Briefcase, 
   GraduationCap,
-  Star
+  Star,
+  MonitorPlay
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -48,6 +49,8 @@ export default function Navbar() {
       rolePortal = { label: 'Register Startup', href: '/register', icon: PlusCircle };
     } else if (user.role === 'judge') {
       rolePortal = { label: 'Judge Portal', href: '/judge', icon: Award };
+    } else if (user.role === 'tv_admin') {
+      rolePortal = { label: 'TV Display', href: '/leaderboard/stage', icon: MonitorPlay };
     } else if (user.role === 'admin') {
       rolePortal = { label: 'Admin Console', href: '/admin', icon: ShieldCheck };
     }
@@ -59,21 +62,21 @@ export default function Navbar() {
         className="navbar-container"
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr auto 1fr',
+          gridTemplateColumns: 'auto 1fr auto',
           alignItems: 'center',
-          gap: '1rem',
+          gap: '0.5rem',
         }}
       >
         {/* Left: Logo + Core Nav Links */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
           <Link href="/" className="navbar-brand" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
             <img
               src="/bfest-logo.jpg"
               alt="Business Fest Logo"
               style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '10px',
+                width: '36px',
+                height: '36px',
+                borderRadius: '9px',
                 objectFit: 'contain',
                 background: '#ffffff',
                 padding: '2px',
@@ -83,7 +86,7 @@ export default function Navbar() {
             />
           </Link>
 
-          <nav style={{ display: 'none' }} className="desktop-nav">
+          <nav className="desktop-nav">
             <ul className="nav-links" style={{ gap: '0.35rem' }}>
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
@@ -145,12 +148,12 @@ export default function Navbar() {
         </div>
 
         {/* Center: Title */}
-        <div style={{ textAlign: 'center', padding: '0 0.5rem' }}>
+        <div style={{ textAlign: 'center', padding: '0 0.25rem', minWidth: 0 }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
             <span style={{ 
               fontFamily: 'var(--font-display)', 
               fontWeight: 900, 
-              fontSize: 'clamp(1.05rem, 2vw, 1.35rem)', 
+              fontSize: 'clamp(0.95rem, 3.6vw, 1.35rem)', 
               color: '#ffffff', 
               letterSpacing: '0.02em',
               whiteSpace: 'nowrap',
@@ -161,7 +164,7 @@ export default function Navbar() {
         </div>
 
         {/* Right: Role Portal + User Auth + IMS Badge */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.55rem', flexShrink: 0, whiteSpace: 'nowrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.45rem', flexShrink: 0, whiteSpace: 'nowrap' }}>
           {rolePortal && (
             <Link
               href={rolePortal.href}
@@ -187,13 +190,14 @@ export default function Navbar() {
           )}
 
           {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', whiteSpace: 'nowrap' }}>
+            <div className="hide-on-mobile" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', whiteSpace: 'nowrap' }}>
               <Link
                 href={
                   user.role === 'student' ? '/student' :
                   user.role === 'investor' ? '/investor' :
                   user.role === 'student_affairs' ? '/startups' :
                   user.role === 'registration_team' ? '/register' :
+                  user.role === 'tv_admin' ? '/leaderboard/stage' :
                   user.role === 'judge' ? '/judge' : '/admin'
                 }
                 style={{
@@ -223,7 +227,7 @@ export default function Navbar() {
                 }}>
                   {user.fullName.charAt(0).toUpperCase()}
                 </div>
-                <div className="hide-on-mobile" style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
                   <span style={{ fontWeight: 700, lineHeight: 1.1 }}>{user.fullName.split(' ')[0]}</span>
                   <span style={{ fontSize: '0.68rem', color: '#cbd5e1', textTransform: 'capitalize' }}>
                     {user.role.replace('_', ' ')}
@@ -275,8 +279,8 @@ export default function Navbar() {
           <div
             style={{
               background: '#ffffff',
-              padding: '4px 8px',
-              borderRadius: '8px',
+              padding: '3px 6px',
+              borderRadius: '7px',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -289,7 +293,7 @@ export default function Navbar() {
               src="/imsciences-logo.png"
               alt="IMSciences Peshawar"
               style={{
-                height: '28px',
+                height: 'clamp(20px, 4vw, 26px)',
                 width: 'auto',
                 objectFit: 'contain',
                 display: 'block',
@@ -304,7 +308,6 @@ export default function Navbar() {
             aria-label="Toggle navigation menu"
             style={{
               padding: '0.35rem 0.45rem',
-              display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               background: 'rgba(255,255,255,0.08)',
@@ -411,30 +414,6 @@ export default function Navbar() {
           </ul>
         </div>
       )}
-
-      <style jsx>{`
-        @media (min-width: 1024px) {
-          .desktop-nav {
-            display: block !important;
-          }
-          .mobile-menu-toggle {
-            display: none !important;
-          }
-        }
-        @media (max-width: 1023px) {
-          .desktop-nav {
-            display: none !important;
-          }
-          .mobile-menu-toggle {
-            display: flex !important;
-          }
-        }
-        @media (max-width: 600px) {
-          .hide-on-mobile {
-            display: none !important;
-          }
-        }
-      `}</style>
     </header>
   );
 }

@@ -307,7 +307,7 @@ export default function RegisterStartupPage() {
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+          <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
             <div>
               <label className="form-label" style={{ fontSize: '0.8rem', color: '#064e3b' }}>
                 Official Student Google Form Link
@@ -419,7 +419,7 @@ export default function RegisterStartupPage() {
                   ⚠️ {manualError}
                 </div>
               )}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+              <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
                 <div>
                   <label className="form-label">Stall / Startup Name *</label>
                   <input
@@ -444,7 +444,7 @@ export default function RegisterStartupPage() {
                   </select>
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+              <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
                 <div>
                   <label className="form-label">Short Tagline / Idea *</label>
                   <input
@@ -468,7 +468,7 @@ export default function RegisterStartupPage() {
                   />
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+              <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
                 <div>
                   <label className="form-label">Team Lead / Founder Name</label>
                   <input

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Award, ShieldCheck, Mail, MapPin, Star, Lock } from 'lucide-react';
+import { Award, ShieldCheck, Mail, MapPin, Star, Lock, MonitorPlay } from 'lucide-react';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -16,7 +16,7 @@ export default function Footer() {
   return (
     <footer className="footer">
       <div className="container">
-        <div className="footer-top" style={{ gridTemplateColumns: '1.8fr 1fr 1.4fr' }}>
+        <div className="footer-top">
           {/* Col 1: About */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
@@ -141,6 +141,27 @@ export default function Footer() {
                   <ShieldCheck size={14} color="#f87171" /> Organizer / Admin Console
                 </span>
                 <span style={{ fontSize: '0.75rem', color: '#fca5a5' }}>Sign In →</span>
+              </Link>
+
+              <Link
+                href="/leaderboard/stage"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.45rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'rgba(6, 182, 212, 0.14)',
+                  border: '1px solid rgba(6, 182, 212, 0.35)',
+                  color: '#ffffff',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                }}
+              >
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+                  <MonitorPlay size={14} color="#22d3ee" /> University TV Display
+                </span>
+                <span style={{ fontSize: '0.75rem', color: '#67e8f9' }}>TV Auth →</span>
               </Link>
             </div>
           </div>

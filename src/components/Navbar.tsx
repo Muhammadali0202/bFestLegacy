@@ -58,15 +58,7 @@ export default function Navbar() {
 
   return (
     <header className="navbar">
-      <div
-        className="navbar-container"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'auto 1fr auto',
-          alignItems: 'center',
-          gap: '0.5rem',
-        }}
-      >
+      <div className="navbar-container">
         {/* Left: Logo + Core Nav Links */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
           <Link href="/" className="navbar-brand" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>

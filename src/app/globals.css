@@ -499,16 +499,23 @@ a {
 }
 
 .navbar-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: nowrap;
   gap: 0.75rem;
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 1.25rem;
   box-sizing: border-box;
+}
+
+@media (max-width: 1023px) {
+  .navbar-container {
+    grid-template-columns: auto 1fr auto;
+    gap: 0.5rem;
+    padding: 0 1rem;
+  }
 }
 
 .navbar-brand {

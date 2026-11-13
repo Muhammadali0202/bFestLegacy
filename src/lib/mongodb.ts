@@ -39,6 +39,12 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
     return cached.conn;
   }
 
+  try {
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+  } catch (_) {
+    // Ignore if DNS servers cannot be overridden
+  }
+
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,

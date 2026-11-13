@@ -248,3 +248,4 @@ export async function syncGoogleSheetToDatabase(options?: {
     message: `Synced Google Sheet: ${importedCount} new stall(s) imported to live website, ${skippedCount} already synced.`,
   };
 }
+

@@ -34,6 +34,7 @@ let memUsers: (User & { passwordHash: string })[] = initialUsers.map(u => ({
     u.role === 'judge' ? 'judge123' :
     u.role === 'student_affairs' ? 'affairs123' :
     u.role === 'registration_team' ? 'reg123' :
+    u.role === 'tv_admin' ? 'tv2027' :
     u.role === 'investor' ? 'investor123' : 'student123'
   )
 }));

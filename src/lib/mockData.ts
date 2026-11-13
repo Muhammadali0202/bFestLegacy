@@ -93,6 +93,16 @@ export const initialUsers: (User & { passwordHash: string })[] = [
     institution: 'IMSciences Peshawar - Registration Desk',
     createdAt: '2027-01-09T00:00:00Z',
   },
+  {
+    id: 'user-tv-1',
+    fullName: 'University TV Display Administrator',
+    email: 'tv@imsciences.edu.pk',
+    passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', // tv2027
+    role: 'tv_admin',
+    isApproved: true,
+    institution: 'IMSciences Peshawar - Campus AV & TV Screens',
+    createdAt: '2027-01-10T00:00:00Z',
+  },
 ];
 
 export const initialStartups: Startup[] = [

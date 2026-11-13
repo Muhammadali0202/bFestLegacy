@@ -123,6 +123,14 @@ export async function seedDatabaseIfEmpty() {
       isApproved: true,
       institution: 'IMSciences Peshawar - Registration Desk',
     },
+    {
+      fullName: 'University TV Display Administrator',
+      email: 'tv@imsciences.edu.pk',
+      passwordHash: hashPassword('tv2027'),
+      role: 'tv_admin',
+      isApproved: true,
+      institution: 'IMSciences Peshawar - Campus AV & TV Screens',
+    },
   ];
 
   for (const u of seedUsersList) {

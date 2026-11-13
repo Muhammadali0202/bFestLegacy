@@ -783,6 +783,7 @@ export default function AdminDashboardPage() {
                   <option value="student_affairs">Student Affairs (Startup Rating Access)</option>
                   <option value="registration_team">Registration Team (Startup Intake Access)</option>
                   <option value="investor">Pre-Approved Investor</option>
+                  <option value="tv_admin">TV Display Administrator</option>
                   <option value="admin">Fest Organizer / Admin</option>
                 </select>
               </div>
@@ -873,7 +874,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Provisioned Accounts List */}
-          <div className="card" style={{ gridColumn: 'span 2', padding: 0, overflow: 'hidden' }}>
+          <div className="card span-2-desktop" style={{ padding: 0, overflow: 'hidden' }}>
             <div style={{ padding: '1.25rem 1.5rem', background: '#f8fafc', borderBottom: '1px solid var(--bf-border)' }}>
               <h3 style={{ fontSize: '1.15rem', color: 'var(--bf-primary)' }}>
                 All Provisioned Accounts ({managedAccounts.length})
@@ -1025,7 +1026,7 @@ export default function AdminDashboardPage() {
               The live rankings are mathematically synthesized using the following weights:
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+            <div className="grid grid-cols-3 gap-4">
               <div style={{ background: '#ffffff', padding: '1rem', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
                 <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700 }}>JUDGE RUBRIC WEIGHT</div>
                 <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#d4af37' }}>

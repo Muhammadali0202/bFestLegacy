@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validRoles: UserRole[] = ['student', 'judge', 'student_affairs', 'registration_team', 'investor', 'admin'];
+    const validRoles: UserRole[] = ['student', 'judge', 'student_affairs', 'registration_team', 'tv_admin', 'investor', 'admin'];
     if (!validRoles.includes(role)) {
       return NextResponse.json(
         { success: false, error: 'Invalid role specified.' },

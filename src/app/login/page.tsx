@@ -18,7 +18,8 @@ import {
   Eye,
   EyeOff,
   Star,
-  ClipboardList
+  ClipboardList,
+  MonitorPlay
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/types';
@@ -91,6 +92,15 @@ function LoginContent() {
       redirect: '/investor',
       defaultEmail: 'investor@venturekp.com',
       defaultPass: 'investor123',
+    },
+    tv_admin: {
+      label: 'TV Display Admin',
+      icon: MonitorPlay,
+      color: '#06b6d4',
+      desc: 'University AV & Campus TV screen administrator for live stage broadcast',
+      redirect: '/leaderboard/stage',
+      defaultEmail: 'tv@imsciences.edu.pk',
+      defaultPass: 'tv2027',
     },
     admin: {
       label: 'Organizer / Admin',
@@ -195,10 +205,10 @@ function LoginContent() {
           </p>
         </div>
 
-        {/* Role Selector Grid (3x2) */}
+        {/* Role Selector Grid (3x2 on desktop, 2x3 on small mobile) */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(115px, 1fr))',
           gap: '0.45rem',
           background: '#f1f5f9',
           padding: '0.4rem',
@@ -385,7 +395,7 @@ function LoginContent() {
           }}>
             <Zap size={14} color="#f59e0b" /> Quick Demo Credentials:
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(115px, 1fr))', gap: '0.4rem' }}>
             {allRoles.map((r) => (
               <button
                 key={r}

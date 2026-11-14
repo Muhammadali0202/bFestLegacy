@@ -40,6 +40,7 @@ export interface IStartup extends Document {
 
   compositeScore: number;
   progressPercentage: number;
+  isFirstSemester: boolean;
   rank?: number;
 
   createdAt: Date;
@@ -93,6 +94,7 @@ const StartupSchema = new Schema<IStartup>(
 
     compositeScore: { type: Number, default: 0, index: true },
     progressPercentage: { type: Number, default: 0, min: 0, max: 100 },
+    isFirstSemester: { type: Boolean, default: false, index: true },
     rank: { type: Number },
   },
   {

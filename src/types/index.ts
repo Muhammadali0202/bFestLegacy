@@ -60,6 +60,7 @@ export interface Startup {
   // Overall Composite & Ranking
   compositeScore: number;    // Weighted combination or Official points
   progressPercentage?: number; // 0-100 updated by Bfest's Officials / Student Affairs
+  isFirstSemester?: boolean; // 1st semester startups shown on Legacy Board TV
   rank?: number;
   submittedBy?: string;      // Student User ID
   createdAt: string;

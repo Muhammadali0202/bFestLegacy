@@ -57,6 +57,8 @@ export async function POST(request: NextRequest) {
       founders: body.founders || [{ name: 'Founder', role: 'Lead' }],
       boothNumber: body.boothNumber || 'Pending Allocation',
       submittedBy: body.submittedBy,
+      isFirstSemester: !!body.isFirstSemester,
+      autoApprove: !!body.autoApprove,
     });
 
     return NextResponse.json({ 

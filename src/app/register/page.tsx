@@ -45,6 +45,7 @@ export default function RegisterStartupPage() {
     founder1Name: user?.fullName || '',
     founder1Role: 'Founder & CEO',
     boothNumber: 'Pending Allocation',
+    isFirstSemester: true,
   });
   const [manualLoading, setManualLoading] = useState(false);
   const [manualSuccess, setManualSuccess] = useState(false);
@@ -166,6 +167,8 @@ export default function RegisterStartupPage() {
           boothNumber: formData.boothNumber,
           founders: [{ name: formData.founder1Name || 'Student Founder', role: formData.founder1Role }],
           submittedBy: user?.id,
+          isFirstSemester: formData.isFirstSemester,
+          autoApprove: true,
         }),
       });
       const data = await res.json();
@@ -197,6 +200,24 @@ export default function RegisterStartupPage() {
       alert('Network error removing startup.');
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleToggleFirstSemester = async (startupId: string, nextValue: boolean) => {
+    try {
+      const res = await fetch(`/api/startups/${startupId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFirstSemester: nextValue, status: 'approved', isPublished: true }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStartups((prev) =>
+          prev.map((s) => (s.id === startupId ? { ...s, isFirstSemester: nextValue } : s))
+        );
+      }
+    } catch {
+      alert('Network error updating Legacy Board status.');
     }
   };
 
@@ -568,6 +589,16 @@ export default function RegisterStartupPage() {
                   />
                 </div>
               </div>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.55rem', cursor: 'pointer', fontSize: '0.88rem', fontWeight: 700, color: 'var(--bf-primary)' }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.isFirstSemester}
+                    onChange={(e) => setFormData({ ...formData, isFirstSemester: e.target.checked })}
+                  />
+                  1st Semester Startup (Show on Legacy Board TV Display)
+                </label>
+              </div>
               <button type="submit" disabled={manualLoading} className="btn btn-primary btn-sm">
                 {manualLoading ? 'Saving...' : 'Add Single Stall'}
               </button>
@@ -616,23 +647,39 @@ export default function RegisterStartupPage() {
                       <div style={{ fontSize: '0.78rem', color: 'var(--bf-text-muted)' }}>{s.sector}</div>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    disabled={deletingId === s.id}
-                    onClick={() => handleDeleteStartup(s.id, s.name)}
-                    className="btn btn-sm"
-                    style={{
-                      background: '#fee2e2',
-                      color: '#b91c1c',
-                      border: '1px solid #fecaca',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.35rem',
-                    }}
-                  >
-                    <Trash2 size={14} />
-                    {deletingId === s.id ? 'Removing...' : 'Remove'}
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleFirstSemester(s.id, !s.isFirstSemester)}
+                      className="btn btn-sm"
+                      style={{
+                        background: s.isFirstSemester ? '#dcfce7' : '#e2e8f0',
+                        color: s.isFirstSemester ? '#166534' : '#475569',
+                        border: s.isFirstSemester ? '1px solid #86efac' : '1px solid #cbd5e1',
+                        fontSize: '0.76rem',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {s.isFirstSemester ? '✓ 1st Sem (Legacy Board)' : 'Mark 1st Sem'}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={deletingId === s.id}
+                      onClick={() => handleDeleteStartup(s.id, s.name)}
+                      className="btn btn-sm"
+                      style={{
+                        background: '#fee2e2',
+                        color: '#b91c1c',
+                        border: '1px solid #fecaca',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                      }}
+                    >
+                      <Trash2 size={14} />
+                      {deletingId === s.id ? 'Removing...' : 'Remove'}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

@@ -29,7 +29,7 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
-    const updated = await StartupRepository.updateStatus(id, body.status, body.isPublished);
+    const updated = await StartupRepository.updateStatus(id, body.status, body.isPublished, body.isFirstSemester);
 
     if (!updated) {
       return NextResponse.json({ success: false, error: 'Startup not found' }, { status: 404 });

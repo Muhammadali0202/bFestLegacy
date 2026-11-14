@@ -14,8 +14,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const sector = searchParams.get('sector') || undefined;
+    const firstSemesterOnly = searchParams.get('firstSemesterOnly') === 'true';
 
-    const leaderboard = await StartupRepository.getLeaderboard(sector);
+    const leaderboard = await StartupRepository.getLeaderboard(sector, firstSemesterOnly);
     return NextResponse.json({ success: true, ...leaderboard });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch leaderboard' }, { status: 500 });

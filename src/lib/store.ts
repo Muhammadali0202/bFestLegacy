@@ -120,6 +120,7 @@ function toStartupObject(doc: any): Startup {
 
     compositeScore: obj.compositeScore || 0,
     progressPercentage: obj.progressPercentage || 0,
+    isFirstSemester: !!obj.isFirstSemester,
     rank: obj.rank,
     submittedBy: obj.submittedBy ? obj.submittedBy.toString() : undefined,
     createdAt: obj.createdAt ? new Date(obj.createdAt).toISOString() : new Date().toISOString(),
@@ -298,15 +299,18 @@ export const StartupRepository = {
   },
 
   // Register new startup (Student intake pipeline)
-  register: async (data: Omit<Startup, 'id' | 'status' | 'isPublished' | 'publicRating' | 'totalPublicVotes' | 'judgeScore' | 'totalJudgeEvaluations' | 'investorRating' | 'totalInvestorRatings' | 'totalInvestedAmount' | 'investorScore' | 'compositeScore' | 'createdAt'> & { submittedBy?: string }): Promise<Startup> => {
+  register: async (data: Omit<Startup, 'id' | 'status' | 'isPublished' | 'publicRating' | 'totalPublicVotes' | 'judgeScore' | 'totalJudgeEvaluations' | 'investorRating' | 'totalInvestorRatings' | 'totalInvestedAmount' | 'investorScore' | 'compositeScore' | 'createdAt'> & { submittedBy?: string; autoApprove?: boolean; isFirstSemester?: boolean }): Promise<Startup> => {
     const hasDb = await initDb();
+    const shouldAutoPublish = !!(data.autoApprove || data.isFirstSemester);
+    const { autoApprove: _autoApprove, ...startupFields } = data;
 
     if (hasDb) {
       try {
         const doc = await StartupModel.create({
-          ...data,
-          status: 'pending',
-          isPublished: false,
+          ...startupFields,
+          status: shouldAutoPublish ? 'approved' : 'pending',
+          isPublished: shouldAutoPublish,
+          isFirstSemester: !!data.isFirstSemester,
           publicRating: 0,
           totalPublicVotes: 0,
           judgeScore: 0,
@@ -331,10 +335,11 @@ export const StartupRepository = {
 
     // In-memory Fallback
     const newStartup: Startup = {
-      ...data,
+      ...startupFields,
       id: `startup-${Date.now()}`,
-      status: 'pending',
-      isPublished: false,
+      status: shouldAutoPublish ? 'approved' : 'pending',
+      isPublished: shouldAutoPublish,
+      isFirstSemester: !!data.isFirstSemester,
       publicRating: 0,
       totalPublicVotes: 0,
       judgeScore: 0,
@@ -378,24 +383,34 @@ export const StartupRepository = {
     return false;
   },
 
-  // Update status (Admin moderation)
-  updateStatus: async (id: string, status: StartupStatus, isPublished?: boolean): Promise<Startup | null> => {
+  // Update status (Admin moderation) or 1st-semester Legacy Board flag
+  updateStatus: async (id: string, status?: StartupStatus, isPublished?: boolean, isFirstSemester?: boolean): Promise<Startup | null> => {
     const hasDb = await initDb();
 
     if (hasDb) {
       try {
-        const published = isPublished !== undefined ? isPublished : (status === 'approved');
+        const updateFields: Record<string, any> = { reviewedAt: new Date() };
+        if (status !== undefined) {
+          updateFields.status = status;
+          updateFields.isPublished = isPublished !== undefined ? isPublished : (status === 'approved');
+        } else if (isPublished !== undefined) {
+          updateFields.isPublished = isPublished;
+        }
+        if (isFirstSemester !== undefined) {
+          updateFields.isFirstSemester = isFirstSemester;
+        }
+
         let doc: any = null;
         try {
           doc = await StartupModel.findByIdAndUpdate(
             id,
-            { status, isPublished: published, reviewedAt: new Date() },
+            updateFields,
             { new: true }
           );
         } catch (_) {
           doc = await StartupModel.findOneAndUpdate(
             { name: new RegExp(id, 'i') },
-            { status, isPublished: published, reviewedAt: new Date() },
+            updateFields,
             { new: true }
           );
         }
@@ -403,7 +418,7 @@ export const StartupRepository = {
         if (doc) {
           await AuditLogModel.create({
             action: 'STARTUP_STATUS_UPDATED',
-            details: { startupId: doc._id, status, isPublished: published },
+            details: { startupId: doc._id, ...updateFields },
           });
 
           // Recalculate ranks in MongoDB
@@ -424,8 +439,15 @@ export const StartupRepository = {
     const startup = memStartups.find(s => s.id === id);
     if (!startup) return null;
 
-    startup.status = status;
-    startup.isPublished = isPublished !== undefined ? isPublished : (status === 'approved');
+    if (status !== undefined) {
+      startup.status = status;
+      startup.isPublished = isPublished !== undefined ? isPublished : (status === 'approved');
+    } else if (isPublished !== undefined) {
+      startup.isPublished = isPublished;
+    }
+    if (isFirstSemester !== undefined) {
+      startup.isFirstSemester = isFirstSemester;
+    }
     recalculateMemLeaderboard();
     return startup;
   },
@@ -687,7 +709,7 @@ export const StartupRepository = {
   },
 
   // Get current Leaderboard
-  getLeaderboard: async (sector?: string) => {
+  getLeaderboard: async (sector?: string, firstSemesterOnly?: boolean) => {
     const hasDb = await initDb();
 
     if (hasDb) {
@@ -696,6 +718,9 @@ export const StartupRepository = {
         const query: any = { status: 'approved', isPublished: true };
         if (sector && sector !== 'All') {
           query.sector = sector;
+        }
+        if (firstSemesterOnly) {
+          query.isFirstSemester = true;
         }
 
         const docs = await StartupModel.find(query).sort({ compositeScore: -1 });
@@ -717,6 +742,7 @@ export const StartupRepository = {
             publicRating: s.publicRating,
             totalVotes: s.totalPublicVotes,
             progressPercentage: s.progressPercentage || 0,
+            isFirstSemester: !!s.isFirstSemester,
           })),
           timestamp: new Date().toISOString(),
         };
@@ -730,6 +756,9 @@ export const StartupRepository = {
     let published = memStartups.filter(s => s.status === 'approved' && s.isPublished);
     if (sector && sector !== 'All') {
       published = published.filter(s => s.sector === sector);
+    }
+    if (firstSemesterOnly) {
+      published = published.filter(s => !!s.isFirstSemester);
     }
     published.sort((a, b) => b.compositeScore - a.compositeScore);
 

@@ -30,7 +30,7 @@ export default function StageLeaderboardPage() {
   const fetchLive = async () => {
     try {
       const [lbRes, cfgRes] = await Promise.all([
-        fetch('/api/leaderboard'),
+        fetch('/api/leaderboard?firstSemesterOnly=true'),
         fetch('/api/event-config'),
       ]);
       const data = await lbRes.json();
@@ -283,34 +283,37 @@ export default function StageLeaderboardPage() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'radial-gradient(circle at 50% 0%, #0f294a 0%, #050b16 65%, #02050b 100%)',
-      color: '#ffffff',
-      padding: 'clamp(1rem, 2.5vw, 2rem) clamp(1rem, 3vw, 2.75rem)',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      gap: '1.25rem',
-    }}>
+    <div
+      className="stage-tv-root"
+      style={{
+        minHeight: '100vh',
+        background: 'radial-gradient(circle at 50% 0%, #0f294a 0%, #050b16 65%, #02050b 100%)',
+        color: '#ffffff',
+        padding: 'clamp(0.75rem, 1.8vh, 2.5rem) clamp(1rem, 2.5vw, 4rem)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        gap: 'clamp(0.75rem, 1.4vh, 2rem)',
+      }}
+    >
       {/* TV Broadcast Header */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: '1rem',
+        gap: '1vw',
         borderBottom: '2px solid rgba(255, 210, 51, 0.35)',
-        paddingBottom: '1rem',
+        paddingBottom: 'clamp(0.6rem, 1.2vh, 1.4rem)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.65rem, 1vw, 1.5rem)' }}>
           <img
             src="/bfest-logo.jpg"
             alt="Business Fest Logo"
             style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '14px',
+              width: 'clamp(44px, 3.6vw, 84px)',
+              height: 'clamp(44px, 3.6vw, 84px)',
+              borderRadius: 'clamp(10px, 0.9vw, 20px)',
               objectFit: 'contain',
               background: '#ffffff',
               padding: '3px',
@@ -321,7 +324,7 @@ export default function StageLeaderboardPage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
               <h1 style={{
-                fontSize: 'clamp(1.5rem, 3vw, 2.4rem)',
+                fontSize: 'clamp(1.4rem, 2.5vw, 4rem)',
                 fontWeight: 900,
                 fontFamily: 'var(--font-display)',
                 letterSpacing: '-0.02em',
@@ -341,42 +344,42 @@ export default function StageLeaderboardPage() {
                   color: '#fbbf24',
                   padding: '0.2rem 0.65rem',
                   borderRadius: '9999px',
-                  fontSize: '0.75rem',
+                  fontSize: 'clamp(0.7rem, 0.85vw, 1.15rem)',
                   fontWeight: 800,
                 }}>
                   <Lock size={12} /> STANDINGS FROZEN
                 </span>
               )}
             </div>
-            <span style={{ fontSize: 'clamp(0.75rem, 1.2vw, 0.95rem)', color: '#94a3b8', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 600 }}>
-              IMSciences Peshawar — Live Campus TV Leaderboard
+            <span style={{ fontSize: 'clamp(0.7rem, 1vw, 1.45rem)', color: '#94a3b8', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 600 }}>
+              IMSciences Peshawar — 1st Semester Legacy Board
             </span>
           </div>
         </div>
 
         {/* Countdown + IMSciences Logo + Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.5rem, 0.8vw, 1.25rem)', flexWrap: 'wrap' }}>
           <div style={{
             background: 'rgba(255, 255, 255, 0.06)',
             border: '1px solid rgba(255, 210, 51, 0.35)',
             borderRadius: '12px',
-            padding: '0.45rem 0.9rem',
+            padding: 'clamp(0.35rem, 0.6vh, 0.75rem) clamp(0.65rem, 0.9vw, 1.35rem)',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.55rem',
+            gap: '0.5rem',
           }}>
             <Clock size={16} color="#ffd233" />
-            <span style={{ fontSize: '0.8rem', color: '#ffd233', fontWeight: 700, textTransform: 'uppercase' }}>
+            <span style={{ fontSize: 'clamp(0.72rem, 0.85vw, 1.2rem)', color: '#ffd233', fontWeight: 700, textTransform: 'uppercase' }}>
               19 Dec:
             </span>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1rem', color: '#ffffff' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(0.88rem, 1.1vw, 1.55rem)', color: '#ffffff' }}>
               {eventTimeLeft.days}d : {pad(eventTimeLeft.hours)}h : {pad(eventTimeLeft.minutes)}m : {pad(eventTimeLeft.seconds)}s
             </span>
           </div>
 
           <div style={{
             background: '#ffffff',
-            padding: '4px 10px',
+            padding: 'clamp(3px, 0.4vh, 8px) clamp(8px, 0.7vw, 14px)',
             borderRadius: '8px',
             display: 'inline-flex',
             alignItems: 'center',
@@ -384,7 +387,7 @@ export default function StageLeaderboardPage() {
             <img
               src="/imsciences-logo.png"
               alt="IMSciences Peshawar"
-              style={{ height: '28px', width: 'auto', objectFit: 'contain' }}
+              style={{ height: 'clamp(22px, 2.2vh, 44px)', width: 'auto', objectFit: 'contain' }}
             />
           </div>
 
@@ -392,14 +395,14 @@ export default function StageLeaderboardPage() {
             onClick={toggleFullscreen}
             title={isFullscreen ? 'Exit Fullscreen TV Mode' : 'Enter Fullscreen TV Mode'}
             className="btn btn-secondary btn-sm"
-            style={{ background: 'rgba(255,255,255,0.08)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)' }}
+            style={{ background: 'rgba(255,255,255,0.08)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)', fontSize: 'clamp(0.75rem, 0.85vw, 1.1rem)' }}
           >
             {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
             <span>{isFullscreen ? 'Exit TV' : 'Fullscreen TV'}</span>
           </button>
 
           {!isFullscreen && (
-            <Link href="/leaderboard" className="btn btn-secondary btn-sm" style={{ background: 'rgba(255,255,255,0.08)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)' }}>
+            <Link href="/leaderboard" className="btn btn-secondary btn-sm" style={{ background: 'rgba(255,255,255,0.08)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)', fontSize: 'clamp(0.75rem, 0.85vw, 1.1rem)' }}>
               <ArrowLeft size={15} /> Back
             </Link>
           )}
@@ -427,22 +430,49 @@ export default function StageLeaderboardPage() {
         .stage-rest-animate {
           animation: stageSlideUp 0.55s ease-out;
         }
+        @media (min-width: 900px) {
+          .stage-tv-root {
+            height: 100vh;
+            max-height: 100vh;
+            overflow: hidden;
+          }
+        }
         .sponsor-marquee-track {
           display: flex;
           align-items: center;
-          gap: 3rem;
+          gap: clamp(1.5rem, 2.5vw, 4rem);
           width: max-content;
           animation: sponsorMarquee 24s linear infinite;
         }
       `}</style>
 
-      {/* Top 3 Podium (Smaller & Shifted Higher for Footer Space) */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '0.35rem', gap: '1.25rem' }}>
+      {/* Top 3 Podium & Ranks #4-#15 (Viewport-Scaled for Laptop to 4K TV) */}
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 'clamp(0.75rem, 1.8vh, 2rem)' }}>
+        {items.length === 0 ? (
+          <div style={{
+            maxWidth: 'min(92vw, 760px)',
+            margin: '0 auto',
+            textAlign: 'center',
+            background: 'rgba(15, 29, 52, 0.75)',
+            border: '1px solid rgba(255, 210, 51, 0.3)',
+            borderRadius: '20px',
+            padding: 'clamp(1.5rem, 4vh, 3.5rem)',
+          }}>
+            <h2 style={{ fontSize: 'clamp(1.25rem, 2vw, 2.5rem)', color: '#ffd233', marginBottom: '0.6rem', fontFamily: 'var(--font-display)' }}>
+              Waiting for 1st Semester Startups
+            </h2>
+            <p style={{ fontSize: 'clamp(0.9rem, 1.1vw, 1.5rem)', color: '#cbd5e1' }}>
+              Student Affairs or the Registration Team can add 1st Semester startups from the Register page to display them here.
+            </p>
+          </div>
+        ) : (
+        <>
         <div
-          className={`grid grid-cols-3 gap-5 ${top3Changed ? 'top3-rank-changed' : ''}`}
+          className={`grid grid-cols-3 ${top3Changed ? 'top3-rank-changed' : ''}`}
           style={{
             alignItems: 'end',
-            maxWidth: '1160px',
+            gap: 'clamp(0.75rem, 1.5vw, 2.25rem)',
+            maxWidth: 'min(94vw, 1800px)',
             width: '100%',
             margin: '0 auto',
           }}
@@ -452,36 +482,36 @@ export default function StageLeaderboardPage() {
             <div style={{
               background: 'linear-gradient(180deg, #10213b 0%, #091424 100%)',
               border: '2px solid #cbd5e1',
-              borderRadius: '18px',
-              padding: '1.25rem 1.15rem',
+              borderRadius: 'clamp(14px, 1.4vw, 26px)',
+              padding: 'clamp(0.85rem, 1.8vh, 2.25rem) clamp(0.75rem, 1.3vw, 2rem)',
               textAlign: 'center',
               boxShadow: '0 10px 25px rgba(0,0,0,0.55)',
               transition: 'all 0.5s ease',
             }}>
               <div style={{
-                width: '42px',
-                height: '42px',
+                width: 'clamp(34px, 3vw, 64px)',
+                height: 'clamp(34px, 3vw, 64px)',
                 borderRadius: '50%',
                 background: '#e2e8f0',
                 color: '#06172e',
                 fontWeight: 900,
-                fontSize: '1.15rem',
+                fontSize: 'clamp(1rem, 1.3vw, 2rem)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 0.6rem',
+                margin: '0 auto clamp(0.35rem, 0.8vh, 0.9rem)',
               }}>
                 2
               </div>
-              <span style={{ fontSize: '2.1rem', display: 'block', marginBottom: '0.25rem' }}>{top3[1].logo}</span>
-              <h2 style={{ fontSize: '1.25rem', color: '#ffffff', marginBottom: '0.2rem', fontFamily: 'var(--font-display)' }}>
+              <span style={{ fontSize: 'clamp(1.6rem, 2.5vw, 3.8rem)', display: 'block', marginBottom: '0.2vh' }}>{top3[1].logo}</span>
+              <h2 style={{ fontSize: 'clamp(1rem, 1.45vw, 2.25rem)', color: '#ffffff', marginBottom: '0.2vh', fontFamily: 'var(--font-display)' }}>
                 {top3[1].name}
               </h2>
-              <span style={{ color: '#94a3b8', fontSize: '0.82rem', display: 'block', marginBottom: '0.55rem' }}>
+              <span style={{ color: '#94a3b8', fontSize: 'clamp(0.72rem, 0.9vw, 1.3rem)', display: 'block', marginBottom: 'clamp(0.35rem, 0.8vh, 0.9rem)' }}>
                 {top3[1].sector}
               </span>
-              <div style={{ fontSize: '2rem', fontWeight: 900, color: '#e2e8f0', fontFamily: 'var(--font-display)' }}>
-                {top3[1].compositeScore.toFixed(1)} <span style={{ fontSize: '0.9rem', color: '#64748b' }}>PTS</span>
+              <div style={{ fontSize: 'clamp(1.5rem, 2.4vw, 3.6rem)', fontWeight: 900, color: '#e2e8f0', fontFamily: 'var(--font-display)' }}>
+                {top3[1].compositeScore.toFixed(1)} <span style={{ fontSize: 'clamp(0.75rem, 0.95vw, 1.35rem)', color: '#64748b' }}>PTS</span>
               </div>
             </div>
           )}
@@ -491,8 +521,8 @@ export default function StageLeaderboardPage() {
             <div style={{
               background: 'linear-gradient(180deg, #18345c 0%, #0c1d36 100%)',
               border: '3px solid #ffd233',
-              borderRadius: '20px',
-              padding: '1.65rem 1.35rem',
+              borderRadius: 'clamp(16px, 1.6vw, 30px)',
+              padding: 'clamp(1.1rem, 2.4vh, 2.85rem) clamp(0.9rem, 1.5vw, 2.25rem)',
               textAlign: 'center',
               boxShadow: '0 0 40px rgba(255, 210, 51, 0.28)',
               position: 'relative',
@@ -500,14 +530,14 @@ export default function StageLeaderboardPage() {
             }}>
               <div style={{
                 position: 'absolute',
-                top: '-13px',
+                top: 'clamp(-16px, -1.2vh, -10px)',
                 left: '50%',
                 transform: 'translateX(-50%)',
                 background: '#ffd233',
                 color: '#06172e',
                 fontWeight: 900,
-                fontSize: '0.75rem',
-                padding: '0.25rem 1.1rem',
+                fontSize: 'clamp(0.65rem, 0.8vw, 1.15rem)',
+                padding: 'clamp(0.2rem, 0.35vh, 0.45rem) clamp(0.8rem, 1.2vw, 1.6rem)',
                 borderRadius: '9999px',
                 letterSpacing: '0.08em',
                 whiteSpace: 'nowrap',
@@ -516,30 +546,30 @@ export default function StageLeaderboardPage() {
               </div>
 
               <div style={{
-                width: '54px',
-                height: '54px',
+                width: 'clamp(42px, 3.8vw, 80px)',
+                height: 'clamp(42px, 3.8vw, 80px)',
                 borderRadius: '50%',
                 background: 'linear-gradient(135deg, #ffe033 0%, #eab308 100%)',
                 color: '#06172e',
                 fontWeight: 900,
-                fontSize: '1.5rem',
+                fontSize: 'clamp(1.2rem, 1.7vw, 2.5rem)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0.25rem auto 0.7rem',
+                margin: '0.3vh auto clamp(0.4rem, 1vh, 1.1rem)',
                 boxShadow: '0 0 24px rgba(255, 210, 51, 0.45)',
               }}>
                 1
               </div>
-              <span style={{ fontSize: '2.6rem', display: 'block', marginBottom: '0.25rem' }}>{top3[0].logo}</span>
-              <h2 style={{ fontSize: '1.55rem', color: '#ffffff', marginBottom: '0.2rem', fontFamily: 'var(--font-display)' }}>
+              <span style={{ fontSize: 'clamp(2rem, 3.1vw, 4.6rem)', display: 'block', marginBottom: '0.2vh' }}>{top3[0].logo}</span>
+              <h2 style={{ fontSize: 'clamp(1.2rem, 1.8vw, 2.75rem)', color: '#ffffff', marginBottom: '0.2vh', fontFamily: 'var(--font-display)' }}>
                 {top3[0].name}
               </h2>
-              <span style={{ color: '#ffd233', fontSize: '0.88rem', fontWeight: 700, display: 'block', marginBottom: '0.65rem' }}>
+              <span style={{ color: '#ffd233', fontSize: 'clamp(0.78rem, 0.95vw, 1.4rem)', fontWeight: 700, display: 'block', marginBottom: 'clamp(0.45rem, 1vh, 1.1rem)' }}>
                 {top3[0].sector}
               </span>
-              <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#ffd233', fontFamily: 'var(--font-display)' }}>
-                {top3[0].compositeScore.toFixed(1)} <span style={{ fontSize: '1rem', color: '#94a3b8' }}>PTS</span>
+              <div style={{ fontSize: 'clamp(1.85rem, 3vw, 4.4rem)', fontWeight: 900, color: '#ffd233', fontFamily: 'var(--font-display)' }}>
+                {top3[0].compositeScore.toFixed(1)} <span style={{ fontSize: 'clamp(0.85rem, 1.1vw, 1.55rem)', color: '#94a3b8' }}>PTS</span>
               </div>
             </div>
           )}
@@ -549,36 +579,36 @@ export default function StageLeaderboardPage() {
             <div style={{
               background: 'linear-gradient(180deg, #10213b 0%, #091424 100%)',
               border: '2px solid #cd7f32',
-              borderRadius: '18px',
-              padding: '1.25rem 1.15rem',
+              borderRadius: 'clamp(14px, 1.4vw, 26px)',
+              padding: 'clamp(0.85rem, 1.8vh, 2.25rem) clamp(0.75rem, 1.3vw, 2rem)',
               textAlign: 'center',
               boxShadow: '0 10px 25px rgba(0,0,0,0.55)',
               transition: 'all 0.5s ease',
             }}>
               <div style={{
-                width: '42px',
-                height: '42px',
+                width: 'clamp(34px, 3vw, 64px)',
+                height: 'clamp(34px, 3vw, 64px)',
                 borderRadius: '50%',
                 background: '#cd7f32',
                 color: '#ffffff',
                 fontWeight: 900,
-                fontSize: '1.15rem',
+                fontSize: 'clamp(1rem, 1.3vw, 2rem)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 0.6rem',
+                margin: '0 auto clamp(0.35rem, 0.8vh, 0.9rem)',
               }}>
                 3
               </div>
-              <span style={{ fontSize: '2.1rem', display: 'block', marginBottom: '0.25rem' }}>{top3[2].logo}</span>
-              <h2 style={{ fontSize: '1.25rem', color: '#ffffff', marginBottom: '0.2rem', fontFamily: 'var(--font-display)' }}>
+              <span style={{ fontSize: 'clamp(1.6rem, 2.5vw, 3.8rem)', display: 'block', marginBottom: '0.2vh' }}>{top3[2].logo}</span>
+              <h2 style={{ fontSize: 'clamp(1rem, 1.45vw, 2.25rem)', color: '#ffffff', marginBottom: '0.2vh', fontFamily: 'var(--font-display)' }}>
                 {top3[2].name}
               </h2>
-              <span style={{ color: '#94a3b8', fontSize: '0.82rem', display: 'block', marginBottom: '0.55rem' }}>
+              <span style={{ color: '#94a3b8', fontSize: 'clamp(0.72rem, 0.9vw, 1.3rem)', display: 'block', marginBottom: 'clamp(0.35rem, 0.8vh, 0.9rem)' }}>
                 {top3[2].sector}
               </span>
-              <div style={{ fontSize: '2rem', fontWeight: 900, color: '#e2e8f0', fontFamily: 'var(--font-display)' }}>
-                {top3[2].compositeScore.toFixed(1)} <span style={{ fontSize: '0.9rem', color: '#64748b' }}>PTS</span>
+              <div style={{ fontSize: 'clamp(1.5rem, 2.4vw, 3.6rem)', fontWeight: 900, color: '#e2e8f0', fontFamily: 'var(--font-display)' }}>
+                {top3[2].compositeScore.toFixed(1)} <span style={{ fontSize: 'clamp(0.75rem, 0.95vw, 1.35rem)', color: '#64748b' }}>PTS</span>
               </div>
             </div>
           )}
@@ -586,14 +616,14 @@ export default function StageLeaderboardPage() {
 
         {/* Ranks #4 - #15 Rotating Animated Grid */}
         {visibleRest.length > 0 && (
-          <div style={{ maxWidth: '1160px', width: '100%', margin: '0 auto' }}>
+          <div style={{ maxWidth: 'min(94vw, 1800px)', width: '100%', margin: '0 auto' }}>
             <div
               key={currentRestPage}
               className="stage-rest-animate"
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                gap: '0.75rem',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(220px, 20vw, 420px), 1fr))',
+                gap: 'clamp(0.6rem, 1vw, 1.5rem)',
               }}
             >
               {visibleRest.map((s, idx) => {
@@ -604,23 +634,23 @@ export default function StageLeaderboardPage() {
                     style={{
                       background: 'rgba(15, 29, 52, 0.85)',
                       border: '1px solid rgba(148, 163, 184, 0.2)',
-                      borderRadius: '14px',
-                      padding: '0.8rem 1.1rem',
+                      borderRadius: 'clamp(10px, 1vw, 18px)',
+                      padding: 'clamp(0.65rem, 1.2vh, 1.5rem) clamp(0.9rem, 1.2vw, 1.75rem)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      gap: '0.75rem',
+                      gap: '0.75vw',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.5rem, 0.8vw, 1.25rem)', minWidth: 0 }}>
                       <span style={{
-                        width: '30px',
-                        height: '30px',
+                        width: 'clamp(28px, 2.2vw, 48px)',
+                        height: 'clamp(28px, 2.2vw, 48px)',
                         borderRadius: '8px',
                         background: 'rgba(255, 255, 255, 0.08)',
                         color: '#cbd5e1',
                         fontWeight: 900,
-                        fontSize: '0.9rem',
+                        fontSize: 'clamp(0.8rem, 1vw, 1.45rem)',
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -628,17 +658,17 @@ export default function StageLeaderboardPage() {
                       }}>
                         #{rankNum}
                       </span>
-                      <span style={{ fontSize: '1.45rem', flexShrink: 0 }}>{s.logo}</span>
+                      <span style={{ fontSize: 'clamp(1.2rem, 1.7vw, 2.4rem)', flexShrink: 0 }}>{s.logo}</span>
                       <div style={{ minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: '0.96rem', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <div style={{ fontWeight: 700, fontSize: 'clamp(0.88rem, 1.1vw, 1.6rem)', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {s.name}
                         </div>
-                        <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                        <div style={{ fontSize: 'clamp(0.7rem, 0.8vw, 1.15rem)', color: '#94a3b8' }}>
                           {s.sector}
                         </div>
                       </div>
                     </div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.15rem', color: '#ffd233', flexShrink: 0 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(1.05rem, 1.4vw, 2.1rem)', color: '#ffd233', flexShrink: 0 }}>
                       {s.compositeScore.toFixed(1)}
                     </div>
                   </div>
@@ -647,25 +677,27 @@ export default function StageLeaderboardPage() {
             </div>
           </div>
         )}
+        </>
+        )}
       </div>
 
       {/* Dynamic Moving "Our Proud Sponsors" Marquee Footer */}
       <div style={{
         borderTop: '1px solid rgba(255, 210, 51, 0.25)',
-        paddingTop: '0.85rem',
+        paddingTop: 'clamp(0.6rem, 1.1vh, 1.25rem)',
         display: 'flex',
         alignItems: 'center',
-        gap: '1.5rem',
+        gap: 'clamp(0.9rem, 1.5vw, 2rem)',
         overflow: 'hidden',
       }}>
         <div style={{
           flexShrink: 0,
-          fontSize: '0.85rem',
+          fontSize: 'clamp(0.75rem, 0.95vw, 1.35rem)',
           fontWeight: 800,
           letterSpacing: '0.08em',
           textTransform: 'uppercase',
           color: '#ffd233',
-          paddingRight: '1rem',
+          paddingRight: 'clamp(0.75rem, 1.2vw, 1.75rem)',
           borderRight: '1px solid rgba(255, 255, 255, 0.15)',
         }}>
           Our Proud Sponsors
@@ -682,7 +714,7 @@ export default function StageLeaderboardPage() {
                     alignItems: 'center',
                     gap: '0.65rem',
                     background: 'rgba(255, 255, 255, 0.95)',
-                    padding: '0.35rem 0.9rem',
+                    padding: 'clamp(0.25rem, 0.5vh, 0.6rem) clamp(0.7rem, 1vw, 1.35rem)',
                     borderRadius: '10px',
                     flexShrink: 0,
                   }}
@@ -690,22 +722,22 @@ export default function StageLeaderboardPage() {
                   <img
                     src={sp.logoUrl}
                     alt={sp.name}
-                    style={{ height: '28px', maxWidth: '90px', objectFit: 'contain' }}
+                    style={{ height: 'clamp(22px, 2.6vh, 48px)', maxWidth: 'clamp(70px, 7vw, 140px)', objectFit: 'contain' }}
                   />
-                  <span style={{ color: '#0b2545', fontWeight: 700, fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                  <span style={{ color: '#0b2545', fontWeight: 700, fontSize: 'clamp(0.78rem, 0.95vw, 1.35rem)', whiteSpace: 'nowrap' }}>
                     {sp.name}
                   </span>
                 </div>
               ))}
             </div>
           ) : (
-            <div style={{ fontSize: '0.84rem', color: '#94a3b8' }}>
+            <div style={{ fontSize: 'clamp(0.78rem, 0.95vw, 1.35rem)', color: '#94a3b8' }}>
               Partnering with leading organizations to empower student entrepreneurship at IMSciences Peshawar.
             </div>
           )}
         </div>
 
-        <span style={{ flexShrink: 0, fontSize: '0.78rem', color: '#64748b' }}>
+        <span style={{ flexShrink: 0, fontSize: 'clamp(0.7rem, 0.8vw, 1.1rem)', color: '#64748b' }}>
           Synced {lastUpdated || '...'}
         </span>
       </div>

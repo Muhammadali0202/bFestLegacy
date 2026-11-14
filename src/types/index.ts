@@ -58,7 +58,8 @@ export interface Startup {
   investorScore: number;     // 0-100 scale normalized
   
   // Overall Composite & Ranking
-  compositeScore: number;    // Weighted combination of Judge + Investor + Public
+  compositeScore: number;    // Weighted combination or Official points
+  progressPercentage?: number; // 0-100 updated by Bfest's Officials / Student Affairs
   rank?: number;
   submittedBy?: string;      // Student User ID
   createdAt: string;
@@ -113,5 +114,7 @@ export interface EventConfig {
   investorWeight: number; // default: 0.30
   publicWeight: number;   // default: 0.20
   googleFormUrl?: string;
+  vendorFormUrl?: string;
   googleSheetUrl?: string;
+  sponsors?: { name: string; logoUrl: string }[];
 }

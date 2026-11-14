@@ -31,6 +31,7 @@ interface LeaderboardItem {
   investorRating?: number;
   totalInvestedAmount?: number;
   publicRating: number;
+  progressPercentage?: number;
   totalVotes: number;
 }
 
@@ -107,9 +108,6 @@ export default function LeaderboardPage() {
           <h1 style={{ fontSize: '2.1rem', color: 'var(--bf-primary)', marginBottom: '0.4rem' }}>
             Live Event Leaderboard
           </h1>
-          <p style={{ color: 'var(--bf-text-secondary)', fontSize: '0.92rem', maxWidth: '750px' }}>
-            Composite rankings calculated dynamically from official jury rubrics (50%), accredited investor ratings & capital (30%), and Student Affairs ratings (20%).
-          </p>
         </div>
 
         {/* Action Controls */}
@@ -121,15 +119,6 @@ export default function LeaderboardPage() {
           >
             <RotateCw size={14} /> Refresh
           </button>
-
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--bf-text-secondary)', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={autoRefresh}
-              onChange={(e) => setAutoRefresh(e.target.checked)}
-            />
-            Auto-sync (8s)
-          </label>
         </div>
       </div>
 
@@ -180,9 +169,8 @@ export default function LeaderboardPage() {
                     <th style={{ padding: '0.7rem 1.25rem', width: '60px' }}>Rank</th>
                     <th style={{ padding: '0.7rem 1rem' }}>Title</th>
                     <th style={{ padding: '0.7rem 1rem' }}>Sector</th>
-                    <th style={{ padding: '0.7rem 0.75rem', textAlign: 'center' }}>Jury (50%)</th>
-                    <th style={{ padding: '0.7rem 0.75rem', textAlign: 'center' }}>Investor (30%)</th>
-                    <th style={{ padding: '0.7rem 0.75rem', textAlign: 'center' }}>Student Affairs (20%)</th>
+                    <th style={{ padding: '0.7rem 0.75rem', textAlign: 'center' }}>Official Rating</th>
+                    <th style={{ padding: '0.7rem 0.75rem', textAlign: 'center' }}>Progress</th>
                     <th style={{ padding: '0.7rem 1.25rem', textAlign: 'right' }}>Points</th>
                   </tr>
                 </thead>
@@ -220,9 +208,6 @@ export default function LeaderboardPage() {
                             <Link href={`/startups/${item.id}`} style={{ fontWeight: 700, color: 'var(--bf-primary)', fontSize: '1rem', display: 'block' }}>
                               {item.name}
                             </Link>
-                            <span style={{ fontSize: '0.78rem', color: 'var(--bf-text-muted)' }}>
-                              {item.boothNumber || 'Main Exhibition Arena'}
-                            </span>
                           </div>
                         </div>
                       </td>
@@ -231,32 +216,7 @@ export default function LeaderboardPage() {
                         <span className="badge badge-sector">{item.sector}</span>
                       </td>
 
-                      {/* Jury Score (50%) */}
-                      <td style={{ padding: '1rem 1rem', textAlign: 'center' }}>
-                        <span style={{ fontWeight: 700, color: 'var(--bf-primary)' }}>
-                          {item.judgeScore > 0 ? item.judgeScore.toFixed(1) : '-'}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)' }}> / 100</span>
-                      </td>
-
-                      {/* Investor Backing (30%) */}
-                      <td style={{ padding: '1rem 1rem', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                            <Briefcase size={13} color="#10b981" />
-                            <span style={{ fontWeight: 700, color: '#047857' }}>
-                              {item.investorRating && item.investorRating > 0 ? `${item.investorRating}★` : '—'}
-                            </span>
-                          </div>
-                          {item.totalInvestedAmount && item.totalInvestedAmount > 0 ? (
-                            <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>
-                              PKR {(item.totalInvestedAmount / 1000).toLocaleString()}k
-                            </span>
-                          ) : null}
-                        </div>
-                      </td>
-
-                      {/* Audience (20%) */}
+                      {/* Official Rating */}
                       <td style={{ padding: '1rem 1rem', textAlign: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem' }}>
                           <Star size={13} fill="#f59e0b" color="#f59e0b" />
@@ -265,7 +225,26 @@ export default function LeaderboardPage() {
                         </div>
                       </td>
 
-                      {/* Composite Total */}
+                      {/* Progress Percentage */}
+                      <td style={{ padding: '1rem 1rem', textAlign: 'center' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', minWidth: '100px' }}>
+                          <div style={{ flex: 1, height: '7px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+                            <div
+                              style={{
+                                width: `${Math.min(100, Math.max(0, item.progressPercentage ?? 0))}%`,
+                                height: '100%',
+                                background: 'var(--bf-accent-blue)',
+                                borderRadius: '999px',
+                              }}
+                            />
+                          </div>
+                          <span style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--bf-primary)' }}>
+                            {item.progressPercentage ?? 0}%
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Official Points */}
                       <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
                         <span style={{
                           fontSize: '1.25rem',

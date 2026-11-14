@@ -119,6 +119,7 @@ function toStartupObject(doc: any): Startup {
     investorScore: obj.investorScore || 0,
 
     compositeScore: obj.compositeScore || 0,
+    progressPercentage: obj.progressPercentage || 0,
     rank: obj.rank,
     submittedBy: obj.submittedBy ? obj.submittedBy.toString() : undefined,
     createdAt: obj.createdAt ? new Date(obj.createdAt).toISOString() : new Date().toISOString(),
@@ -349,6 +350,34 @@ export const StartupRepository = {
     return newStartup;
   },
 
+  // Delete startup (Admin or Registration Team)
+  delete: async (id: string): Promise<boolean> => {
+    const hasDb = await initDb();
+
+    if (hasDb) {
+      try {
+        const deleted = await StartupModel.findByIdAndDelete(id);
+        if (deleted) {
+          await AuditLogModel.create({
+            action: 'STARTUP_DELETED',
+            details: { startupId: id, name: deleted.name },
+          });
+          return true;
+        }
+      } catch (e) {
+        console.error('Error deleting startup from MongoDB:', e);
+      }
+    }
+
+    const idx = memStartups.findIndex(s => s.id === id);
+    if (idx !== -1) {
+      memStartups.splice(idx, 1);
+      recalculateMemLeaderboard();
+      return true;
+    }
+    return false;
+  },
+
   // Update status (Admin moderation)
   updateStatus: async (id: string, status: StartupStatus, isPublished?: boolean): Promise<Startup | null> => {
     const hasDb = await initDb();
@@ -547,11 +576,12 @@ export const StartupRepository = {
     return { success: true, evaluation, message: 'Evaluation submitted successfully.' };
   },
 
-  // Submit public audience rating
+  // Submit Official / Student Affairs rating & progress percentage
   submitPublicVote: async (voteData: {
     startupId: string;
     voterToken: string;
     rating: number;
+    progressPercentage?: number;
     feedback?: string;
   }): Promise<{ success: boolean; message: string }> => {
     const hasDb = await initDb();
@@ -560,7 +590,7 @@ export const StartupRepository = {
       try {
         const config = await EventConfigModel.findOne({ key: 'ACTIVE_EVENT' }) || memEventConfig;
         if (!config.isVotingOpen) {
-          return { success: false, message: 'Audience voting is currently closed.' };
+          return { success: false, message: 'Evaluation is currently closed.' };
         }
 
         let startupDoc: any = null;
@@ -574,46 +604,36 @@ export const StartupRepository = {
           return { success: false, message: 'Startup not found.' };
         }
 
+        const clampedRating = Math.min(5, Math.max(1, voteData.rating));
         const existingVote = await PublicVoteModel.findOne({
           startupId: startupDoc._id,
           voterToken: voteData.voterToken,
         });
 
         if (existingVote) {
-          return { success: false, message: 'You have already voted for this startup.' };
+          existingVote.rating = clampedRating;
+          if (voteData.feedback !== undefined) existingVote.feedback = voteData.feedback;
+          await existingVote.save();
+        } else {
+          await PublicVoteModel.create({
+            startupId: startupDoc._id,
+            voterToken: voteData.voterToken,
+            rating: clampedRating,
+            feedback: voteData.feedback,
+          });
         }
-
-        await PublicVoteModel.create({
-          startupId: startupDoc._id,
-          voterToken: voteData.voterToken,
-          rating: Math.min(5, Math.max(1, voteData.rating)),
-          feedback: voteData.feedback,
-        });
 
         const allVotes = await PublicVoteModel.find({ startupId: startupDoc._id });
         const avgPublicRating = parseFloat((allVotes.reduce((acc, curr) => acc + curr.rating, 0) / allVotes.length).toFixed(1));
 
         startupDoc.publicRating = avgPublicRating;
         startupDoc.totalPublicVotes = allVotes.length;
-
-        // Recalculate composite
-        const normPublic = (avgPublicRating / 5) * 100;
-        const normJudge = startupDoc.totalJudgeEvaluations > 0 ? startupDoc.judgeScore : 0;
-        const normInvestor = startupDoc.investorScore || 0;
-
-        let rawComp = normPublic * config.publicWeight;
-        let totWeight = config.publicWeight;
-
-        if (startupDoc.totalJudgeEvaluations > 0) {
-          rawComp += normJudge * config.judgeWeight;
-          totWeight += config.judgeWeight;
-        }
-        if (startupDoc.totalInvestorRatings > 0 || startupDoc.totalInvestedAmount > 0) {
-          rawComp += normInvestor * (config.investorWeight || 0.30);
-          totWeight += (config.investorWeight || 0.30);
+        if (typeof voteData.progressPercentage === 'number' && !isNaN(voteData.progressPercentage)) {
+          startupDoc.progressPercentage = Math.min(100, Math.max(0, Math.round(voteData.progressPercentage)));
         }
 
-        startupDoc.compositeScore = parseFloat((rawComp / totWeight).toFixed(1));
+        // Points based directly on Official's rating (0-100 scale)
+        startupDoc.compositeScore = parseFloat(((avgPublicRating / 5) * 100).toFixed(1));
         await startupDoc.save();
 
         const published = await StartupModel.find({ status: 'approved', isPublished: true }).sort({ compositeScore: -1 });
@@ -621,44 +641,49 @@ export const StartupRepository = {
           await StartupModel.updateOne({ _id: published[i]._id }, { rank: i + 1 });
         }
 
-        return { success: true, message: 'Vote recorded! Thank you for participating.' };
+        return { success: true, message: 'Progress rating & percentage updated!' };
       } catch (e: any) {
-        if (e.code === 11000) {
-          return { success: false, message: 'You have already voted for this startup.' };
-        }
-        console.error('Error submitting public vote to MongoDB:', e);
+        console.error('Error submitting official rating to MongoDB:', e);
       }
     }
 
     // In-memory Fallback
     if (!memEventConfig.isVotingOpen) {
-      return { success: false, message: 'Audience voting is currently closed.' };
-    }
-    const existing = memPublicVotes.find(
-      v => v.startupId === voteData.startupId && v.voterToken === voteData.voterToken
-    );
-    if (existing) {
-      return { success: false, message: 'You have already voted for this startup.' };
+      return { success: false, message: 'Evaluation is currently closed.' };
     }
     const startup = memStartups.find(s => s.id === voteData.startupId);
     if (!startup) return { success: false, message: 'Startup not found.' };
 
-    const vote: IPublicVote = {
-      id: `vote-${Date.now()}`,
-      startupId: voteData.startupId,
-      voterToken: voteData.voterToken,
-      rating: Math.min(5, Math.max(1, voteData.rating)),
-      feedback: voteData.feedback,
-      createdAt: new Date().toISOString(),
-    };
-    memPublicVotes.push(vote);
+    const clampedRating = Math.min(5, Math.max(1, voteData.rating));
+    const existing = memPublicVotes.find(
+      v => v.startupId === voteData.startupId && v.voterToken === voteData.voterToken
+    );
 
-    const currentTotal = startup.publicRating * startup.totalPublicVotes;
-    startup.totalPublicVotes += 1;
-    startup.publicRating = parseFloat(((currentTotal + vote.rating) / startup.totalPublicVotes).toFixed(1));
-    recalculateMemLeaderboard();
+    if (existing) {
+      existing.rating = clampedRating;
+      existing.feedback = voteData.feedback;
+    } else {
+      memPublicVotes.push({
+        id: `vote-${Date.now()}`,
+        startupId: voteData.startupId,
+        voterToken: voteData.voterToken,
+        rating: clampedRating,
+        feedback: voteData.feedback,
+        createdAt: new Date().toISOString(),
+      });
+    }
 
-    return { success: true, message: 'Vote recorded! Thank you for participating.' };
+    const startupVotes = memPublicVotes.filter(v => v.startupId === startup.id);
+    startup.totalPublicVotes = startupVotes.length;
+    startup.publicRating = parseFloat(
+      (startupVotes.reduce((acc, v) => acc + v.rating, 0) / startupVotes.length).toFixed(1)
+    );
+    if (typeof voteData.progressPercentage === 'number' && !isNaN(voteData.progressPercentage)) {
+      startup.progressPercentage = Math.min(100, Math.max(0, Math.round(voteData.progressPercentage)));
+    }
+    startup.compositeScore = parseFloat(((startup.publicRating / 5) * 100).toFixed(1));
+
+    return { success: true, message: 'Progress rating & percentage updated!' };
   },
 
   // Get current Leaderboard
@@ -691,6 +716,7 @@ export const StartupRepository = {
             totalInvestedAmount: s.totalInvestedAmount || 0,
             publicRating: s.publicRating,
             totalVotes: s.totalPublicVotes,
+            progressPercentage: s.progressPercentage || 0,
           })),
           timestamp: new Date().toISOString(),
         };
@@ -724,6 +750,7 @@ export const StartupRepository = {
         totalInvestedAmount: s.totalInvestedAmount || 0,
         publicRating: s.publicRating,
         totalVotes: s.totalPublicVotes,
+        progressPercentage: s.progressPercentage || 0,
       })),
       timestamp: new Date().toISOString(),
     };
@@ -749,7 +776,9 @@ export const StartupRepository = {
             investorWeight: config.investorWeight || 0.30,
             publicWeight: config.publicWeight,
             googleFormUrl: config.googleFormUrl || initialEventConfig.googleFormUrl,
+            vendorFormUrl: config.vendorFormUrl || initialEventConfig.googleFormUrl,
             googleSheetUrl: config.googleSheetUrl || initialEventConfig.googleSheetUrl,
+            sponsors: config.sponsors || [],
           };
         }
       } catch (e) {
@@ -788,7 +817,9 @@ export const StartupRepository = {
           investorWeight: updated.investorWeight || 0.30,
           publicWeight: updated.publicWeight,
           googleFormUrl: updated.googleFormUrl || '',
+          vendorFormUrl: updated.vendorFormUrl || '',
           googleSheetUrl: updated.googleSheetUrl || '',
+          sponsors: updated.sponsors || [],
         };
       } catch (e) {
         console.error('Error updating event config in MongoDB:', e);

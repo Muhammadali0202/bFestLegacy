@@ -31,7 +31,7 @@ function LoginContent() {
 
   const urlRole = searchParams.get('role') as UserRole | null;
 
-  const [selectedRole, setSelectedRole] = useState<UserRole>(urlRole || 'student');
+  const [selectedRole, setSelectedRole] = useState<UserRole>(urlRole || 'student_affairs');
 
   useEffect(() => {
     if (urlRole) {
@@ -67,10 +67,10 @@ function LoginContent() {
       defaultPass: 'judge123',
     },
     student_affairs: {
-      label: 'Student Affairs',
+      label: "Bfest's Officials",
       icon: Star,
       color: '#0047ff',
-      desc: 'Authorized IMSciences Student Affairs portal to rate participating startups',
+      desc: "Authorized Bfest's Officials portal to rate startups and update progress",
       redirect: '/startups',
       defaultEmail: 'studentaffairs@imsciences.edu.pk',
       defaultPass: 'affairs123',
@@ -114,11 +114,9 @@ function LoginContent() {
   };
 
   const allRoles: UserRole[] = [
-    'student',
-    'judge',
     'student_affairs',
     'registration_team',
-    'investor',
+    'tv_admin',
     'admin',
   ];
 
@@ -417,7 +415,7 @@ function LoginContent() {
           fontSize: '0.82rem',
           color: '#64748b',
         }}>
-          All participant, jury, and staff accounts are provisioned directly by the Business Fest Administrator.
+          All official and staff accounts are provisioned directly by the Business Fest Administrator.
         </div>
       </div>
     </div>

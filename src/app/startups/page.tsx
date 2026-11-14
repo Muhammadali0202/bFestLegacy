@@ -71,14 +71,11 @@ function StartupsDirectoryContent() {
     <div className="container" style={{ padding: '3rem 1.5rem 5rem' }}>
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <div className="badge badge-gold" style={{ marginBottom: '0.5rem' }}>
-          Exhibitor Directory
-        </div>
         <h1 style={{ fontSize: '2.5rem', color: 'var(--bf-primary)', marginBottom: '0.5rem' }}>
           Participating Startups
         </h1>
-        <p style={{ color: 'var(--bf-text-secondary)', fontSize: '1.05rem', maxWidth: '750px' }}>
-          Explore validated student ventures, innovative commercial prototypes, and high-impact business models competing at Business Fest 2027.
+        <p style={{ color: 'var(--bf-text-secondary)', fontSize: '1.05rem', maxWidth: '650px' }}>
+          Discover student-led ventures and innovative ideas showcasing at Business Fest 2027.
         </p>
       </div>
 
@@ -256,9 +253,6 @@ function StartupsDirectoryContent() {
                       <h3 style={{ fontSize: '1.2rem', color: 'var(--bf-primary)', lineHeight: 1.2 }}>
                         {startup.name}
                       </h3>
-                      <span style={{ fontSize: '0.78rem', color: 'var(--bf-accent-blue)', fontWeight: 600 }}>
-                        {startup.boothNumber || 'Exhibition Hall'}
-                      </span>
                     </div>
                   </div>
                   {startup.rank && (
@@ -322,8 +316,8 @@ function StartupsDirectoryContent() {
                     </span>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--bf-text-muted)', display: 'block' }}>Student Affairs Rating</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--bf-text-muted)', display: 'block' }}>Progress Rating</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', justifyContent: 'flex-end' }}>
                       <Star size={13} fill="#f59e0b" color="#f59e0b" />
                       <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{startup.publicRating.toFixed(1)}</span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)' }}>({startup.totalPublicVotes})</span>
@@ -337,7 +331,7 @@ function StartupsDirectoryContent() {
                     className="btn btn-primary btn-sm"
                     style={{ flex: 1 }}
                   >
-                    View Pitch & Rate <ArrowRight size={14} />
+                    View Details <ArrowRight size={14} />
                   </Link>
                 </div>
               </div>

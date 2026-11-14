@@ -5,9 +5,9 @@ import { verifySessionToken } from '@/lib/auth';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { startupId, voterToken, rating, feedback, userRole } = body;
+    const { startupId, voterToken, rating, progressPercentage, feedback, userRole } = body;
 
-    // Verify Student Affairs or Admin access
+    // Verify Bfest's Officials (student_affairs) or Admin access
     const tokenCookie = request.cookies.get('bf_session')?.value;
     const sessionUser = tokenCookie ? verifySessionToken(tokenCookie) : null;
     const effectiveRole = sessionUser?.role || userRole;
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     if (effectiveRole !== 'student_affairs' && effectiveRole !== 'admin') {
       return NextResponse.json({
         success: false,
-        error: 'Rating access is restricted to IMSciences Student Affairs only.',
+        error: "Rating access is restricted to Bfest's Officials only.",
       }, { status: 403 });
     }
 
@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
       startupId,
       voterToken: sessionUser?.id ? `sa_${sessionUser.id}` : voterToken,
       rating: Number(rating),
+      progressPercentage: progressPercentage !== undefined ? Number(progressPercentage) : undefined,
       feedback,
     });
 

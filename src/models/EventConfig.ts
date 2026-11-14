@@ -13,7 +13,9 @@ export interface IEventConfig extends Document {
   investorWeight: number;
   publicWeight: number;
   googleFormUrl?: string;
+  vendorFormUrl?: string;
   googleSheetUrl?: string;
+  sponsors?: { name: string; logoUrl: string }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,9 +37,22 @@ const EventConfigSchema = new Schema<IEventConfig>(
       type: String,
       default: 'https://docs.google.com/forms/d/e/1FAIpQLSeGFeOX8EYzWRrchT0Wwv96b2imsU1ix5UtOOWgi0gHsfvbVA/viewform?usp=publish-editor',
     },
+    vendorFormUrl: {
+      type: String,
+      default: 'https://docs.google.com/forms/d/e/1FAIpQLSeGFeOX8EYzWRrchT0Wwv96b2imsU1ix5UtOOWgi0gHsfvbVA/viewform?usp=publish-editor',
+    },
     googleSheetUrl: {
       type: String,
       default: 'https://docs.google.com/spreadsheets/d/1Lys9DrF2n9Fos_gunDb686GM0cUjRGtTY1vazAMz_QI/edit?usp=sharing',
+    },
+    sponsors: {
+      type: [
+        {
+          name: { type: String, required: true },
+          logoUrl: { type: String, required: true },
+        },
+      ],
+      default: [],
     },
   },
   {

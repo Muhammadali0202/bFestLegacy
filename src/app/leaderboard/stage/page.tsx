@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Maximize2, Minimize2, Clock, Lock, MapPin, MonitorPlay, ShieldCheck, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Maximize2, Minimize2, Clock, Lock, MonitorPlay, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const BFEST_TARGET_DATE = new Date('2026-12-19T09:00:00+05:00').getTime();
@@ -10,11 +10,14 @@ const BFEST_TARGET_DATE = new Date('2026-12-19T09:00:00+05:00').getTime();
 export default function StageLeaderboardPage() {
   const { user, login, loading: authLoading } = useAuth();
   const [items, setItems] = useState<any[]>([]);
+  const [sponsors, setSponsors] = useState<{ name: string; logoUrl: string }[]>([]);
   const [isFrozen, setIsFrozen] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>('');
-  const [countdown, setCountdown] = useState(5);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [eventTimeLeft, setEventTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [restPage, setRestPage] = useState(0);
+  const [top3Changed, setTop3Changed] = useState(false);
+  const prevTop3IdsRef = useRef<string>('');
 
   // Inline TV Admin Auth state
   const [tvEmail, setTvEmail] = useState('tv@imsciences.edu.pk');
@@ -26,13 +29,26 @@ export default function StageLeaderboardPage() {
 
   const fetchLive = async () => {
     try {
-      const res = await fetch('/api/leaderboard');
-      const data = await res.json();
+      const [lbRes, cfgRes] = await Promise.all([
+        fetch('/api/leaderboard'),
+        fetch('/api/event-config'),
+      ]);
+      const data = await lbRes.json();
+      const cfgData = await cfgRes.json();
+
       if (data.success) {
+        const nextTop3Ids = (data.items || []).slice(0, 3).map((x: any) => x.id).join(',');
+        if (prevTop3IdsRef.current && prevTop3IdsRef.current !== nextTop3Ids) {
+          setTop3Changed(true);
+          setTimeout(() => setTop3Changed(false), 2400);
+        }
+        prevTop3IdsRef.current = nextTop3Ids;
         setItems(data.items);
         setIsFrozen(data.isFrozen);
         setLastUpdated(new Date().toLocaleTimeString());
-        setCountdown(5);
+      }
+      if (cfgData.success && Array.isArray(cfgData.config?.sponsors)) {
+        setSponsors(cfgData.config.sponsors);
       }
     } catch (e) {
       console.error(e);
@@ -64,9 +80,12 @@ export default function StageLeaderboardPage() {
     }, 5000);
 
     const timer = setInterval(() => {
-      setCountdown((prev) => (prev > 1 ? prev - 1 : 5));
       updateEventClock();
     }, 1000);
+
+    const rotateTimer = setInterval(() => {
+      setRestPage((prev) => prev + 1);
+    }, 5000);
 
     const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', onFsChange);
@@ -75,6 +94,7 @@ export default function StageLeaderboardPage() {
       document.body.classList.remove('stage-mode');
       clearInterval(interval);
       clearInterval(timer);
+      clearInterval(rotateTimer);
       document.removeEventListener('fullscreenchange', onFsChange);
     };
   }, [isAuthorizedTvAdmin]);
@@ -105,7 +125,11 @@ export default function StageLeaderboardPage() {
 
   const pad = (n: number) => String(n).padStart(2, '0');
   const top3 = items.slice(0, 3);
-  const rest = items.slice(3, 10);
+  const restPool = items.slice(3, 15); // Ranks #4 through #15
+  const pageSize = 4;
+  const totalRestPages = Math.max(1, Math.ceil(restPool.length / pageSize));
+  const currentRestPage = restPage % totalRestPages;
+  const visibleRest = restPool.slice(currentRestPage * pageSize, currentRestPage * pageSize + pageSize);
 
   if (authLoading) {
     return (
@@ -330,7 +354,7 @@ export default function StageLeaderboardPage() {
           </div>
         </div>
 
-        {/* Countdown + Live Sync + IMSciences Logo + Controls */}
+        {/* Countdown + IMSciences Logo + Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
           <div style={{
             background: 'rgba(255, 255, 255, 0.06)',
@@ -347,21 +371,6 @@ export default function StageLeaderboardPage() {
             </span>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1rem', color: '#ffffff' }}>
               {eventTimeLeft.days}d : {pad(eventTimeLeft.hours)}h : {pad(eventTimeLeft.minutes)}m : {pad(eventTimeLeft.seconds)}s
-            </span>
-          </div>
-
-          <div style={{
-            background: 'rgba(16, 185, 129, 0.12)',
-            border: '1px solid rgba(16, 185, 129, 0.4)',
-            borderRadius: '9999px',
-            padding: '0.45rem 0.95rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-          }}>
-            <span className="live-indicator"></span>
-            <span style={{ fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.05em', color: '#34d399' }}>
-              LIVE • {countdown}s
             </span>
           </div>
 
@@ -397,48 +406,82 @@ export default function StageLeaderboardPage() {
         </div>
       </div>
 
-      {/* Top 3 Podium */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1.75rem' }}>
-        <div className="grid grid-cols-3 gap-6" style={{
-          alignItems: 'end',
-          maxWidth: '1280px',
-          width: '100%',
-          margin: '0 auto',
-        }}>
+      {/* Animations for Stage Display */}
+      <style>{`
+        @keyframes top3RankPulse {
+          0% { transform: scale(1); }
+          35% { transform: scale(1.04) translateY(-6px); box-shadow: 0 0 60px rgba(255, 210, 51, 0.65); }
+          100% { transform: scale(1); }
+        }
+        @keyframes stageSlideUp {
+          0% { opacity: 0; transform: translateY(14px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes sponsorMarquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .top3-rank-changed {
+          animation: top3RankPulse 1.4s ease-out;
+        }
+        .stage-rest-animate {
+          animation: stageSlideUp 0.55s ease-out;
+        }
+        .sponsor-marquee-track {
+          display: flex;
+          align-items: center;
+          gap: 3rem;
+          width: max-content;
+          animation: sponsorMarquee 24s linear infinite;
+        }
+      `}</style>
+
+      {/* Top 3 Podium (Smaller & Shifted Higher for Footer Space) */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '0.35rem', gap: '1.25rem' }}>
+        <div
+          className={`grid grid-cols-3 gap-5 ${top3Changed ? 'top3-rank-changed' : ''}`}
+          style={{
+            alignItems: 'end',
+            maxWidth: '1160px',
+            width: '100%',
+            margin: '0 auto',
+          }}
+        >
           {/* #2 Silver */}
           {top3[1] && (
             <div style={{
               background: 'linear-gradient(180deg, #10213b 0%, #091424 100%)',
               border: '2px solid #cbd5e1',
-              borderRadius: '20px',
-              padding: '1.75rem 1.5rem',
+              borderRadius: '18px',
+              padding: '1.25rem 1.15rem',
               textAlign: 'center',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.55)',
+              transition: 'all 0.5s ease',
             }}>
               <div style={{
-                width: '52px',
-                height: '52px',
+                width: '42px',
+                height: '42px',
                 borderRadius: '50%',
                 background: '#e2e8f0',
                 color: '#06172e',
                 fontWeight: 900,
-                fontSize: '1.4rem',
+                fontSize: '1.15rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 0.85rem',
+                margin: '0 auto 0.6rem',
               }}>
                 2
               </div>
-              <span style={{ fontSize: '2.6rem', display: 'block', marginBottom: '0.35rem' }}>{top3[1].logo}</span>
-              <h2 style={{ fontSize: '1.45rem', color: '#ffffff', marginBottom: '0.25rem', fontFamily: 'var(--font-display)' }}>
+              <span style={{ fontSize: '2.1rem', display: 'block', marginBottom: '0.25rem' }}>{top3[1].logo}</span>
+              <h2 style={{ fontSize: '1.25rem', color: '#ffffff', marginBottom: '0.2rem', fontFamily: 'var(--font-display)' }}>
                 {top3[1].name}
               </h2>
-              <span style={{ color: '#94a3b8', fontSize: '0.88rem', display: 'block', marginBottom: '0.75rem' }}>
-                {top3[1].sector} {top3[1].boothNumber ? `• ${top3[1].boothNumber}` : ''}
+              <span style={{ color: '#94a3b8', fontSize: '0.82rem', display: 'block', marginBottom: '0.55rem' }}>
+                {top3[1].sector}
               </span>
-              <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#e2e8f0', fontFamily: 'var(--font-display)' }}>
-                {top3[1].compositeScore.toFixed(1)} <span style={{ fontSize: '1rem', color: '#64748b' }}>PTS</span>
+              <div style={{ fontSize: '2rem', fontWeight: 900, color: '#e2e8f0', fontFamily: 'var(--font-display)' }}>
+                {top3[1].compositeScore.toFixed(1)} <span style={{ fontSize: '0.9rem', color: '#64748b' }}>PTS</span>
               </div>
             </div>
           )}
@@ -448,22 +491,23 @@ export default function StageLeaderboardPage() {
             <div style={{
               background: 'linear-gradient(180deg, #18345c 0%, #0c1d36 100%)',
               border: '3px solid #ffd233',
-              borderRadius: '24px',
-              padding: '2.35rem 1.75rem',
+              borderRadius: '20px',
+              padding: '1.65rem 1.35rem',
               textAlign: 'center',
-              boxShadow: '0 0 50px rgba(255, 210, 51, 0.3)',
+              boxShadow: '0 0 40px rgba(255, 210, 51, 0.28)',
               position: 'relative',
+              transition: 'all 0.5s ease',
             }}>
               <div style={{
                 position: 'absolute',
-                top: '-15px',
+                top: '-13px',
                 left: '50%',
                 transform: 'translateX(-50%)',
                 background: '#ffd233',
                 color: '#06172e',
                 fontWeight: 900,
-                fontSize: '0.8rem',
-                padding: '0.3rem 1.25rem',
+                fontSize: '0.75rem',
+                padding: '0.25rem 1.1rem',
                 borderRadius: '9999px',
                 letterSpacing: '0.08em',
                 whiteSpace: 'nowrap',
@@ -472,30 +516,30 @@ export default function StageLeaderboardPage() {
               </div>
 
               <div style={{
-                width: '66px',
-                height: '66px',
+                width: '54px',
+                height: '54px',
                 borderRadius: '50%',
                 background: 'linear-gradient(135deg, #ffe033 0%, #eab308 100%)',
                 color: '#06172e',
                 fontWeight: 900,
-                fontSize: '1.85rem',
+                fontSize: '1.5rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0.35rem auto 1rem',
-                boxShadow: '0 0 30px rgba(255, 210, 51, 0.5)',
+                margin: '0.25rem auto 0.7rem',
+                boxShadow: '0 0 24px rgba(255, 210, 51, 0.45)',
               }}>
                 1
               </div>
-              <span style={{ fontSize: '3.25rem', display: 'block', marginBottom: '0.35rem' }}>{top3[0].logo}</span>
-              <h2 style={{ fontSize: '1.85rem', color: '#ffffff', marginBottom: '0.3rem', fontFamily: 'var(--font-display)' }}>
+              <span style={{ fontSize: '2.6rem', display: 'block', marginBottom: '0.25rem' }}>{top3[0].logo}</span>
+              <h2 style={{ fontSize: '1.55rem', color: '#ffffff', marginBottom: '0.2rem', fontFamily: 'var(--font-display)' }}>
                 {top3[0].name}
               </h2>
-              <span style={{ color: '#ffd233', fontSize: '0.95rem', fontWeight: 700, display: 'block', marginBottom: '0.9rem' }}>
-                {top3[0].sector} {top3[0].boothNumber ? `• ${top3[0].boothNumber}` : ''}
+              <span style={{ color: '#ffd233', fontSize: '0.88rem', fontWeight: 700, display: 'block', marginBottom: '0.65rem' }}>
+                {top3[0].sector}
               </span>
-              <div style={{ fontSize: '3rem', fontWeight: 900, color: '#ffd233', fontFamily: 'var(--font-display)' }}>
-                {top3[0].compositeScore.toFixed(1)} <span style={{ fontSize: '1.15rem', color: '#94a3b8' }}>PTS</span>
+              <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#ffd233', fontFamily: 'var(--font-display)' }}>
+                {top3[0].compositeScore.toFixed(1)} <span style={{ fontSize: '1rem', color: '#94a3b8' }}>PTS</span>
               </div>
             </div>
           )}
@@ -505,121 +549,165 @@ export default function StageLeaderboardPage() {
             <div style={{
               background: 'linear-gradient(180deg, #10213b 0%, #091424 100%)',
               border: '2px solid #cd7f32',
-              borderRadius: '20px',
-              padding: '1.75rem 1.5rem',
+              borderRadius: '18px',
+              padding: '1.25rem 1.15rem',
               textAlign: 'center',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.55)',
+              transition: 'all 0.5s ease',
             }}>
               <div style={{
-                width: '52px',
-                height: '52px',
+                width: '42px',
+                height: '42px',
                 borderRadius: '50%',
                 background: '#cd7f32',
                 color: '#ffffff',
                 fontWeight: 900,
-                fontSize: '1.4rem',
+                fontSize: '1.15rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 0.85rem',
+                margin: '0 auto 0.6rem',
               }}>
                 3
               </div>
-              <span style={{ fontSize: '2.6rem', display: 'block', marginBottom: '0.35rem' }}>{top3[2].logo}</span>
-              <h2 style={{ fontSize: '1.45rem', color: '#ffffff', marginBottom: '0.25rem', fontFamily: 'var(--font-display)' }}>
+              <span style={{ fontSize: '2.1rem', display: 'block', marginBottom: '0.25rem' }}>{top3[2].logo}</span>
+              <h2 style={{ fontSize: '1.25rem', color: '#ffffff', marginBottom: '0.2rem', fontFamily: 'var(--font-display)' }}>
                 {top3[2].name}
               </h2>
-              <span style={{ color: '#94a3b8', fontSize: '0.88rem', display: 'block', marginBottom: '0.75rem' }}>
-                {top3[2].sector} {top3[2].boothNumber ? `• ${top3[2].boothNumber}` : ''}
+              <span style={{ color: '#94a3b8', fontSize: '0.82rem', display: 'block', marginBottom: '0.55rem' }}>
+                {top3[2].sector}
               </span>
-              <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#e2e8f0', fontFamily: 'var(--font-display)' }}>
-                {top3[2].compositeScore.toFixed(1)} <span style={{ fontSize: '1rem', color: '#64748b' }}>PTS</span>
+              <div style={{ fontSize: '2rem', fontWeight: 900, color: '#e2e8f0', fontFamily: 'var(--font-display)' }}>
+                {top3[2].compositeScore.toFixed(1)} <span style={{ fontSize: '0.9rem', color: '#64748b' }}>PTS</span>
               </div>
             </div>
           )}
         </div>
 
-        {/* Ranks #4 - #10 Grid for Wide TV Visibility */}
-        {rest.length > 0 && (
-          <div style={{ maxWidth: '1280px', width: '100%', margin: '0 auto' }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-              gap: '0.75rem',
-            }}>
-              {rest.map((s, idx) => (
-                <div
-                  key={s.id}
-                  style={{
-                    background: 'rgba(15, 29, 52, 0.85)',
-                    border: '1px solid rgba(148, 163, 184, 0.2)',
-                    borderRadius: '14px',
-                    padding: '0.85rem 1.15rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '0.75rem',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-                    <span style={{
-                      width: '30px',
-                      height: '30px',
-                      borderRadius: '8px',
-                      background: 'rgba(255, 255, 255, 0.08)',
-                      color: '#cbd5e1',
-                      fontWeight: 900,
-                      fontSize: '0.9rem',
-                      display: 'inline-flex',
+        {/* Ranks #4 - #15 Rotating Animated Grid */}
+        {visibleRest.length > 0 && (
+          <div style={{ maxWidth: '1160px', width: '100%', margin: '0 auto' }}>
+            <div
+              key={currentRestPage}
+              className="stage-rest-animate"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: '0.75rem',
+              }}
+            >
+              {visibleRest.map((s, idx) => {
+                const rankNum = currentRestPage * pageSize + idx + 4;
+                return (
+                  <div
+                    key={s.id}
+                    style={{
+                      background: 'rgba(15, 29, 52, 0.85)',
+                      border: '1px solid rgba(148, 163, 184, 0.2)',
+                      borderRadius: '14px',
+                      padding: '0.8rem 1.1rem',
+                      display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                    }}>
-                      #{idx + 4}
-                    </span>
-                    <span style={{ fontSize: '1.45rem', flexShrink: 0 }}>{s.logo}</span>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.98rem', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {s.name}
-                      </div>
-                      <div style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                        <span>{s.sector}</span>
-                        {s.boothNumber && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.15rem', color: '#38bdf8' }}>
-                            • <MapPin size={10} /> {s.boothNumber}
-                          </span>
-                        )}
+                      justifyContent: 'space-between',
+                      gap: '0.75rem',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                      <span style={{
+                        width: '30px',
+                        height: '30px',
+                        borderRadius: '8px',
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        color: '#cbd5e1',
+                        fontWeight: 900,
+                        fontSize: '0.9rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}>
+                        #{rankNum}
+                      </span>
+                      <span style={{ fontSize: '1.45rem', flexShrink: 0 }}>{s.logo}</span>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.96rem', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {s.name}
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                          {s.sector}
+                        </div>
                       </div>
                     </div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.15rem', color: '#ffd233', flexShrink: 0 }}>
+                      {s.compositeScore.toFixed(1)}
+                    </div>
                   </div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.2rem', color: '#ffd233', flexShrink: 0 }}>
-                    {s.compositeScore.toFixed(1)}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
       </div>
 
-      {/* TV Footer Bar */}
+      {/* Dynamic Moving "Our Proud Sponsors" Marquee Footer */}
       <div style={{
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-        paddingTop: '0.75rem',
+        borderTop: '1px solid rgba(255, 210, 51, 0.25)',
+        paddingTop: '0.85rem',
         display: 'flex',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '0.75rem',
-        fontSize: '0.82rem',
-        color: '#94a3b8',
+        gap: '1.5rem',
+        overflow: 'hidden',
       }}>
-        <span>
-          Scoring Formula: <strong style={{ color: '#ffd233' }}>50% Jury Rubric</strong> •{' '}
-          <strong style={{ color: '#34d399' }}>30% Investor Backing</strong> •{' '}
-          <strong style={{ color: '#38bdf8' }}>20% Student Affairs</strong>
+        <div style={{
+          flexShrink: 0,
+          fontSize: '0.85rem',
+          fontWeight: 800,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          color: '#ffd233',
+          paddingRight: '1rem',
+          borderRight: '1px solid rgba(255, 255, 255, 0.15)',
+        }}>
+          Our Proud Sponsors
+        </div>
+
+        <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+          {sponsors.length > 0 ? (
+            <div className="sponsor-marquee-track">
+              {[...sponsors, ...sponsors].map((sp, idx) => (
+                <div
+                  key={`${sp.name}-${idx}`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.65rem',
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    padding: '0.35rem 0.9rem',
+                    borderRadius: '10px',
+                    flexShrink: 0,
+                  }}
+                >
+                  <img
+                    src={sp.logoUrl}
+                    alt={sp.name}
+                    style={{ height: '28px', maxWidth: '90px', objectFit: 'contain' }}
+                  />
+                  <span style={{ color: '#0b2545', fontWeight: 700, fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                    {sp.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ fontSize: '0.84rem', color: '#94a3b8' }}>
+              Partnering with leading organizations to empower student entrepreneurship at IMSciences Peshawar.
+            </div>
+          )}
+        </div>
+
+        <span style={{ flexShrink: 0, fontSize: '0.78rem', color: '#64748b' }}>
+          Synced {lastUpdated || '...'}
         </span>
-        <span>Last Live Sync: {lastUpdated || 'Connecting...'}</span>
       </div>
     </div>
   );

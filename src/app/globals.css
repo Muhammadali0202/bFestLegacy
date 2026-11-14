@@ -158,6 +158,18 @@ a {
   }
 }
 
+.home-split-grid {
+  display: grid;
+  grid-template-columns: 7fr 3fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .home-split-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .desktop-nav {
   display: block;
 }

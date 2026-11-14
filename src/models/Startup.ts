@@ -39,6 +39,7 @@ export interface IStartup extends Document {
   investorScore: number;
 
   compositeScore: number;
+  progressPercentage: number;
   rank?: number;
 
   createdAt: Date;
@@ -91,6 +92,7 @@ const StartupSchema = new Schema<IStartup>(
     investorScore: { type: Number, default: 0 },
 
     compositeScore: { type: Number, default: 0, index: true },
+    progressPercentage: { type: Number, default: 0, min: 0, max: 100 },
     rank: { type: Number },
   },
   {

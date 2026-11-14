@@ -13,15 +13,19 @@ import {
   ClipboardList,
   ChevronDown,
   ChevronUp,
+  Trash2,
 } from 'lucide-react';
-import { BusinessSector, EventConfig } from '@/types';
+import { BusinessSector, EventConfig, Startup } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 
 export default function RegisterStartupPage() {
   const { user } = useAuth();
   const [config, setConfig] = useState<EventConfig | null>(null);
   const [googleFormUrl, setGoogleFormUrl] = useState('');
+  const [vendorFormUrl, setVendorFormUrl] = useState('');
   const [googleSheetUrl, setGoogleSheetUrl] = useState('');
+  const [startups, setStartups] = useState<Startup[]>([]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [savingLinks, setSavingLinks] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
@@ -46,6 +50,17 @@ export default function RegisterStartupPage() {
   const [manualSuccess, setManualSuccess] = useState(false);
   const [manualError, setManualError] = useState('');
 
+  const loadStartups = () => {
+    fetch('/api/startups?status=all')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.startups)) {
+          setStartups(data.startups);
+        }
+      })
+      .catch(() => {});
+  };
+
   useEffect(() => {
     fetch('/api/event-config')
       .then((res) => res.json())
@@ -53,10 +68,12 @@ export default function RegisterStartupPage() {
         if (data.success && data.config) {
           setConfig(data.config);
           setGoogleFormUrl(data.config.googleFormUrl || '');
+          setVendorFormUrl(data.config.vendorFormUrl || '');
           setGoogleSheetUrl(data.config.googleSheetUrl || '');
         }
       })
       .catch(() => {});
+    loadStartups();
   }, []);
 
   const isStaff =
@@ -75,6 +92,7 @@ export default function RegisterStartupPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           googleFormUrl: googleFormUrl.trim(),
+          vendorFormUrl: vendorFormUrl.trim(),
           googleSheetUrl: googleSheetUrl.trim(),
         }),
       });
@@ -153,6 +171,7 @@ export default function RegisterStartupPage() {
       const data = await res.json();
       if (data.success) {
         setManualSuccess(true);
+        loadStartups();
       } else {
         setManualError(data.error || 'Failed to register stall.');
       }
@@ -160,6 +179,24 @@ export default function RegisterStartupPage() {
       setManualError('Network error submitting stall.');
     } finally {
       setManualLoading(false);
+    }
+  };
+
+  const handleDeleteStartup = async (startupId: string, startupName: string) => {
+    if (!confirm(`Remove "${startupName}" from Business Fest?`)) return;
+    setDeletingId(startupId);
+    try {
+      const res = await fetch(`/api/startups/${startupId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setStartups((prev) => prev.filter((s) => s.id !== startupId));
+      } else {
+        alert(data.error || 'Failed to remove startup.');
+      }
+    } catch {
+      alert('Network error removing startup.');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -174,41 +211,38 @@ export default function RegisterStartupPage() {
   ];
 
   return (
-    <div className="container" style={{ padding: '3rem 1.5rem 5rem', maxWidth: '860px' }}>
+    <div className="container" style={{ padding: '3rem 1.5rem 5rem', maxWidth: '960px' }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '2.25rem' }}>
-        <div className="badge badge-gold" style={{ marginBottom: '0.75rem' }}>
-          <ClipboardList size={14} /> Official Stall Registration
-        </div>
-        <h1 style={{ fontSize: '2.3rem', color: 'var(--bf-primary)', marginBottom: '0.5rem' }}>
-          Business Fest 2027 Stall Registration
+        <h1 style={{ fontSize: '2.5rem', color: 'var(--bf-primary)', marginBottom: '0' }}>
+          Register
         </h1>
-        <p style={{ color: 'var(--bf-text-secondary)', fontSize: '0.98rem', maxWidth: '640px', margin: '0 auto' }}>
-          All student stalls register through our official <strong>Google Form</strong>. Responses are stored in a shared{' '}
-          <strong>Google Sheet</strong> accessible to the Registration Team, Student Affairs, and Admin, and synced directly into the website.
-        </p>
       </div>
 
-      {/* Card 1: Official Google Form for Student Stall Registration */}
-      <div
-        className="card"
-        style={{
-          padding: '2rem',
-          marginBottom: '1.75rem',
-          border: '2px solid rgba(0, 71, 255, 0.2)',
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem' }}>
-          <div style={{ flex: '1 1 320px' }}>
-            <span className="badge badge-sector" style={{ marginBottom: '0.5rem' }}>
-              Step 1 • Student Stall Form
+      {/* 2 Side-by-Side Registration Frames */}
+      <div className="grid grid-cols-2 gap-6" style={{ marginBottom: '2rem' }}>
+        {/* Frame 1: Students Paid Stall */}
+        <div
+          className="card"
+          style={{
+            padding: '2rem',
+            border: '2px solid rgba(0, 71, 255, 0.2)',
+            background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            gap: '1.25rem',
+          }}
+        >
+          <div>
+            <span className="badge badge-sector" style={{ marginBottom: '0.6rem' }}>
+              1. Students Paid Stall
             </span>
-            <h2 style={{ fontSize: '1.4rem', color: 'var(--bf-primary)', marginBottom: '0.35rem' }}>
-              Register Your Stall via Google Form
+            <h2 style={{ fontSize: '1.4rem', color: 'var(--bf-primary)', marginBottom: '0.5rem' }}>
+              Students Paid Stall
             </h2>
-            <p style={{ fontSize: '0.9rem', color: 'var(--bf-text-secondary)', lineHeight: 1.55 }}>
-              Fill out the official Business Fest Google Form with your Startup/Stall Name, Sector, Team Lead, and Idea summary.
+            <p style={{ fontSize: '0.94rem', color: 'var(--bf-text-secondary)', lineHeight: 1.55 }}>
+              Students of IMSciences non-ITB students who wants to register their stalls.
             </p>
           </div>
 
@@ -219,22 +253,69 @@ export default function RegisterStartupPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-primary"
+                style={{ width: '100%' }}
               >
-                Open Stall Registration Google Form <ExternalLink size={16} />
+                Register Student Stall <ExternalLink size={16} />
               </a>
             ) : (
-              <span className="badge badge-pending" style={{ padding: '0.5rem 0.9rem', fontSize: '0.82rem' }}>
+              <span className="badge badge-pending" style={{ padding: '0.5rem 0.9rem', fontSize: '0.82rem', display: 'inline-block' }}>
                 {isStaff
-                  ? 'Paste your Google Form link below to activate this button'
-                  : 'Google Form link will be published by the Registration Team shortly'}
+                  ? 'Paste Student Stall Google Form link below to activate'
+                  : 'Registration form link will be published shortly'}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Frame 2: Vendors */}
+        <div
+          className="card"
+          style={{
+            padding: '2rem',
+            border: '2px solid rgba(212, 175, 55, 0.35)',
+            background: 'linear-gradient(135deg, #ffffff 0%, #fffbeb 100%)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            gap: '1.25rem',
+          }}
+        >
+          <div>
+            <span className="badge badge-gold" style={{ marginBottom: '0.6rem' }}>
+              2. Vendors
+            </span>
+            <h2 style={{ fontSize: '1.4rem', color: 'var(--bf-primary)', marginBottom: '0.5rem' }}>
+              Vendors
+            </h2>
+            <p style={{ fontSize: '0.94rem', color: 'var(--bf-text-secondary)', lineHeight: 1.55 }}>
+              Food, Retail, Art, Corporate, NGOs may register here.
+            </p>
+          </div>
+
+          <div>
+            {config?.vendorFormUrl ? (
+              <a
+                href={config.vendorFormUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-gold"
+                style={{ width: '100%' }}
+              >
+                Register as Vendor <ExternalLink size={16} />
+              </a>
+            ) : (
+              <span className="badge badge-pending" style={{ padding: '0.5rem 0.9rem', fontSize: '0.82rem', display: 'inline-block' }}>
+                {isStaff
+                  ? 'Paste Vendor Google Form link below to activate'
+                  : 'Vendor registration form link will be published shortly'}
               </span>
             )}
           </div>
         </div>
       </div>
 
-      {/* Card 2: Shared Google Sheet Hub (For Registration Team, Student Affairs, and Admin) */}
-      {isStaff ? (
+      {/* Card 2: Shared Google Sheet Hub (For Registration Team, Bfest's Officials, and Admin) */}
+      {isStaff && (
         <div
           className="card"
           style={{
@@ -307,10 +388,10 @@ export default function RegisterStartupPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
+          <div className="grid grid-cols-3 gap-4" style={{ marginBottom: '1rem' }}>
             <div>
               <label className="form-label" style={{ fontSize: '0.8rem', color: '#064e3b' }}>
-                Official Student Google Form Link
+                Students Paid Stall Form Link
               </label>
               <input
                 type="url"
@@ -324,7 +405,21 @@ export default function RegisterStartupPage() {
 
             <div>
               <label className="form-label" style={{ fontSize: '0.8rem', color: '#064e3b' }}>
-                Shared Responses Google Sheet Link (&ldquo;Anyone with link can view&rdquo;)
+                Vendors Registration Form Link
+              </label>
+              <input
+                type="url"
+                className="form-input"
+                placeholder="https://docs.google.com/forms/d/e/.../viewform"
+                value={vendorFormUrl}
+                onChange={(e) => setVendorFormUrl(e.target.value)}
+                style={{ background: '#ffffff', fontSize: '0.85rem' }}
+              />
+            </div>
+
+            <div>
+              <label className="form-label" style={{ fontSize: '0.8rem', color: '#064e3b' }}>
+                Shared Responses Google Sheet Link
               </label>
               <input
                 type="url"
@@ -360,23 +455,6 @@ export default function RegisterStartupPage() {
 
             <Link href="/startups" className="btn btn-secondary btn-sm" style={{ background: '#ffffff' }}>
               View Live Stalls Directory <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <div className="card" style={{ padding: '1.5rem', textAlign: 'center', marginBottom: '1.75rem' }}>
-          <p style={{ fontSize: '0.9rem', color: 'var(--bf-text-secondary)', marginBottom: '0.75rem' }}>
-            Are you part of the <strong>Registration Team</strong>, <strong>Student Affairs</strong>, or <strong>Fest Admin</strong>? Sign in to access the shared Google Sheet and 1-click website stall sync.
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <Link href="/login?role=registration_team" className="btn btn-secondary btn-sm">
-              Registration Team Sign In
-            </Link>
-            <Link href="/login?role=student_affairs" className="btn btn-secondary btn-sm">
-              Student Affairs Sign In
-            </Link>
-            <Link href="/login?role=admin" className="btn btn-secondary btn-sm">
-              Admin Sign In
             </Link>
           </div>
         </div>
@@ -494,6 +572,70 @@ export default function RegisterStartupPage() {
                 {manualLoading ? 'Saving...' : 'Add Single Stall'}
               </button>
             </form>
+          )}
+        </div>
+      )}
+
+      {/* Manage Registered Startups (Add & Remove) for Staff */}
+      {isStaff && (
+        <div className="card" style={{ padding: '1.5rem', marginTop: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ fontSize: '1.15rem', color: 'var(--bf-primary)' }}>
+              Manage Registered Startups ({startups.length})
+            </h3>
+            <button
+              type="button"
+              onClick={loadStartups}
+              className="btn btn-secondary btn-sm"
+            >
+              <RefreshCw size={14} /> Refresh
+            </button>
+          </div>
+          {startups.length === 0 ? (
+            <p style={{ fontSize: '0.9rem', color: 'var(--bf-text-muted)' }}>No startups registered yet.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '360px', overflowY: 'auto' }}>
+              {startups.map((s) => (
+                <div
+                  key={s.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0.7rem 1rem',
+                    background: '#f8fafc',
+                    border: '1px solid var(--bf-border)',
+                    borderRadius: '8px',
+                    gap: '1rem',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                    <span style={{ fontSize: '1.35rem' }}>{s.logo}</span>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, color: 'var(--bf-primary)', fontSize: '0.95rem' }}>{s.name}</div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--bf-text-muted)' }}>{s.sector}</div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={deletingId === s.id}
+                    onClick={() => handleDeleteStartup(s.id, s.name)}
+                    className="btn btn-sm"
+                    style={{
+                      background: '#fee2e2',
+                      color: '#b91c1c',
+                      border: '1px solid #fecaca',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                    }}
+                  >
+                    <Trash2 size={14} />
+                    {deletingId === s.id ? 'Removing...' : 'Remove'}
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}

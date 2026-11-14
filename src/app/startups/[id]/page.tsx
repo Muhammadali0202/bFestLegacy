@@ -31,8 +31,9 @@ export default function StartupProfilePage() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Public voting state
+  // Official progress & rating state
   const [selectedRating, setSelectedRating] = useState<number>(5);
+  const [progressPercentage, setProgressPercentage] = useState<number>(0);
   const [feedback, setFeedback] = useState('');
   const [voteSubmitted, setVoteSubmitted] = useState(false);
   const [votingError, setVotingError] = useState('');
@@ -56,6 +57,7 @@ export default function StartupProfilePage() {
       .then(([startupData, invData]) => {
         if (startupData.success) {
           setStartup(startupData.startup);
+          setProgressPercentage(startupData.startup.progressPercentage ?? 0);
         }
         if (invData.success) {
           setInvestments(invData.investments);
@@ -95,6 +97,7 @@ export default function StartupProfilePage() {
           startupId: id,
           voterToken: user?.id ? `sa_${user.id}` : voterToken,
           rating: selectedRating,
+          progressPercentage,
           feedback,
           userRole: user?.role,
         }),
@@ -265,10 +268,6 @@ export default function StartupProfilePage() {
         <div className="flex gap-4 items-center flex-wrap" style={{ borderTop: '1px solid var(--bf-border)', paddingTop: '1.25rem' }}>
           <div className="badge badge-sector" style={{ fontSize: '0.85rem' }}>
             {startup.sector}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem', color: 'var(--bf-text-secondary)', fontWeight: 600 }}>
-            <MapPin size={16} color="var(--bf-accent-blue)" />
-            <span>{startup.boothNumber || 'Main Exhibition Arena'}</span>
           </div>
           {startup.website && (
             <a href={startup.website} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem', color: 'var(--bf-accent-blue)', fontWeight: 600 }}>
@@ -490,14 +489,14 @@ export default function StartupProfilePage() {
             )}
           </div>
 
-          {/* Student Affairs Rating Box (Rate Access Restricted to Student Affairs Only) */}
+          {/* Progress Rating Box (Rate Access Restricted to Bfest's Officials Only) */}
           <div className="card" style={{ marginBottom: '1.5rem', border: '1.5px solid var(--bf-border)' }}>
             <div className="flex items-center gap-2" style={{ marginBottom: '0.5rem' }}>
               <Star size={20} color="var(--bf-accent-gold)" fill="var(--bf-accent-gold)" />
-              <h3 style={{ fontSize: '1.25rem', color: 'var(--bf-primary)' }}>Student Affairs Rating</h3>
+              <h3 style={{ fontSize: '1.25rem', color: 'var(--bf-primary)' }}>Progress Rating</h3>
             </div>
             <p style={{ fontSize: '0.88rem', color: 'var(--bf-text-secondary)', marginBottom: '1.25rem' }}>
-              Official Student Affairs ratings contribute 20% to the composite leaderboard standing.
+              Official progress percentage and rating recorded by Bfest&apos;s Officials.
             </p>
 
             <div style={{
@@ -511,15 +510,15 @@ export default function StartupProfilePage() {
               alignItems: 'center',
             }}>
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)', display: 'block' }}>Rating Average</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)', display: 'block' }}>Official Rating</span>
                 <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--bf-primary)' }}>
                   {startup.publicRating.toFixed(1)} / 5.0
                 </span>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)', display: 'block' }}>Ratings Recorded</span>
-                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--bf-text-secondary)' }}>
-                  {startup.totalPublicVotes}
+                <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)', display: 'block' }}>Progress</span>
+                <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--bf-accent-blue)' }}>
+                  {startup.progressPercentage ?? 0}%
                 </span>
               </div>
             </div>
@@ -535,8 +534,17 @@ export default function StartupProfilePage() {
                   color: '#047857',
                 }}>
                   <CheckCircle size={28} style={{ margin: '0 auto 0.5rem' }} />
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700 }}>Rating Recorded!</h4>
-                  <p style={{ fontSize: '0.82rem' }}>Student Affairs rating submitted for {startup.name}.</p>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700 }}>Progress &amp; Rating Recorded!</h4>
+                  <p style={{ fontSize: '0.82rem', marginBottom: '0.75rem' }}>
+                    Official evaluation submitted for {startup.name}.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setVoteSubmitted(false)}
+                    className="btn btn-secondary btn-sm"
+                  >
+                    Update Rating / Progress
+                  </button>
                 </div>
               ) : (
                 <form onSubmit={handleVoteSubmit}>
@@ -556,7 +564,7 @@ export default function StartupProfilePage() {
 
                   <div style={{ marginBottom: '1rem' }}>
                     <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.5rem' }}>
-                      Select Student Affairs Rating:
+                      Select Official Rating:
                     </label>
                     <div className="flex gap-2 justify-center" style={{ padding: '0.5rem 0' }}>
                       {[1, 2, 3, 4, 5].map((star) => (
@@ -583,9 +591,29 @@ export default function StartupProfilePage() {
                     </div>
                   </div>
 
+                  <div style={{ marginBottom: '1rem' }}>
+                    <div className="flex justify-between items-center" style={{ marginBottom: '0.4rem' }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--bf-primary)' }}>
+                        Progress Percentage:
+                      </label>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--bf-accent-blue)' }}>
+                        {progressPercentage}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={progressPercentage}
+                      onChange={(e) => setProgressPercentage(Number(e.target.value))}
+                      style={{ width: '100%', accentColor: 'var(--bf-accent-blue)', cursor: 'pointer' }}
+                    />
+                  </div>
+
                   <div style={{ marginBottom: '1.25rem' }}>
                     <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--bf-text-secondary)', marginBottom: '0.4rem' }}>
-                      Student Affairs Remarks (Optional):
+                      Official Remarks (Optional):
                     </label>
                     <textarea
                       rows={2}
@@ -612,7 +640,7 @@ export default function StartupProfilePage() {
                     style={{ width: '100%' }}
                   >
                     <Send size={15} />
-                    {isSubmittingVote ? 'Submitting Rating...' : 'Submit Student Affairs Rating'}
+                    {isSubmittingVote ? 'Submitting...' : 'Submit Progress & Rating'}
                   </button>
                 </form>
               )
@@ -625,17 +653,17 @@ export default function StartupProfilePage() {
                 textAlign: 'center',
               }}>
                 <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.3rem' }}>
-                  🔒 Rate Access: Student Affairs Only
+                  🔒 Rate Access: Bfest&apos;s Officials Only
                 </div>
                 <p style={{ fontSize: '0.8rem', color: 'var(--bf-text-secondary)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
-                  Only authorized IMSciences Student Affairs accounts provisioned by the Fest Admin can rate startups.
+                  Only authorized Bfest&apos;s Officials accounts provisioned by the Fest Admin can rate startups and update progress.
                 </p>
                 <Link
                   href="/login?mode=staff&role=student_affairs"
                   className="btn btn-secondary btn-sm"
                   style={{ width: '100%' }}
                 >
-                  Student Affairs Sign In
+                  Official Sign In
                 </Link>
               </div>
             )}

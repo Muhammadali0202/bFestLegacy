@@ -25,8 +25,9 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // If in dedicated full-screen stage mode, hide normal navbar to maximize auditorium projection space
-  if (pathname === '/leaderboard/stage') {
+  // On Home (/), the custom compact white header renders Title -> Description -> Nav Bar in order.
+  // In full-screen stage/TV mode (/leaderboard/stage), hide navbar.
+  if (pathname === '/leaderboard/stage' || pathname === '/') {
     return null;
   }
 

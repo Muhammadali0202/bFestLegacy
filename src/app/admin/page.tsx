@@ -55,6 +55,11 @@ export default function AdminDashboardPage() {
   const [syncingSheet, setSyncingSheet] = useState(false);
   const [sheetError, setSheetError] = useState('');
 
+  // Our Proud Sponsors Manager State
+  const [sponsorName, setSponsorName] = useState('');
+  const [sponsorLogoUrl, setSponsorLogoUrl] = useState('');
+  const [savingSponsor, setSavingSponsor] = useState(false);
+
   const loadData = async () => {
     try {
       const [startupsRes, configRes, investorsRes, accountsRes, healthRes] = await Promise.all([
@@ -210,6 +215,52 @@ export default function AdminDashboardPage() {
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleAddSponsor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!sponsorName.trim() || !sponsorLogoUrl.trim() || !config) return;
+    setSavingSponsor(true);
+    try {
+      const updatedSponsors = [...(config.sponsors || []), { name: sponsorName.trim(), logoUrl: sponsorLogoUrl.trim() }];
+      const res = await fetch('/api/event-config', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sponsors: updatedSponsors }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setConfig(data.config);
+        setSponsorName('');
+        setSponsorLogoUrl('');
+        setActionMessage('Sponsor added to TV Display marquee!');
+        setTimeout(() => setActionMessage(''), 4000);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingSponsor(false);
+    }
+  };
+
+  const handleRemoveSponsor = async (index: number) => {
+    if (!config) return;
+    const updatedSponsors = (config.sponsors || []).filter((_, i) => i !== index);
+    try {
+      const res = await fetch('/api/event-config', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sponsors: updatedSponsors }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setConfig(data.config);
+        setActionMessage('Sponsor removed.');
+        setTimeout(() => setActionMessage(''), 4000);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -1128,6 +1179,94 @@ export default function AdminDashboardPage() {
   UrlFetchApp.fetch(url, options);
 }`}</pre>
             </details>
+          </div>
+
+          {/* Our Proud Sponsors Manager (Dynamic TV Display Marquee) */}
+          <div style={{
+            marginTop: '2rem',
+            background: '#f8fafc',
+            border: '1px solid var(--bf-border)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+          }}>
+            <h4 style={{ fontSize: '1.1rem', color: 'var(--bf-primary)', fontWeight: 800, marginBottom: '0.35rem' }}>
+              🤝 Our Proud Sponsors (TV Display Marquee)
+            </h4>
+            <p style={{ color: 'var(--bf-text-secondary)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+              Add sponsor logos here to display them in the moving footer on the Campus TV Display (/leaderboard/stage).
+            </p>
+
+            <form onSubmit={handleAddSponsor} style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Sponsor Name (e.g. Bank of Khyber)"
+                value={sponsorName}
+                onChange={(e) => setSponsorName(e.target.value)}
+                required
+                style={{ flex: '1 1 200px', background: '#ffffff' }}
+              />
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Logo URL (e.g. https://... or /logo.png)"
+                value={sponsorLogoUrl}
+                onChange={(e) => setSponsorLogoUrl(e.target.value)}
+                required
+                style={{ flex: '2 1 280px', background: '#ffffff' }}
+              />
+              <button type="submit" disabled={savingSponsor} className="btn btn-primary btn-sm">
+                {savingSponsor ? 'Adding...' : 'Add Sponsor'}
+              </button>
+            </form>
+
+            {(config.sponsors || []).length === 0 ? (
+              <p style={{ fontSize: '0.84rem', color: 'var(--bf-text-muted)' }}>
+                No sponsors added yet. Add a sponsor above to show logos on the TV display.
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                {(config.sponsors || []).map((sp, idx) => (
+                  <div
+                    key={`${sp.name}-${idx}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.65rem',
+                      background: '#ffffff',
+                      border: '1px solid var(--bf-border)',
+                      borderRadius: '10px',
+                      padding: '0.5rem 0.75rem',
+                    }}
+                  >
+                    <img
+                      src={sp.logoUrl}
+                      alt={sp.name}
+                      style={{ height: '28px', maxWidth: '72px', objectFit: 'contain' }}
+                    />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--bf-primary)' }}>
+                      {sp.name}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSponsor(idx)}
+                      style={{
+                        background: '#fee2e2',
+                        color: '#b91c1c',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '0.25rem 0.45rem',
+                        cursor: 'pointer',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -8,7 +8,7 @@ import {
   User, 
   Investment 
 } from '@/types';
-import { initialStartups, initialEventConfig, initialUsers, initialInvestments } from './mockData';
+import { initialEventConfig } from './mockData';
 import connectToDatabase, { isMongoConnected } from './mongodb';
 import { 
   Startup as StartupModel, 
@@ -23,22 +23,53 @@ import { seedDatabaseIfEmpty } from './dbSeeder';
 import { hashPassword, verifyPassword } from './auth';
 
 // In-Memory Fallback State (Active if MongoDB is not reachable)
-let memStartups: Startup[] = [...initialStartups];
+let memStartups: Startup[] = [];
 let memEventConfig: IEventConfig = { ...initialEventConfig };
 let memJudgeEvaluations: IJudgeEval[] = [];
 let memPublicVotes: IPublicVote[] = [];
-let memUsers: (User & { passwordHash: string })[] = initialUsers.map(u => ({
-  ...u,
-  passwordHash: hashPassword(
-    u.role === 'admin' ? 'admin123' :
-    u.role === 'judge' ? 'judge123' :
-    u.role === 'student_affairs' ? 'affairs123' :
-    u.role === 'registration_team' ? 'reg123' :
-    u.role === 'tv_admin' ? 'tv2027' :
-    u.role === 'investor' ? 'investor123' : 'student123'
-  )
-}));
-let memInvestments: Investment[] = [...initialInvestments];
+let memUsers: (User & { passwordHash: string })[] = [
+  {
+    id: 'user-admin-1',
+    fullName: 'Business Fest Administrator',
+    email: 'admin@bfest2027.org',
+    role: 'admin',
+    isApproved: true,
+    institution: 'IMSciences Peshawar',
+    createdAt: new Date().toISOString(),
+    passwordHash: hashPassword('BFest@Admin2027!'),
+  },
+  {
+    id: 'user-officials-1',
+    fullName: "Bfest's Officials",
+    email: 'officials@bfest2027.org',
+    role: 'student_affairs',
+    isApproved: true,
+    institution: "IMSciences Peshawar - Bfest's Officials",
+    createdAt: new Date().toISOString(),
+    passwordHash: hashPassword('BFest@Officials2027!'),
+  },
+  {
+    id: 'user-reg-1',
+    fullName: 'Registration Team',
+    email: 'registration@bfest2027.org',
+    role: 'registration_team',
+    isApproved: true,
+    institution: 'IMSciences Peshawar - Registration Desk',
+    createdAt: new Date().toISOString(),
+    passwordHash: hashPassword('BFest@Reg2027!'),
+  },
+  {
+    id: 'user-tv-1',
+    fullName: 'TV Display Administrator',
+    email: 'tv@bfest2027.org',
+    role: 'tv_admin',
+    isApproved: true,
+    institution: 'IMSciences Peshawar - Campus AV & TV Screens',
+    createdAt: new Date().toISOString(),
+    passwordHash: hashPassword('BFest@TV2027!'),
+  },
+];
+let memInvestments: Investment[] = [];
 
 let isDbInitialized = false;
 let lastDbError: string | null = null;

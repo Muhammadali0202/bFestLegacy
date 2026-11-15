@@ -47,15 +47,13 @@ function LoginContent() {
   const [successMsg, setSuccessMsg] = useState('');
 
   // Role metadata
-  const rolesConfig: Record<UserRole, { label: string; icon: any; color: string; desc: string; redirect: string; defaultEmail: string; defaultPass: string }> = {
+  const rolesConfig: Record<UserRole, { label: string; icon: any; color: string; desc: string; redirect: string }> = {
     student: {
       label: 'Student Team',
       icon: GraduationCap,
       color: '#3b82f6',
       desc: 'Register startup team, submit pitch deck, & track standing',
       redirect: '/student',
-      defaultEmail: 'student@imsciences.edu.pk',
-      defaultPass: 'student123',
     },
     judge: {
       label: 'Jury / Judge',
@@ -63,8 +61,6 @@ function LoginContent() {
       color: '#d4af37',
       desc: 'Evaluate ventures on 4 rubrics & assign official jury scores',
       redirect: '/judge',
-      defaultEmail: 'jury.irfan@imsciences.edu.pk',
-      defaultPass: 'judge123',
     },
     student_affairs: {
       label: "Bfest's Officials",
@@ -72,8 +68,6 @@ function LoginContent() {
       color: '#0047ff',
       desc: "Authorized Bfest's Officials portal to rate startups and update progress",
       redirect: '/startups',
-      defaultEmail: 'studentaffairs@imsciences.edu.pk',
-      defaultPass: 'affairs123',
     },
     registration_team: {
       label: 'Registration Team',
@@ -81,8 +75,6 @@ function LoginContent() {
       color: '#8b5cf6',
       desc: 'Official intake desk to register student startups and manage entries',
       redirect: '/register',
-      defaultEmail: 'registration@imsciences.edu.pk',
-      defaultPass: 'reg123',
     },
     investor: {
       label: 'Investor',
@@ -90,8 +82,6 @@ function LoginContent() {
       color: '#10b981',
       desc: 'Pledge capital, rate startups, & boost leaderboard rankings',
       redirect: '/investor',
-      defaultEmail: 'investor@venturekp.com',
-      defaultPass: 'investor123',
     },
     tv_admin: {
       label: 'TV Display Admin',
@@ -99,17 +89,13 @@ function LoginContent() {
       color: '#06b6d4',
       desc: 'University AV & Campus TV screen administrator for live stage broadcast',
       redirect: '/leaderboard/stage',
-      defaultEmail: 'tv@imsciences.edu.pk',
-      defaultPass: 'tv2027',
     },
     admin: {
       label: 'Organizer / Admin',
       icon: ShieldCheck,
       color: '#ef4444',
-      desc: 'Create Student, Judge, Student Affairs & Registration Team accounts and manage event',
+      desc: 'Create official accounts and manage event settings & sponsors',
       redirect: '/admin',
-      defaultEmail: 'admin@imsciences.edu.pk',
-      defaultPass: 'admin123',
     },
   };
 
@@ -122,13 +108,6 @@ function LoginContent() {
 
   const handleRoleChange = (role: UserRole) => {
     setSelectedRole(role);
-    setError('');
-  };
-
-  const fillQuickDemo = (role: UserRole) => {
-    setSelectedRole(role);
-    setEmail(rolesConfig[role].defaultEmail);
-    setPassword(rolesConfig[role].defaultPass);
     setError('');
   };
 
@@ -316,7 +295,7 @@ function LoginContent() {
               <input
                 type="email"
                 className="form-input has-icon-left"
-                placeholder={`e.g. ${rolesConfig[selectedRole].defaultEmail}`}
+                placeholder="you@bfest2027.org"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -375,38 +354,6 @@ function LoginContent() {
             <ArrowRight size={18} />
           </button>
         </form>
-
-        {/* One-Click Quick Test Accounts */}
-        <div style={{
-          marginTop: '1.75rem',
-          paddingTop: '1.25rem',
-          borderTop: '1px dashed #e2e8f0',
-        }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '0.4rem', 
-            fontSize: '0.8rem', 
-            fontWeight: 700, 
-            color: '#64748b',
-            marginBottom: '0.6rem' 
-          }}>
-            <Zap size={14} color="#f59e0b" /> Quick Demo Credentials:
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(115px, 1fr))', gap: '0.4rem' }}>
-            {allRoles.map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => fillQuickDemo(r)}
-                className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.73rem', justifyContent: 'center', padding: '0.4rem 0.45rem' }}
-              >
-                {rolesConfig[r].label}
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Managed Access Note */}
         <div style={{

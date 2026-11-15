@@ -20,7 +20,7 @@ export default function StageLeaderboardPage() {
   const prevTop3IdsRef = useRef<string>('');
 
   // Inline TV Admin Auth state
-  const [tvEmail, setTvEmail] = useState('tv@imsciences.edu.pk');
+  const [tvEmail, setTvEmail] = useState('');
   const [tvPassword, setTvPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [signingIn, setSigningIn] = useState(false);

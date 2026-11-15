@@ -45,7 +45,7 @@ export default function AdminDashboardPage() {
   const [newAccName, setNewAccName] = useState('');
   const [newAccEmail, setNewAccEmail] = useState('');
   const [newAccPassword, setNewAccPassword] = useState('');
-  const [newAccRole, setNewAccRole] = useState<UserRole>('student');
+  const [newAccRole, setNewAccRole] = useState<UserRole>('student_affairs');
   const [newAccDesignation, setNewAccDesignation] = useState('');
   const [newAccPin, setNewAccPin] = useState('2027');
   const [creatingAcc, setCreatingAcc] = useState(false);
@@ -829,13 +829,11 @@ export default function AdminDashboardPage() {
                   value={newAccRole}
                   onChange={(e) => setNewAccRole(e.target.value as UserRole)}
                 >
-                  <option value="student">Student Team (Pitch & Startup Portal)</option>
-                  <option value="judge">Official Jury / Judge (Rubrics Access)</option>
-                  <option value="student_affairs">Student Affairs (Startup Rating Access)</option>
+                  <option value="student_affairs">Bfest&apos;s Officials (Rating &amp; Progress Access)</option>
                   <option value="registration_team">Registration Team (Startup Intake Access)</option>
-                  <option value="investor">Pre-Approved Investor</option>
                   <option value="tv_admin">TV Display Administrator</option>
                   <option value="admin">Fest Organizer / Admin</option>
+                  <option value="judge">Official Jury / Judge (Later)</option>
                 </select>
               </div>
 

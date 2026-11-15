@@ -164,6 +164,9 @@ a {
   gap: 1.5rem;
   align-items: start;
 }
+.home-split-grid > * {
+  min-width: 0;
+}
 @media (max-width: 900px) {
   .home-split-grid {
     grid-template-columns: 1fr;

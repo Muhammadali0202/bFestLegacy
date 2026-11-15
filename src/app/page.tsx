@@ -271,7 +271,7 @@ export default function HomePage() {
         <div className="container">
           <div className="home-split-grid">
             {/* Left 70%: Top Ranked Startups */}
-            <div>
+            <div style={{ minWidth: 0 }}>
               <div className="flex justify-between items-center" style={{ marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Trophy size={19} color="#b8860b" />

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { Startup, Investment } from '@/types';
 import { useAuth } from '@/context/AuthContext';
+import StartupLogo from '@/components/StartupLogo';
 
 export default function StartupProfilePage() {
   const params = useParams();
@@ -226,9 +227,10 @@ export default function StartupProfilePage() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '3rem',
+              overflow: 'hidden',
+              flexShrink: 0,
             }}>
-              {startup.logo}
+              <StartupLogo logo={startup.logo} name={startup.name} size={76} fontSize="3rem" rounded="10px" />
             </div>
             <div>
               <div className="flex items-center gap-2" style={{ marginBottom: '0.25rem' }}>

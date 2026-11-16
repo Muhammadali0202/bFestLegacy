@@ -15,9 +15,11 @@ import {
   ChevronUp,
   Trash2,
   Pencil,
+  Upload,
 } from 'lucide-react';
 import { BusinessSector, EventConfig, Startup } from '@/types';
 import { useAuth } from '@/context/AuthContext';
+import StartupLogo from '@/components/StartupLogo';
 
 export default function RegisterStartupPage() {
   const { user } = useAuth();
@@ -186,6 +188,39 @@ export default function RegisterStartupPage() {
     document.getElementById('custom-startup-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setManualError('Please select a valid image file (PNG, JPG, WebP).');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const maxSize = 180;
+        const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/webp', 0.85);
+          setFormData((prev) => ({ ...prev, logo: dataUrl }));
+          setManualError('');
+        }
+      };
+      if (typeof reader.result === 'string') {
+        img.src = reader.result;
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setManualError('');
@@ -312,28 +347,20 @@ export default function RegisterStartupPage() {
               Students Paid Stall
             </h2>
             <p style={{ fontSize: '0.94rem', color: 'var(--bf-text-secondary)', lineHeight: 1.55 }}>
-              Students of IMSciences non-ITB students who wants to register their stalls.
+              Students of IMSciences <em>not</em> participating through ITB course must register their paid stalls here.
             </p>
           </div>
 
           <div>
-            {config?.googleFormUrl ? (
-              <a
-                href={config.googleFormUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary"
-                style={{ width: '100%' }}
-              >
-                Register Student Stall <ExternalLink size={16} />
-              </a>
-            ) : (
-              <span className="badge badge-pending" style={{ padding: '0.5rem 0.9rem', fontSize: '0.82rem', display: 'inline-block' }}>
-                {isStaff
-                  ? 'Paste Student Stall Google Form link below to activate'
-                  : 'Registration form link will be published shortly'}
-              </span>
-            )}
+            <a
+              href={config?.googleFormUrl || 'https://forms.gle/HJvwFsgCzGS8MK3d7'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary"
+              style={{ width: '100%' }}
+            >
+              Register Student Stall <ExternalLink size={16} />
+            </a>
           </div>
         </div>
 
@@ -358,28 +385,20 @@ export default function RegisterStartupPage() {
               Vendors
             </h2>
             <p style={{ fontSize: '0.94rem', color: 'var(--bf-text-secondary)', lineHeight: 1.55 }}>
-              Food, Retail, Art, Corporate, NGOs may register here.
+              Food/retail/corporate businesses, NGOs, and art corner participants may register here.
             </p>
           </div>
 
           <div>
-            {config?.vendorFormUrl ? (
-              <a
-                href={config.vendorFormUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-gold"
-                style={{ width: '100%' }}
-              >
-                Register as Vendor <ExternalLink size={16} />
-              </a>
-            ) : (
-              <span className="badge badge-pending" style={{ padding: '0.5rem 0.9rem', fontSize: '0.82rem', display: 'inline-block' }}>
-                {isStaff
-                  ? 'Paste Vendor Google Form link below to activate'
-                  : 'Vendor registration form link will be published shortly'}
-              </span>
-            )}
+            <a
+              href={config?.vendorFormUrl || 'https://forms.gle/PYNusAYuHRWPRhBw7'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-gold"
+              style={{ width: '100%' }}
+            >
+              Register as Vendor <ExternalLink size={16} />
+            </a>
           </div>
         </div>
       </div>
@@ -681,14 +700,35 @@ export default function RegisterStartupPage() {
 
               <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
                 <div>
-                  <label className="form-label">Logo Emoji</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.logo}
-                    onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                    placeholder="🚀"
-                  />
+                  <label className="form-label">Startup Logo</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                    {formData.logo && (formData.logo.startsWith('data:image/') || formData.logo.startsWith('http') || formData.logo.startsWith('/')) ? (
+                      <StartupLogo logo={formData.logo} name={formData.name || 'Preview'} size={42} />
+                    ) : null}
+                    <label
+                      className="btn btn-secondary btn-sm"
+                      style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                    >
+                      <Upload size={14} />
+                      {formData.logo.startsWith('data:image/') ? 'Change Image' : 'Upload Image'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoFileChange}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                    {formData.logo.startsWith('data:image/') && (
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, logo: '' })}
+                        className="btn btn-secondary btn-sm"
+                        style={{ fontSize: '0.78rem', color: '#b91c1c' }}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="form-label">Website (Optional)</label>
@@ -765,7 +805,7 @@ export default function RegisterStartupPage() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-                    <span style={{ fontSize: '1.35rem' }}>{s.logo}</span>
+                    <StartupLogo logo={s.logo} name={s.name} size={34} fontSize="1.35rem" />
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontWeight: 700, color: 'var(--bf-primary)', fontSize: '0.95rem' }}>{s.name}</div>
                       <div style={{ fontSize: '0.78rem', color: 'var(--bf-text-muted)' }}>{s.sector}</div>

@@ -16,6 +16,7 @@ import {
   Briefcase
 } from 'lucide-react';
 import { BusinessSector } from '@/types';
+import StartupLogo from '@/components/StartupLogo';
 
 interface LeaderboardItem {
   rank: number;
@@ -203,7 +204,7 @@ export default function LeaderboardPage() {
 
                       <td style={{ padding: '1rem 1.5rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                          <span style={{ fontSize: '1.75rem' }}>{item.logo}</span>
+                          <StartupLogo logo={item.logo} name={item.name} size={38} fontSize="1.75rem" />
                           <div>
                             <Link href={`/startups/${item.id}`} style={{ fontWeight: 700, color: 'var(--bf-primary)', fontSize: '1rem', display: 'block' }}>
                               {item.name}

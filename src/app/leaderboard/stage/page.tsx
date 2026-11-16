@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Maximize2, Minimize2, Clock, Lock, MonitorPlay, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import StartupLogo from '@/components/StartupLogo';
 
 const BFEST_TARGET_DATE = new Date('2026-12-19T09:00:00+05:00').getTime();
 
@@ -503,7 +504,9 @@ export default function StageLeaderboardPage() {
               }}>
                 2
               </div>
-              <span style={{ fontSize: 'clamp(1.6rem, 2.5vw, 3.8rem)', display: 'block', marginBottom: '0.2vh' }}>{top3[1].logo}</span>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.2vh' }}>
+                <StartupLogo logo={top3[1].logo} name={top3[1].name} size="clamp(40px, 3.6vw, 72px)" fontSize="clamp(1.6rem, 2.5vw, 3.8rem)" rounded="14px" />
+              </div>
               <h2 style={{ fontSize: 'clamp(1rem, 1.45vw, 2.25rem)', color: '#ffffff', marginBottom: '0.2vh', fontFamily: 'var(--font-display)' }}>
                 {top3[1].name}
               </h2>
@@ -561,7 +564,9 @@ export default function StageLeaderboardPage() {
               }}>
                 1
               </div>
-              <span style={{ fontSize: 'clamp(2rem, 3.1vw, 4.6rem)', display: 'block', marginBottom: '0.2vh' }}>{top3[0].logo}</span>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.2vh' }}>
+                <StartupLogo logo={top3[0].logo} name={top3[0].name} size="clamp(48px, 4.4vw, 88px)" fontSize="clamp(2rem, 3.1vw, 4.6rem)" rounded="16px" />
+              </div>
               <h2 style={{ fontSize: 'clamp(1.2rem, 1.8vw, 2.75rem)', color: '#ffffff', marginBottom: '0.2vh', fontFamily: 'var(--font-display)' }}>
                 {top3[0].name}
               </h2>
@@ -600,7 +605,9 @@ export default function StageLeaderboardPage() {
               }}>
                 3
               </div>
-              <span style={{ fontSize: 'clamp(1.6rem, 2.5vw, 3.8rem)', display: 'block', marginBottom: '0.2vh' }}>{top3[2].logo}</span>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.2vh' }}>
+                <StartupLogo logo={top3[2].logo} name={top3[2].name} size="clamp(40px, 3.6vw, 72px)" fontSize="clamp(1.6rem, 2.5vw, 3.8rem)" rounded="14px" />
+              </div>
               <h2 style={{ fontSize: 'clamp(1rem, 1.45vw, 2.25rem)', color: '#ffffff', marginBottom: '0.2vh', fontFamily: 'var(--font-display)' }}>
                 {top3[2].name}
               </h2>
@@ -658,7 +665,7 @@ export default function StageLeaderboardPage() {
                       }}>
                         #{rankNum}
                       </span>
-                      <span style={{ fontSize: 'clamp(1.2rem, 1.7vw, 2.4rem)', flexShrink: 0 }}>{s.logo}</span>
+                      <StartupLogo logo={s.logo} name={s.name} size="clamp(28px, 2.2vw, 48px)" fontSize="clamp(1.2rem, 1.7vw, 2.4rem)" rounded="8px" />
                       <div style={{ minWidth: 0 }}>
                         <div style={{ fontWeight: 700, fontSize: 'clamp(0.88rem, 1.1vw, 1.6rem)', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {s.name}

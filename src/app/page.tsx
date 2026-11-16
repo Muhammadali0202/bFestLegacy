@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Startup } from '@/types';
 import { useAuth } from '@/context/AuthContext';
+import StartupLogo from '@/components/StartupLogo';
 
 // Target date for Business Fest (19 December 2026)
 const BFEST_TARGET_DATE = new Date('2026-12-19T09:00:00+05:00').getTime();
@@ -364,7 +365,7 @@ export default function HomePage() {
                                   color: 'var(--bf-primary)',
                                 }}
                               >
-                                <span style={{ fontSize: '1.2rem' }}>{startup.logo}</span>
+                                <StartupLogo logo={startup.logo} name={startup.name} size={28} fontSize="1.2rem" rounded="6px" />
                                 <span>{startup.name}</span>
                               </Link>
                             </td>

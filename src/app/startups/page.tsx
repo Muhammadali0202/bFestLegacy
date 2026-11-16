@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { Search, Filter, Star, ArrowRight, ExternalLink, Users, Award, Sparkles, FileSpreadsheet } from 'lucide-react';
 import { Startup, BusinessSector, EventConfig } from '@/types';
 import { useAuth } from '@/context/AuthContext';
+import StartupLogo from '@/components/StartupLogo';
 
 function StartupsDirectoryContent() {
   const { user } = useAuth();
@@ -248,7 +249,7 @@ function StartupsDirectoryContent() {
                 {/* Card Top */}
                 <div className="flex justify-between items-start" style={{ marginBottom: '0.75rem' }}>
                   <div className="flex items-center gap-3">
-                    <span style={{ fontSize: '2.2rem' }}>{startup.logo}</span>
+                    <StartupLogo logo={startup.logo} name={startup.name} size={46} fontSize="2.2rem" />
                     <div>
                       <h3 style={{ fontSize: '1.2rem', color: 'var(--bf-primary)', lineHeight: 1.2 }}>
                         {startup.name}

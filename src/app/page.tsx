@@ -71,9 +71,8 @@ export default function HomePage() {
       {/* Compact Light/White Header: 1. Title -> 2. Description -> 3. Navigation Bar */}
       <header
         style={{
-          background: '#ffffff',
-          borderBottom: '2px solid #e2e8f0',
-          padding: '1.15rem 0 0.95rem',
+          background: 'linear-gradient(180deg, #64b3e8 0%, #9fd0f2 52%, #e1f0fb 82%, #f8fafc 100%)',
+          padding: '1.15rem 0 1.25rem',
         }}
       >
         <div className="container">
@@ -117,16 +116,26 @@ export default function HomePage() {
               BUSINESS FEST <span style={{ color: '#0047ff' }}>2027</span>
             </h1>
 
-            <img
-              src="/imsciences-logo.png"
-              alt="IMSciences Peshawar"
+            <div
               style={{
-                height: 'clamp(22px, 4vw, 30px)',
-                width: 'auto',
-                objectFit: 'contain',
+                background: 'rgba(255, 255, 255, 0.88)',
+                padding: '3px 8px',
+                borderRadius: '8px',
+                display: 'inline-flex',
+                alignItems: 'center',
                 flexShrink: 0,
               }}
-            />
+            >
+              <img
+                src="/imsciences-logo.png"
+                alt="IMSciences Peshawar"
+                style={{
+                  height: 'clamp(22px, 4vw, 28px)',
+                  width: 'auto',
+                  objectFit: 'contain',
+                }}
+              />
+            </div>
           </div>
 
           {/* 2. Description */}
@@ -134,7 +143,8 @@ export default function HomePage() {
             style={{
               textAlign: 'center',
               fontSize: 'clamp(0.85rem, 2vw, 0.96rem)',
-              color: '#475569',
+              color: '#0f294a',
+              fontWeight: 500,
               margin: '0 auto 0.95rem',
               maxWidth: '640px',
             }}

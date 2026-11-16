@@ -285,10 +285,10 @@ export default function StartupProfilePage() {
       <div className="grid grid-cols-3 gap-8">
         {/* Left Column (2 cols): Details */}
         <div style={{ gridColumn: 'span 2' }}>
-          {/* Executive Summary */}
+          {/* Summary */}
           <div className="card" style={{ marginBottom: '1.75rem' }}>
             <h2 style={{ fontSize: '1.4rem', color: 'var(--bf-primary)', marginBottom: '0.75rem' }}>
-              Executive Summary
+              Summary
             </h2>
             <p style={{ color: 'var(--bf-text-secondary)', lineHeight: 1.7, fontSize: '1rem' }}>
               {startup.description}
@@ -317,7 +317,7 @@ export default function StartupProfilePage() {
           </div>
 
           {/* Founders & Team */}
-          <div className="card" style={{ marginBottom: '1.75rem' }}>
+          <div className="card">
             <div className="flex items-center gap-2" style={{ marginBottom: '1rem' }}>
               <Users size={20} color="var(--bf-primary)" />
               <h3 style={{ fontSize: '1.3rem', color: 'var(--bf-primary)' }}>Student Founders & Team</h3>
@@ -354,140 +354,10 @@ export default function StartupProfilePage() {
               ))}
             </div>
           </div>
-
-          {/* Investor Reviews / Backing Section */}
-          <div className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <div className="flex items-center gap-2">
-                <Briefcase size={20} color="#10b981" />
-                <h3 style={{ fontSize: '1.3rem', color: 'var(--bf-primary)' }}>
-                  Accredited Investor Backing ({investments.length})
-                </h3>
-              </div>
-              {startup.totalInvestedAmount > 0 && (
-                <span style={{
-                  background: '#ecfdf5',
-                  color: '#059669',
-                  fontWeight: 800,
-                  padding: '0.25rem 0.75rem',
-                  borderRadius: '999px',
-                  fontSize: '0.85rem',
-                }}>
-                  Total Pledged: PKR {startup.totalInvestedAmount.toLocaleString()}
-                </span>
-              )}
-            </div>
-
-            {investments.length === 0 ? (
-              <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
-                No investor pledges recorded yet. Accredited angel investors can pledge capital and rate this startup from the Investor Portal.
-              </p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {investments.map((inv) => (
-                  <div key={inv.id} style={{
-                    background: '#f8fafc',
-                    borderRadius: '12px',
-                    padding: '1rem',
-                    border: '1px solid #e2e8f0',
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                      <div>
-                        <strong style={{ color: '#0b2545', fontSize: '0.95rem' }}>{inv.investorName}</strong>
-                        {inv.firmName && (
-                          <span style={{ color: '#64748b', fontSize: '0.82rem', marginLeft: '0.5rem' }}>
-                            ({inv.firmName})
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontWeight: 800, color: '#059669', fontSize: '0.9rem' }}>
-                          PKR {inv.amount.toLocaleString()} ({inv.dealType || 'Seed'})
-                        </span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.1rem', color: '#f59e0b', fontWeight: 800 }}>
-                          <Star size={14} fill="#f59e0b" />
-                          <span>{inv.rating}</span>
-                        </div>
-                      </div>
-                    </div>
-                    {inv.review && (
-                      <p style={{ color: '#475569', fontSize: '0.88rem', fontStyle: 'italic', margin: 0 }}>
-                        &ldquo;{inv.review}&rdquo;
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* Right Column (1 col): Actions, Voting, Investor & Judge Links */}
+        {/* Right Column (1 col): Progress Rating & Judge Links */}
         <div>
-          {/* Investor Quick Pledge Card */}
-          <div className="card" style={{ marginBottom: '1.5rem', border: '1.5px solid #10b981', background: 'linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%)' }}>
-            <div className="flex items-center gap-2" style={{ marginBottom: '0.5rem' }}>
-              <Briefcase size={20} color="#059669" />
-              <h3 style={{ fontSize: '1.2rem', color: '#065f46', fontWeight: 800 }}>Investor Action</h3>
-            </div>
-            <p style={{ fontSize: '0.85rem', color: '#166534', marginBottom: '1rem', lineHeight: 1.5 }}>
-              Accredited investors can pledge capital and assign star ratings to directly boost this startup on the live leaderboard.
-            </p>
-
-            <div style={{
-              background: '#ffffff',
-              border: '1px solid #bbf7d0',
-              borderRadius: '8px',
-              padding: '0.75rem',
-              marginBottom: '1rem',
-              display: 'flex',
-              justifyContent: 'space-between',
-            }}>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block' }}>Investor Rating</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#059669' }}>
-                  {startup.investorRating > 0 ? `${startup.investorRating.toFixed(1)} ★` : 'No ratings'}
-                </span>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block' }}>Capital Pledged</span>
-                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#059669' }}>
-                  PKR {startup.totalInvestedAmount ? (startup.totalInvestedAmount / 1000).toLocaleString() + 'k' : '0'}
-                </span>
-              </div>
-            </div>
-
-            {user?.role === 'investor' && user.isApproved ? (
-              <button
-                onClick={() => setIsInvestModalOpen(true)}
-                className="btn btn-sm"
-                style={{
-                  width: '100%',
-                  background: '#10b981',
-                  color: '#ffffff',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                }}
-              >
-                <Briefcase size={16} /> Invest & Rate Startup
-              </button>
-            ) : user?.role === 'investor' && !user.isApproved ? (
-              <div style={{ fontSize: '0.8rem', color: '#d97706', textAlign: 'center', fontWeight: 600 }}>
-                Your Investor Account is Pending Admin Approval.
-              </div>
-            ) : (
-              <Link
-                href="/investor"
-                className="btn btn-outline-primary btn-sm"
-                style={{ width: '100%', textAlign: 'center', display: 'block' }}
-              >
-                Go to Investor Portal
-              </Link>
-            )}
-          </div>
 
           {/* Progress Rating Box (Rate Access Restricted to Bfest's Officials Only) */}
           <div className="card" style={{ marginBottom: '1.5rem', border: '1.5px solid var(--bf-border)' }}>
@@ -503,23 +373,40 @@ export default function StartupProfilePage() {
               background: '#f8fafc',
               border: '1px solid var(--bf-border)',
               borderRadius: '8px',
-              padding: '0.75rem 1rem',
-              marginBottom: '1.25rem',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              padding: '0.85rem 1rem',
+              marginBottom: user && (user.role === 'student_affairs' || user.role === 'admin') ? '1.25rem' : '0',
             }}>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)', display: 'block' }}>Official Rating</span>
-                <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--bf-primary)' }}>
-                  {startup.publicRating.toFixed(1)} / 5.0
-                </span>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '0.75rem',
+              }}>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)', display: 'block' }}>Official Rating</span>
+                  <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--bf-primary)' }}>
+                    {startup.publicRating.toFixed(1)} / 5.0
+                  </span>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)', display: 'block' }}>Progress</span>
+                  <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--bf-accent-blue)' }}>
+                    {startup.progressPercentage ?? 0}%
+                  </span>
+                </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)', display: 'block' }}>Progress</span>
-                <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--bf-accent-blue)' }}>
-                  {startup.progressPercentage ?? 0}%
-                </span>
+
+              {/* Visual Progress Bar */}
+              <div style={{ width: '100%', height: '10px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+                <div
+                  style={{
+                    width: `${Math.min(100, Math.max(0, startup.progressPercentage ?? 0))}%`,
+                    height: '100%',
+                    background: 'linear-gradient(90deg, #0047ff 0%, #3b82f6 100%)',
+                    borderRadius: '999px',
+                    transition: 'width 0.3s ease',
+                  }}
+                />
               </div>
             </div>
 
@@ -644,29 +531,7 @@ export default function StartupProfilePage() {
                   </button>
                 </form>
               )
-            ) : (
-              <div style={{
-                background: '#f8fafc',
-                border: '1px dashed #cbd5e1',
-                borderRadius: '10px',
-                padding: '1rem',
-                textAlign: 'center',
-              }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.3rem' }}>
-                  🔒 Rate Access: Bfest&apos;s Officials Only
-                </div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--bf-text-secondary)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
-                  Only authorized Bfest&apos;s Officials accounts provisioned by the Fest Admin can rate startups and update progress.
-                </p>
-                <Link
-                  href="/login?mode=staff&role=student_affairs"
-                  className="btn btn-secondary btn-sm"
-                  style={{ width: '100%' }}
-                >
-                  Official Sign In
-                </Link>
-              </div>
-            )}
+            ) : null}
           </div>
 
           {/* Quick Link for Official Judges (only shown if logged in as judge/admin) */}

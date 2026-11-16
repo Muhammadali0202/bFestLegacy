@@ -14,6 +14,7 @@ import {
   ChevronDown,
   ChevronUp,
   Trash2,
+  Pencil,
 } from 'lucide-react';
 import { BusinessSector, EventConfig, Startup } from '@/types';
 import { useAuth } from '@/context/AuthContext';
@@ -30,7 +31,8 @@ export default function RegisterStartupPage() {
   const [savingLinks, setSavingLinks] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
   const [syncError, setSyncError] = useState('');
-  const [showManualForm, setShowManualForm] = useState(false);
+  const [showManualForm, setShowManualForm] = useState(true);
+  const [editingStartupId, setEditingStartupId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -142,44 +144,91 @@ export default function RegisterStartupPage() {
     }
   };
 
+  const resetCustomForm = () => {
+    setEditingStartupId(null);
+    setFormData({
+      name: '',
+      tagline: '',
+      description: '',
+      problem: '',
+      solution: '',
+      sector: 'FinTech & Banking' as BusinessSector,
+      logo: '🚀',
+      website: '',
+      contactEmail: user?.email || '',
+      founder1Name: user?.fullName || '',
+      founder1Role: 'Founder & CEO',
+      boothNumber: 'Pending Allocation',
+      isFirstSemester: true,
+    });
+  };
+
+  const handleStartEdit = (s: Startup) => {
+    setEditingStartupId(s.id);
+    setManualSuccess(false);
+    setManualError('');
+    setShowManualForm(true);
+    setFormData({
+      name: s.name || '',
+      tagline: s.tagline || '',
+      description: s.description || '',
+      problem: s.problem || '',
+      solution: s.solution || '',
+      sector: s.sector || ('FinTech & Banking' as BusinessSector),
+      logo: s.logo || '🚀',
+      website: s.website || '',
+      contactEmail: s.contactEmail || '',
+      founder1Name: s.founders?.[0]?.name || '',
+      founder1Role: s.founders?.[0]?.role || 'Founder & CEO',
+      boothNumber: s.boothNumber || 'Pending Allocation',
+      isFirstSemester: !!s.isFirstSemester,
+    });
+    document.getElementById('custom-startup-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setManualError('');
+    setManualSuccess(false);
     if (!formData.name || !formData.tagline || !formData.contactEmail) {
-      setManualError('Please fill in stall name, tagline, and contact email.');
+      setManualError('Please fill in startup name, tagline, and contact email.');
       return;
     }
     setManualLoading(true);
     try {
-      const res = await fetch('/api/startups', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          tagline: formData.tagline,
-          description: formData.description || formData.tagline,
-          problem: formData.problem,
-          solution: formData.solution,
-          sector: formData.sector,
-          logo: formData.logo,
-          website: formData.website,
-          contactEmail: formData.contactEmail,
-          boothNumber: formData.boothNumber,
-          founders: [{ name: formData.founder1Name || 'Student Founder', role: formData.founder1Role }],
-          submittedBy: user?.id,
-          isFirstSemester: formData.isFirstSemester,
-          autoApprove: true,
-        }),
-      });
+      const payload = {
+        name: formData.name,
+        tagline: formData.tagline,
+        description: formData.description || formData.tagline,
+        problem: formData.problem,
+        solution: formData.solution,
+        sector: formData.sector,
+        logo: formData.logo || '🚀',
+        website: formData.website,
+        contactEmail: formData.contactEmail,
+        founders: [{ name: formData.founder1Name || 'Student Founder', role: formData.founder1Role || 'Founder' }],
+        isFirstSemester: formData.isFirstSemester,
+        ...(editingStartupId ? {} : { submittedBy: user?.id, autoApprove: true }),
+      };
+
+      const res = await fetch(
+        editingStartupId ? `/api/startups/${editingStartupId}` : '/api/startups',
+        {
+          method: editingStartupId ? 'PATCH' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }
+      );
       const data = await res.json();
       if (data.success) {
         setManualSuccess(true);
+        resetCustomForm();
         loadStartups();
       } else {
-        setManualError(data.error || 'Failed to register stall.');
+        setManualError(data.error || 'Failed to save startup.');
       }
     } catch (_) {
-      setManualError('Network error submitting stall.');
+      setManualError('Network error saving startup.');
     } finally {
       setManualLoading(false);
     }
@@ -481,9 +530,9 @@ export default function RegisterStartupPage() {
         </div>
       )}
 
-      {/* Optional Collapsible Manual Entry for Staff */}
+      {/* Custom Form for Adding & Editing Startups (Registration Team / Officials / Admin) */}
       {isStaff && (
-        <div className="card" style={{ padding: '1.25rem 1.5rem' }}>
+        <div id="custom-startup-form" className="card" style={{ padding: '1.5rem' }}>
           <button
             type="button"
             onClick={() => setShowManualForm(!showManualForm)}
@@ -497,11 +546,12 @@ export default function RegisterStartupPage() {
               cursor: 'pointer',
               color: 'var(--bf-primary)',
               fontWeight: 700,
-              fontSize: '0.95rem',
+              fontSize: '1rem',
             }}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-              <PlusCircle size={17} /> Need to add a single stall manually without Google Form?
+              {editingStartupId ? <Pencil size={17} /> : <PlusCircle size={17} />}
+              {editingStartupId ? 'Edit Startup Details' : 'Custom Form: Add Startup'}
             </span>
             {showManualForm ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </button>
@@ -510,7 +560,7 @@ export default function RegisterStartupPage() {
             <form onSubmit={handleManualSubmit} style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid var(--bf-border)' }}>
               {manualSuccess && (
                 <div style={{ background: '#dcfce7', color: '#166534', padding: '0.75rem 1rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.88rem', fontWeight: 600 }}>
-                  ✓ Stall added to database!
+                  ✓ Startup saved successfully!
                 </div>
               )}
               {manualError && (
@@ -520,14 +570,14 @@ export default function RegisterStartupPage() {
               )}
               <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
                 <div>
-                  <label className="form-label">Stall / Startup Name *</label>
+                  <label className="form-label">Startup / Stall Name *</label>
                   <input
                     type="text"
                     className="form-input"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. KhyberAgri Smart Harvest"
+                    placeholder="e.g. Agrivita"
                   />
                 </div>
                 <div>
@@ -543,16 +593,17 @@ export default function RegisterStartupPage() {
                   </select>
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
                 <div>
-                  <label className="form-label">Short Tagline / Idea *</label>
+                  <label className="form-label">Short Tagline *</label>
                   <input
                     type="text"
                     className="form-input"
                     required
                     value={formData.tagline}
                     onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
-                    placeholder="One-line summary of the stall"
+                    placeholder="One-line pitch summary"
                   />
                 </div>
                 <div>
@@ -563,13 +614,51 @@ export default function RegisterStartupPage() {
                     required
                     value={formData.contactEmail}
                     onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-                    placeholder="student@imsciences.edu.pk"
+                    placeholder="founder@imsciences.edu.pk"
                   />
                 </div>
               </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Summary / Description</label>
+                <textarea
+                  rows={2}
+                  className="form-input"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Brief overview of the startup..."
+                  style={{ resize: 'vertical' }}
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
                 <div>
-                  <label className="form-label">Team Lead / Founder Name</label>
+                  <label className="form-label">The Problem Space</label>
+                  <textarea
+                    rows={2}
+                    className="form-input"
+                    value={formData.problem}
+                    onChange={(e) => setFormData({ ...formData, problem: e.target.value })}
+                    placeholder="What problem does this startup solve?"
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Value Proposition &amp; Solution</label>
+                  <textarea
+                    rows={2}
+                    className="form-input"
+                    value={formData.solution}
+                    onChange={(e) => setFormData({ ...formData, solution: e.target.value })}
+                    placeholder="How does the product/service solve it?"
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
+                <div>
+                  <label className="form-label">Founder / Team Lead Name</label>
                   <input
                     type="text"
                     className="form-input"
@@ -579,16 +668,40 @@ export default function RegisterStartupPage() {
                   />
                 </div>
                 <div>
-                  <label className="form-label">Stall / Booth Number</label>
+                  <label className="form-label">Department / Role</label>
                   <input
                     type="text"
                     className="form-input"
-                    value={formData.boothNumber}
-                    onChange={(e) => setFormData({ ...formData, boothNumber: e.target.value })}
-                    placeholder="e.g. Stall A-12"
+                    value={formData.founder1Role}
+                    onChange={(e) => setFormData({ ...formData, founder1Role: e.target.value })}
+                    placeholder="e.g. Computer Sciences / CEO"
                   />
                 </div>
               </div>
+
+              <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
+                <div>
+                  <label className="form-label">Logo Emoji</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={formData.logo}
+                    onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                    placeholder="🚀"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Website (Optional)</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={formData.website}
+                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </div>
+              </div>
+
               <div style={{ marginBottom: '1rem' }}>
                 <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.55rem', cursor: 'pointer', fontSize: '0.88rem', fontWeight: 700, color: 'var(--bf-primary)' }}>
                   <input
@@ -599,9 +712,20 @@ export default function RegisterStartupPage() {
                   1st Semester Startup (Show on Legacy Board TV Display)
                 </label>
               </div>
-              <button type="submit" disabled={manualLoading} className="btn btn-primary btn-sm">
-                {manualLoading ? 'Saving...' : 'Add Single Stall'}
-              </button>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <button type="submit" disabled={manualLoading} className="btn btn-primary btn-sm">
+                  {manualLoading ? 'Saving...' : editingStartupId ? 'Save Startup Changes' : 'Add Startup'}
+                </button>
+                {editingStartupId && (
+                  <button
+                    type="button"
+                    onClick={resetCustomForm}
+                    className="btn btn-secondary btn-sm"
+                  >
+                    Cancel Edit
+                  </button>
+                )}
+              </div>
             </form>
           )}
         </div>
@@ -647,7 +771,24 @@ export default function RegisterStartupPage() {
                       <div style={{ fontSize: '0.78rem', color: 'var(--bf-text-muted)' }}>{s.sector}</div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0, flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => handleStartEdit(s)}
+                      className="btn btn-sm"
+                      style={{
+                        background: '#eff6ff',
+                        color: '#1d4ed8',
+                        border: '1px solid #bfdbfe',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        fontSize: '0.76rem',
+                        fontWeight: 700,
+                      }}
+                    >
+                      <Pencil size={13} /> Edit
+                    </button>
                     <button
                       type="button"
                       onClick={() => handleToggleFirstSemester(s.id, !s.isFirstSemester)}

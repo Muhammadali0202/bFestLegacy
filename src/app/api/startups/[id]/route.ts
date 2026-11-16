@@ -29,7 +29,25 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
-    const updated = await StartupRepository.updateStatus(id, body.status, body.isPublished, body.isFirstSemester);
+    const hasDetailUpdates =
+      body.name !== undefined ||
+      body.tagline !== undefined ||
+      body.description !== undefined ||
+      body.problem !== undefined ||
+      body.solution !== undefined ||
+      body.sector !== undefined ||
+      body.logo !== undefined ||
+      body.website !== undefined ||
+      body.contactEmail !== undefined ||
+      body.founders !== undefined;
+
+    let updated = null;
+    if (hasDetailUpdates) {
+      updated = await StartupRepository.updateDetails(id, body);
+    }
+    if (body.status !== undefined || body.isPublished !== undefined || (body.isFirstSemester !== undefined && !hasDetailUpdates)) {
+      updated = await StartupRepository.updateStatus(id, body.status, body.isPublished, body.isFirstSemester);
+    }
 
     if (!updated) {
       return NextResponse.json({ success: false, error: 'Startup not found' }, { status: 404 });

@@ -483,6 +483,46 @@ export const StartupRepository = {
     return startup;
   },
 
+  // Update startup details (Registration Team / Officials / Admin edit)
+  updateDetails: async (id: string, updates: Partial<Startup>): Promise<Startup | null> => {
+    const hasDb = await initDb();
+    const allowedFields: (keyof Startup)[] = [
+      'name',
+      'tagline',
+      'description',
+      'problem',
+      'solution',
+      'sector',
+      'logo',
+      'website',
+      'contactEmail',
+      'founders',
+      'isFirstSemester',
+    ];
+    const cleanUpdates: Record<string, any> = {};
+    for (const key of allowedFields) {
+      if (updates[key] !== undefined) {
+        cleanUpdates[key] = updates[key];
+      }
+    }
+
+    if (hasDb) {
+      try {
+        const doc = await StartupModel.findByIdAndUpdate(id, cleanUpdates, { new: true });
+        if (doc) {
+          return toStartupObject(doc);
+        }
+      } catch (e) {
+        console.error('Error updating startup details in MongoDB:', e);
+      }
+    }
+
+    const startup = memStartups.find(s => s.id === id);
+    if (!startup) return null;
+    Object.assign(startup, cleanUpdates);
+    return startup;
+  },
+
   // Submit official judge score
   submitJudgeScore: async (evalData: {
     startupId: string;

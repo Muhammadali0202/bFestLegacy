@@ -38,6 +38,10 @@ export interface Startup {
   logo: string;
   website?: string;
   contactEmail: string;
+  contactPhone?: string;
+  studentId?: string;
+  programSemester?: string;
+  teamMembers?: string;
   founders: {
     name: string;
     role: string;

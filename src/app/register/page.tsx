@@ -36,19 +36,29 @@ export default function RegisterStartupPage() {
   const [showManualForm, setShowManualForm] = useState(true);
   const [editingStartupId, setEditingStartupId] = useState<string | null>(null);
 
+  const programSemesters = [
+    'BBA - 1st (A)',
+    'BBA - 1st (B)',
+    'BBA - 1st (C)',
+    'BBA - 1st (D)',
+    'BS A&F - 1st (A)',
+    'BS A&F - 1st (B)',
+    'BS A&F - 1st (C)',
+    'BS BA - 1st (A)',
+    'Other / Non-ITB',
+  ];
+
   const [formData, setFormData] = useState({
     name: '',
-    tagline: '',
-    description: '',
-    problem: '',
-    solution: '',
+    programSemester: 'BBA - 1st (A)',
     sector: 'FinTech & Banking' as BusinessSector,
-    logo: '🚀',
-    website: '',
-    contactEmail: user?.email || '',
-    founder1Name: user?.fullName || '',
-    founder1Role: 'Founder & CEO',
-    boothNumber: 'Pending Allocation',
+    founder1Name: '',
+    teamMembers: '',
+    studentId: '',
+    contactPhone: '',
+    contactEmail: '',
+    description: '',
+    logo: '',
     isFirstSemester: true,
   });
   const [manualLoading, setManualLoading] = useState(false);
@@ -150,17 +160,15 @@ export default function RegisterStartupPage() {
     setEditingStartupId(null);
     setFormData({
       name: '',
-      tagline: '',
-      description: '',
-      problem: '',
-      solution: '',
+      programSemester: 'BBA - 1st (A)',
       sector: 'FinTech & Banking' as BusinessSector,
-      logo: '🚀',
-      website: '',
-      contactEmail: user?.email || '',
-      founder1Name: user?.fullName || '',
-      founder1Role: 'Founder & CEO',
-      boothNumber: 'Pending Allocation',
+      founder1Name: '',
+      teamMembers: '',
+      studentId: '',
+      contactPhone: '',
+      contactEmail: '',
+      description: '',
+      logo: '',
       isFirstSemester: true,
     });
   };
@@ -172,17 +180,15 @@ export default function RegisterStartupPage() {
     setShowManualForm(true);
     setFormData({
       name: s.name || '',
-      tagline: s.tagline || '',
-      description: s.description || '',
-      problem: s.problem || '',
-      solution: s.solution || '',
+      programSemester: s.programSemester || 'BBA - 1st (A)',
       sector: s.sector || ('FinTech & Banking' as BusinessSector),
-      logo: s.logo || '🚀',
-      website: s.website || '',
-      contactEmail: s.contactEmail || '',
       founder1Name: s.founders?.[0]?.name || '',
-      founder1Role: s.founders?.[0]?.role || 'Founder & CEO',
-      boothNumber: s.boothNumber || 'Pending Allocation',
+      teamMembers: s.teamMembers || s.founders?.slice(1).map((f) => f.name).join(', ') || '',
+      studentId: s.studentId || '',
+      contactPhone: s.contactPhone || '',
+      contactEmail: s.contactEmail || '',
+      description: s.description || s.tagline || '',
+      logo: s.logo || '',
       isFirstSemester: !!s.isFirstSemester,
     });
     document.getElementById('custom-startup-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -221,27 +227,49 @@ export default function RegisterStartupPage() {
     reader.readAsDataURL(file);
   };
 
+  const ideaWordCount = formData.description.trim()
+    ? formData.description.trim().split(/\s+/).length
+    : 0;
+
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setManualError('');
     setManualSuccess(false);
-    if (!formData.name || !formData.tagline || !formData.contactEmail) {
-      setManualError('Please fill in startup name, tagline, and contact email.');
+    if (!formData.name || !formData.founder1Name || !formData.studentId || !formData.contactPhone || !formData.contactEmail || !formData.description) {
+      setManualError('Please fill in all required (*) fields.');
+      return;
+    }
+    if (ideaWordCount > 250) {
+      setManualError('Idea Summary must be 250 words or fewer.');
       return;
     }
     setManualLoading(true);
     try {
+      const memberList = formData.teamMembers
+        .split(/[\n,]+/)
+        .map((m) => m.trim())
+        .filter(Boolean)
+        .map((name) => ({ name, role: 'Team Member' }));
+      const founders = [
+        { name: formData.founder1Name.trim(), role: `Team Lead (${formData.programSemester})` },
+        ...memberList,
+      ];
+      const trimmedSummary = formData.description.trim();
+      const shortTagline =
+        trimmedSummary.length > 110 ? `${trimmedSummary.slice(0, 107)}...` : trimmedSummary;
+
       const payload = {
-        name: formData.name,
-        tagline: formData.tagline,
-        description: formData.description || formData.tagline,
-        problem: formData.problem,
-        solution: formData.solution,
+        name: formData.name.trim(),
+        tagline: shortTagline,
+        description: trimmedSummary,
         sector: formData.sector,
         logo: formData.logo || '🚀',
-        website: formData.website,
-        contactEmail: formData.contactEmail,
-        founders: [{ name: formData.founder1Name || 'Student Founder', role: formData.founder1Role || 'Founder' }],
+        contactEmail: formData.contactEmail.trim(),
+        contactPhone: formData.contactPhone.trim(),
+        studentId: formData.studentId.trim(),
+        programSemester: formData.programSemester,
+        teamMembers: formData.teamMembers.trim(),
+        founders,
         isFirstSemester: formData.isFirstSemester,
         ...(editingStartupId ? {} : { submittedBy: user?.id, autoApprove: true }),
       };
@@ -589,7 +617,7 @@ export default function RegisterStartupPage() {
               )}
               <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
                 <div>
-                  <label className="form-label">Startup / Stall Name *</label>
+                  <label className="form-label">Startup Name *</label>
                   <input
                     type="text"
                     className="form-input"
@@ -597,6 +625,33 @@ export default function RegisterStartupPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Agrivita"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Program &amp; Semester *</label>
+                  <select
+                    className="form-select"
+                    required
+                    value={formData.programSemester}
+                    onChange={(e) => setFormData({ ...formData, programSemester: e.target.value })}
+                  >
+                    {programSemesters.map((ps) => (
+                      <option key={ps} value={ps}>{ps}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
+                <div>
+                  <label className="form-label">Team Lead Name *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
+                    value={formData.founder1Name}
+                    onChange={(e) => setFormData({ ...formData, founder1Name: e.target.value })}
+                    placeholder="Full name of team lead"
                   />
                 </div>
                 <div>
@@ -613,132 +668,102 @@ export default function RegisterStartupPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Team Members Names *</label>
+                <textarea
+                  rows={2}
+                  className="form-input"
+                  required
+                  value={formData.teamMembers}
+                  onChange={(e) => setFormData({ ...formData, teamMembers: e.target.value })}
+                  placeholder="Enter team member names separated by commas or new lines"
+                  style={{ resize: 'vertical' }}
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4" style={{ marginBottom: '1rem' }}>
                 <div>
-                  <label className="form-label">Short Tagline *</label>
+                  <label className="form-label">Student ID (Lead) *</label>
                   <input
                     type="text"
                     className="form-input"
                     required
-                    value={formData.tagline}
-                    onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
-                    placeholder="One-line pitch summary"
+                    value={formData.studentId}
+                    onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
+                    placeholder="e.g. 2026-BBA-001"
                   />
                 </div>
                 <div>
-                  <label className="form-label">Contact Email *</label>
+                  <label className="form-label">Contact No. (Lead) *</label>
+                  <input
+                    type="tel"
+                    className="form-input"
+                    required
+                    value={formData.contactPhone}
+                    onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                    placeholder="03XX-XXXXXXX"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Email Address (Lead) *</label>
                   <input
                     type="email"
                     className="form-input"
                     required
                     value={formData.contactEmail}
                     onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-                    placeholder="founder@imsciences.edu.pk"
+                    placeholder="lead@imsciences.edu.pk"
                   />
                 </div>
               </div>
 
               <div style={{ marginBottom: '1rem' }}>
-                <label className="form-label">Summary / Description</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                  <label className="form-label" style={{ marginBottom: 0 }}>Idea Summary * (Max Words limit: 250)</label>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: ideaWordCount > 250 ? '#dc2626' : 'var(--bf-text-muted)' }}>
+                    {ideaWordCount} / 250 words
+                  </span>
+                </div>
                 <textarea
-                  rows={2}
+                  rows={4}
                   className="form-input"
+                  required
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Brief overview of the startup..."
+                  placeholder="Describe your startup idea (max 250 words)..."
                   style={{ resize: 'vertical' }}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
-                <div>
-                  <label className="form-label">The Problem Space</label>
-                  <textarea
-                    rows={2}
-                    className="form-input"
-                    value={formData.problem}
-                    onChange={(e) => setFormData({ ...formData, problem: e.target.value })}
-                    placeholder="What problem does this startup solve?"
-                    style={{ resize: 'vertical' }}
-                  />
-                </div>
-                <div>
-                  <label className="form-label">Value Proposition &amp; Solution</label>
-                  <textarea
-                    rows={2}
-                    className="form-input"
-                    value={formData.solution}
-                    onChange={(e) => setFormData({ ...formData, solution: e.target.value })}
-                    placeholder="How does the product/service solve it?"
-                    style={{ resize: 'vertical' }}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
-                <div>
-                  <label className="form-label">Founder / Team Lead Name</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.founder1Name}
-                    onChange={(e) => setFormData({ ...formData, founder1Name: e.target.value })}
-                    placeholder="Student Name"
-                  />
-                </div>
-                <div>
-                  <label className="form-label">Department / Role</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.founder1Role}
-                    onChange={(e) => setFormData({ ...formData, founder1Role: e.target.value })}
-                    placeholder="e.g. Computer Sciences / CEO"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4" style={{ marginBottom: '1rem' }}>
-                <div>
-                  <label className="form-label">Startup Logo</label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-                    {formData.logo && (formData.logo.startsWith('data:image/') || formData.logo.startsWith('http') || formData.logo.startsWith('/')) ? (
-                      <StartupLogo logo={formData.logo} name={formData.name || 'Preview'} size={42} />
-                    ) : null}
-                    <label
+              <div style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Startup Logo</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                  {formData.logo && (formData.logo.startsWith('data:image/') || formData.logo.startsWith('http') || formData.logo.startsWith('/')) ? (
+                    <StartupLogo logo={formData.logo} name={formData.name || 'Preview'} size={42} />
+                  ) : null}
+                  <label
+                    className="btn btn-secondary btn-sm"
+                    style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                  >
+                    <Upload size={14} />
+                    {formData.logo.startsWith('data:image/') ? 'Change Image' : 'Upload Image'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoFileChange}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                  {formData.logo.startsWith('data:image/') && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, logo: '' })}
                       className="btn btn-secondary btn-sm"
-                      style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                      style={{ fontSize: '0.78rem', color: '#b91c1c' }}
                     >
-                      <Upload size={14} />
-                      {formData.logo.startsWith('data:image/') ? 'Change Image' : 'Upload Image'}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleLogoFileChange}
-                        style={{ display: 'none' }}
-                      />
-                    </label>
-                    {formData.logo.startsWith('data:image/') && (
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, logo: '' })}
-                        className="btn btn-secondary btn-sm"
-                        style={{ fontSize: '0.78rem', color: '#b91c1c' }}
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <label className="form-label">Website (Optional)</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.website}
-                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                    placeholder="https://..."
-                  />
+                      Remove
+                    </button>
+                  )}
                 </div>
               </div>
 

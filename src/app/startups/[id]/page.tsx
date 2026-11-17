@@ -271,6 +271,11 @@ export default function StartupProfilePage() {
           <div className="badge badge-sector" style={{ fontSize: '0.85rem' }}>
             {startup.sector}
           </div>
+          {startup.programSemester && (
+            <div className="badge badge-gold" style={{ fontSize: '0.85rem' }}>
+              {startup.programSemester}
+            </div>
+          )}
           {startup.website && (
             <a href={startup.website} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem', color: 'var(--bf-accent-blue)', fontWeight: 600 }}>
               <Globe size={16} /> Official Website

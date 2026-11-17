@@ -18,6 +18,10 @@ export interface IStartup extends Document {
   logo: string;
   website?: string;
   contactEmail: string;
+  contactPhone?: string;
+  studentId?: string;
+  programSemester?: string;
+  teamMembers?: string;
   founders: IFounder[];
   boothNumber?: string;
   status: StartupStatus;
@@ -67,6 +71,10 @@ const StartupSchema = new Schema<IStartup>(
     logo: { type: String, default: '🚀' },
     website: { type: String, trim: true },
     contactEmail: { type: String, required: true, trim: true, lowercase: true },
+    contactPhone: { type: String, default: '' },
+    studentId: { type: String, default: '' },
+    programSemester: { type: String, default: '' },
+    teamMembers: { type: String, default: '' },
     founders: { type: [FounderSchema], default: [] },
     boothNumber: { type: String, trim: true },
     

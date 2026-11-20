@@ -444,7 +444,7 @@ export default function StageLeaderboardPage() {
           gap: clamp(1.5rem, 2.5vw, 4rem);
           width: max-content;
           padding-left: 100%;
-          animation: sponsorMarquee 18s linear infinite;
+          animation: sponsorMarquee 26s linear infinite;
         }
         .teams-marquee-track {
           display: flex;
@@ -452,7 +452,7 @@ export default function StageLeaderboardPage() {
           gap: clamp(1rem, 1.8vw, 2.5rem);
           width: max-content;
           padding-left: 100%;
-          animation: sponsorMarquee 22s linear infinite;
+          animation: sponsorMarquee 30s linear infinite;
         }
       `}</style>
 

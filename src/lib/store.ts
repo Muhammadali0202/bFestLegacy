@@ -155,6 +155,7 @@ function toStartupObject(doc: any): Startup {
 
     compositeScore: obj.compositeScore || 0,
     progressPercentage: obj.progressPercentage || 0,
+    rubricStars: obj.rubricStars || [],
     isFirstSemester: !!obj.isFirstSemester,
     rank: obj.rank,
     submittedBy: obj.submittedBy ? obj.submittedBy.toString() : undefined,
@@ -677,11 +678,12 @@ export const StartupRepository = {
     return { success: true, evaluation, message: 'Evaluation submitted successfully.' };
   },
 
-  // Submit Official / Student Affairs rating & progress percentage
+  // Submit Official / 10-Star Legacy Framework rating & progress percentage
   submitPublicVote: async (voteData: {
     startupId: string;
     voterToken: string;
     rating: number;
+    rubricStars?: string[];
     progressPercentage?: number;
     feedback?: string;
   }): Promise<{ success: boolean; message: string }> => {
@@ -705,7 +707,7 @@ export const StartupRepository = {
           return { success: false, message: 'Startup not found.' };
         }
 
-        const clampedRating = Math.min(5, Math.max(1, voteData.rating));
+        const clampedRating = Math.min(10, Math.max(0, voteData.rating));
         const existingVote = await PublicVoteModel.findOne({
           startupId: startupDoc._id,
           voterToken: voteData.voterToken,
@@ -713,6 +715,7 @@ export const StartupRepository = {
 
         if (existingVote) {
           existingVote.rating = clampedRating;
+          if (voteData.rubricStars !== undefined) existingVote.rubricStars = voteData.rubricStars;
           if (voteData.feedback !== undefined) existingVote.feedback = voteData.feedback;
           await existingVote.save();
         } else {
@@ -720,6 +723,7 @@ export const StartupRepository = {
             startupId: startupDoc._id,
             voterToken: voteData.voterToken,
             rating: clampedRating,
+            rubricStars: voteData.rubricStars || [],
             feedback: voteData.feedback,
           });
         }
@@ -729,12 +733,15 @@ export const StartupRepository = {
 
         startupDoc.publicRating = avgPublicRating;
         startupDoc.totalPublicVotes = allVotes.length;
+        if (voteData.rubricStars !== undefined) {
+          startupDoc.rubricStars = voteData.rubricStars;
+        }
         if (typeof voteData.progressPercentage === 'number' && !isNaN(voteData.progressPercentage)) {
           startupDoc.progressPercentage = Math.min(100, Math.max(0, Math.round(voteData.progressPercentage)));
         }
 
-        // Points based directly on Official's rating (0-100 scale)
-        startupDoc.compositeScore = parseFloat(((avgPublicRating / 5) * 100).toFixed(1));
+        // Points based directly on 10-Star Legacy Framework rating (0-100 scale, out of 10 stars)
+        startupDoc.compositeScore = parseFloat(((avgPublicRating / 10) * 100).toFixed(1));
         await startupDoc.save();
 
         const published = await StartupModel.find({ status: 'approved', isPublished: true }).sort({ compositeScore: -1 });
@@ -742,7 +749,7 @@ export const StartupRepository = {
           await StartupModel.updateOne({ _id: published[i]._id }, { rank: i + 1 });
         }
 
-        return { success: true, message: 'Progress rating & percentage updated!' };
+        return { success: true, message: '10-Star Legacy rating & progress updated!' };
       } catch (e: any) {
         console.error('Error submitting official rating to MongoDB:', e);
       }
@@ -755,7 +762,7 @@ export const StartupRepository = {
     const startup = memStartups.find(s => s.id === voteData.startupId);
     if (!startup) return { success: false, message: 'Startup not found.' };
 
-    const clampedRating = Math.min(5, Math.max(1, voteData.rating));
+    const clampedRating = Math.min(10, Math.max(0, voteData.rating));
     const existing = memPublicVotes.find(
       v => v.startupId === voteData.startupId && v.voterToken === voteData.voterToken
     );
@@ -779,12 +786,15 @@ export const StartupRepository = {
     startup.publicRating = parseFloat(
       (startupVotes.reduce((acc, v) => acc + v.rating, 0) / startupVotes.length).toFixed(1)
     );
+    if (voteData.rubricStars !== undefined) {
+      startup.rubricStars = voteData.rubricStars;
+    }
     if (typeof voteData.progressPercentage === 'number' && !isNaN(voteData.progressPercentage)) {
       startup.progressPercentage = Math.min(100, Math.max(0, Math.round(voteData.progressPercentage)));
     }
-    startup.compositeScore = parseFloat(((startup.publicRating / 5) * 100).toFixed(1));
+    startup.compositeScore = parseFloat(((startup.publicRating / 10) * 100).toFixed(1));
 
-    return { success: true, message: 'Progress rating & percentage updated!' };
+    return { success: true, message: '10-Star Legacy rating & progress updated!' };
   },
 
   // Get current Leaderboard

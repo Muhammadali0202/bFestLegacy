@@ -23,6 +23,19 @@ import { Startup, Investment } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import StartupLogo from '@/components/StartupLogo';
 
+const LEGACY_RUBRICS = [
+  { id: '01', label: 'Marketing & Promotion' },
+  { id: '02', label: 'Sponsorship Acquisition' },
+  { id: '03', label: 'Strategic Partnerships' },
+  { id: '04', label: 'Audience & Digital Growth' },
+  { id: '05', label: 'Product Development' },
+  { id: '06', label: 'Social Impact & Innovation' },
+  { id: '07', label: 'Team Execution & Consistency' },
+  { id: '08', label: 'Sales & Revenue Generation' },
+  { id: '09', label: 'Customer Validation & Experience' },
+  { id: '10', label: 'Financial & Operational Viability' },
+];
+
 export default function StartupProfilePage() {
   const params = useParams();
   const id = params?.id as string;
@@ -32,8 +45,8 @@ export default function StartupProfilePage() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Official progress & rating state
-  const [selectedRating, setSelectedRating] = useState<number>(5);
+  // Official progress & 10-Star Legacy Framework rating state
+  const [selectedStars, setSelectedStars] = useState<string[]>([]);
   const [progressPercentage, setProgressPercentage] = useState<number>(0);
   const [feedback, setFeedback] = useState('');
   const [voteSubmitted, setVoteSubmitted] = useState(false);
@@ -59,6 +72,7 @@ export default function StartupProfilePage() {
         if (startupData.success) {
           setStartup(startupData.startup);
           setProgressPercentage(startupData.startup.progressPercentage ?? 0);
+          setSelectedStars(Array.isArray(startupData.startup.rubricStars) ? startupData.startup.rubricStars : []);
         }
         if (invData.success) {
           setInvestments(invData.investments);
@@ -76,6 +90,12 @@ export default function StartupProfilePage() {
   useEffect(() => {
     loadStartupData();
   }, [id]);
+
+  const toggleRubricStar = (rubricId: string) => {
+    setSelectedStars((prev) =>
+      prev.includes(rubricId) ? prev.filter((item) => item !== rubricId) : [...prev, rubricId]
+    );
+  };
 
   const handleVoteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,7 +117,8 @@ export default function StartupProfilePage() {
         body: JSON.stringify({
           startupId: id,
           voterToken: user?.id ? `sa_${user.id}` : voterToken,
-          rating: selectedRating,
+          rating: selectedStars.length,
+          rubricStars: selectedStars,
           progressPercentage,
           feedback,
           userRole: user?.role,
@@ -392,7 +413,7 @@ export default function StartupProfilePage() {
                 <div>
                   <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)', display: 'block' }}>Official Rating</span>
                   <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--bf-primary)' }}>
-                    {startup.publicRating.toFixed(1)} / 5.0
+                    {startup.publicRating.toFixed(1)} / 10
                   </span>
                 </div>
                 <div style={{ textAlign: 'right' }}>
@@ -456,32 +477,69 @@ export default function StartupProfilePage() {
                     </div>
                   )}
 
-                  <div style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--bf-primary)', marginBottom: '0.5rem' }}>
-                      Select Official Rating:
-                    </label>
-                    <div className="flex gap-2 justify-center" style={{ padding: '0.5rem 0' }}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setSelectedRating(star)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: '0.2rem',
-                            transform: selectedRating >= star ? 'scale(1.15)' : 'scale(1)',
-                            transition: 'transform 0.15s',
-                          }}
-                        >
-                          <Star
-                            size={28}
-                            color="#f59e0b"
-                            fill={selectedRating >= star ? '#f59e0b' : 'transparent'}
-                          />
-                        </button>
-                      ))}
+                  <div style={{ marginBottom: '1.1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <div>
+                        <span style={{ display: 'block', fontSize: '0.86rem', fontWeight: 800, color: 'var(--bf-primary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                          The 10-Star Legacy Framework
+                        </span>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--bf-text-muted)' }}>
+                          Award 1 star per fulfilled rubric
+                        </span>
+                      </div>
+                      <span className="badge badge-gold" style={{ fontSize: '0.8rem', fontWeight: 800 }}>
+                        {selectedStars.length} / 10 ★
+                      </span>
+                    </div>
+
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.35rem',
+                      background: '#0a0f1c',
+                      borderRadius: '10px',
+                      padding: '0.6rem',
+                      border: '1px solid rgba(212, 175, 55, 0.35)',
+                    }}>
+                      {LEGACY_RUBRICS.map((rubric) => {
+                        const isEarned = selectedStars.includes(rubric.id);
+                        return (
+                          <button
+                            key={rubric.id}
+                            type="button"
+                            onClick={() => toggleRubricStar(rubric.id)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '0.5rem',
+                              width: '100%',
+                              textAlign: 'left',
+                              padding: '0.45rem 0.6rem',
+                              borderRadius: '7px',
+                              border: isEarned ? '1px solid rgba(255, 210, 51, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
+                              background: isEarned ? 'rgba(255, 210, 51, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                              cursor: 'pointer',
+                              transition: 'all 0.15s',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0 }}>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', fontFamily: 'var(--font-display)', flexShrink: 0 }}>
+                                {rubric.id}
+                              </span>
+                              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: isEarned ? '#fef08a' : '#f8fafc', lineHeight: 1.25 }}>
+                                {rubric.label}
+                              </span>
+                            </div>
+                            <Star
+                              size={18}
+                              color="#f59e0b"
+                              fill={isEarned ? '#f59e0b' : 'transparent'}
+                              style={{ flexShrink: 0 }}
+                            />
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 

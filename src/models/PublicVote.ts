@@ -4,7 +4,8 @@ export interface IPublicVote extends Document {
   startupId: mongoose.Types.ObjectId;
   voterToken: string;
   userId?: mongoose.Types.ObjectId;
-  rating: number; // 1 to 5
+  rating: number; // 0 to 10 (10-Star Legacy Framework)
+  rubricStars?: string[];
   feedback?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -15,7 +16,8 @@ const PublicVoteSchema = new Schema<IPublicVote>(
     startupId: { type: Schema.Types.ObjectId, ref: 'Startup', required: true, index: true },
     voterToken: { type: String, required: true, trim: true },
     userId: { type: Schema.Types.ObjectId, ref: 'User' },
-    rating: { type: Number, required: true, min: 1, max: 5 },
+    rating: { type: Number, required: true, min: 0, max: 10 },
+    rubricStars: { type: [String], default: [] },
     feedback: { type: String, trim: true },
   },
   {

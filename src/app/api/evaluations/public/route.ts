@@ -5,7 +5,7 @@ import { verifySessionToken } from '@/lib/auth';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { startupId, voterToken, rating, progressPercentage, feedback, userRole } = body;
+    const { startupId, voterToken, rating, rubricStars, progressPercentage, feedback, userRole } = body;
 
     // Verify Bfest's Officials (student_affairs) or Admin access
     const tokenCookie = request.cookies.get('bf_session')?.value;
@@ -19,17 +19,22 @@ export async function POST(request: NextRequest) {
       }, { status: 403 });
     }
 
-    if (!startupId || !voterToken || !rating) {
+    if (!startupId || !voterToken || (rating === undefined && !Array.isArray(rubricStars))) {
       return NextResponse.json({ 
         success: false, 
         error: 'Missing required fields: startupId, voterToken, and rating are required.' 
       }, { status: 400 });
     }
 
+    const computedRating = Array.isArray(rubricStars)
+      ? rubricStars.length
+      : Number(rating);
+
     const result = await StartupRepository.submitPublicVote({
       startupId,
       voterToken: sessionUser?.id ? `sa_${sessionUser.id}` : voterToken,
-      rating: Number(rating),
+      rating: computedRating,
+      rubricStars: Array.isArray(rubricStars) ? rubricStars : undefined,
       progressPercentage: progressPercentage !== undefined ? Number(progressPercentage) : undefined,
       feedback,
     });

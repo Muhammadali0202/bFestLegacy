@@ -423,7 +423,7 @@ export default function StageLeaderboardPage() {
         }
         @keyframes sponsorMarquee {
           0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+          100% { transform: translateX(-100%); }
         }
         .top3-rank-changed {
           animation: top3RankPulse 1.4s ease-out;
@@ -443,14 +443,16 @@ export default function StageLeaderboardPage() {
           align-items: center;
           gap: clamp(1.5rem, 2.5vw, 4rem);
           width: max-content;
-          animation: sponsorMarquee 24s linear infinite;
+          padding-left: 100%;
+          animation: sponsorMarquee 18s linear infinite;
         }
         .teams-marquee-track {
           display: flex;
           align-items: center;
           gap: clamp(1rem, 1.8vw, 2.5rem);
           width: max-content;
-          animation: sponsorMarquee 28s linear infinite;
+          padding-left: 100%;
+          animation: sponsorMarquee 22s linear infinite;
         }
       `}</style>
 
@@ -661,8 +663,8 @@ export default function StageLeaderboardPage() {
 
             <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
               <div className="teams-marquee-track">
-                {[...items.slice(3), ...items.slice(3)].map((s, idx) => {
-                  const rankNum = (idx % items.slice(3).length) + 4;
+                {items.slice(3).map((s, idx) => {
+                  const rankNum = idx + 4;
                   return (
                     <div
                       key={`${s.id}-${idx}`}
@@ -734,7 +736,7 @@ export default function StageLeaderboardPage() {
           <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
             {sponsors.length > 0 ? (
               <div className="sponsor-marquee-track">
-                {[...sponsors, ...sponsors].map((sp, idx) => (
+                {sponsors.map((sp, idx) => (
                   <div
                     key={`${sp.name}-${idx}`}
                     style={{

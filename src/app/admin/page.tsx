@@ -218,6 +218,31 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleSponsorFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const maxH = 120;
+        const scale = Math.min(maxH / img.height, 260 / img.width, 1);
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, w, h);
+          setSponsorLogoUrl(canvas.toDataURL('image/png'));
+        }
+      };
+      if (typeof reader.result === 'string') img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleAddSponsor = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!sponsorName.trim() || !sponsorLogoUrl.trim() || !config) return;
@@ -1194,25 +1219,29 @@ export default function AdminDashboardPage() {
               Add sponsor logos here to display them in the moving footer on the Campus TV Display (/leaderboard/stage).
             </p>
 
-            <form onSubmit={handleAddSponsor} style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+            <form onSubmit={handleAddSponsor} style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', marginBottom: '1.25rem' }}>
               <input
                 type="text"
                 className="form-input"
-                placeholder="Sponsor Name (e.g. Bank of Khyber)"
+                placeholder="Sponsor Name (e.g. Toyota)"
                 value={sponsorName}
                 onChange={(e) => setSponsorName(e.target.value)}
                 required
-                style={{ flex: '1 1 200px', background: '#ffffff' }}
+                style={{ flex: '1 1 180px', background: '#ffffff' }}
               />
               <input
                 type="text"
                 className="form-input"
-                placeholder="Logo URL (e.g. https://... or /logo.png)"
-                value={sponsorLogoUrl}
+                placeholder="Paste Direct Image URL OR Upload File →"
+                value={sponsorLogoUrl.startsWith('data:image/') ? 'Uploaded Image Ready ✓' : sponsorLogoUrl}
                 onChange={(e) => setSponsorLogoUrl(e.target.value)}
                 required
-                style={{ flex: '2 1 280px', background: '#ffffff' }}
+                style={{ flex: '2 1 240px', background: '#ffffff' }}
               />
+              <label className="btn btn-secondary btn-sm" style={{ cursor: 'pointer', background: '#ffffff' }}>
+                Upload Logo
+                <input type="file" accept="image/*" onChange={handleSponsorFileChange} style={{ display: 'none' }} />
+              </label>
               <button type="submit" disabled={savingSponsor} className="btn btn-primary btn-sm">
                 {savingSponsor ? 'Adding...' : 'Add Sponsor'}
               </button>

@@ -445,6 +445,13 @@ export default function StageLeaderboardPage() {
           width: max-content;
           animation: sponsorMarquee 24s linear infinite;
         }
+        .teams-marquee-track {
+          display: flex;
+          align-items: center;
+          gap: clamp(1rem, 1.8vw, 2.5rem);
+          width: max-content;
+          animation: sponsorMarquee 28s linear infinite;
+        }
       `}</style>
 
       {/* Top 3 Podium & Ranks #4-#15 (Viewport-Scaled for Laptop to 4K TV) */}
@@ -621,132 +628,157 @@ export default function StageLeaderboardPage() {
           )}
         </div>
 
-        {/* Ranks #4 - #15 Rotating Animated Grid */}
-        {visibleRest.length > 0 && (
-          <div style={{ maxWidth: 'min(94vw, 1800px)', width: '100%', margin: '0 auto' }}>
-            <div
-              key={currentRestPage}
-              className="stage-rest-animate"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(220px, 20vw, 420px), 1fr))',
-                gap: 'clamp(0.6rem, 1vw, 1.5rem)',
-              }}
-            >
-              {visibleRest.map((s, idx) => {
-                const rankNum = currentRestPage * pageSize + idx + 4;
-                return (
-                  <div
-                    key={s.id}
-                    style={{
-                      background: 'rgba(15, 29, 52, 0.85)',
-                      border: '1px solid rgba(148, 163, 184, 0.2)',
-                      borderRadius: 'clamp(10px, 1vw, 18px)',
-                      padding: 'clamp(0.65rem, 1.2vh, 1.5rem) clamp(0.9rem, 1.2vw, 1.75rem)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '0.75vw',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.5rem, 0.8vw, 1.25rem)', minWidth: 0 }}>
-                      <span style={{
-                        width: 'clamp(28px, 2.2vw, 48px)',
-                        height: 'clamp(28px, 2.2vw, 48px)',
-                        borderRadius: '8px',
-                        background: 'rgba(255, 255, 255, 0.08)',
-                        color: '#cbd5e1',
-                        fontWeight: 900,
-                        fontSize: 'clamp(0.8rem, 1vw, 1.45rem)',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}>
-                        #{rankNum}
-                      </span>
-                      <StartupLogo logo={s.logo} name={s.name} size="clamp(28px, 2.2vw, 48px)" fontSize="clamp(1.2rem, 1.7vw, 2.4rem)" rounded="8px" />
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: 'clamp(0.88rem, 1.1vw, 1.6rem)', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {s.name}
-                        </div>
-                        <div style={{ fontSize: 'clamp(0.7rem, 0.8vw, 1.15rem)', color: '#94a3b8' }}>
-                          {s.sector}
-                        </div>
-                      </div>
-                    </div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(1.05rem, 1.4vw, 2.1rem)', color: '#ffd233', flexShrink: 0 }}>
-                      {s.compositeScore.toFixed(1)}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
         </>
         )}
       </div>
 
-      {/* Dynamic Moving "Our Proud Sponsors" Marquee Footer */}
-      <div style={{
-        borderTop: '1px solid rgba(255, 210, 51, 0.25)',
-        paddingTop: 'clamp(0.6rem, 1.1vh, 1.25rem)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 'clamp(0.9rem, 1.5vw, 2rem)',
-        overflow: 'hidden',
-      }}>
+      {/* Bottom Stacked Marquees: 1) Teams Below 3rd Position (#4+)  2) Our Proud Sponsors */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(0.55rem, 1vh, 1rem)' }}>
+        {/* Teams Below 3rd Position Marquee */}
+        {items.slice(3).length > 0 && (
+          <div style={{
+            borderTop: '1px solid rgba(148, 163, 184, 0.25)',
+            paddingTop: 'clamp(0.5rem, 0.9vh, 1rem)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'clamp(0.9rem, 1.5vw, 2rem)',
+            overflow: 'hidden',
+            width: '100%',
+          }}>
+            <div style={{
+              flexShrink: 0,
+              fontSize: 'clamp(0.78rem, 1vw, 1.4rem)',
+              fontWeight: 800,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: '#38bdf8',
+              paddingRight: 'clamp(0.75rem, 1.2vw, 1.75rem)',
+              borderRight: '1px solid rgba(255, 255, 255, 0.15)',
+              whiteSpace: 'nowrap',
+            }}>
+              Standings #4+
+            </div>
+
+            <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+              <div className="teams-marquee-track">
+                {[...items.slice(3), ...items.slice(3)].map((s, idx) => {
+                  const rankNum = (idx % items.slice(3).length) + 4;
+                  return (
+                    <div
+                      key={`${s.id}-${idx}`}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 'clamp(0.6rem, 0.9vw, 1.25rem)',
+                        background: 'rgba(15, 29, 52, 0.9)',
+                        border: '1px solid rgba(148, 163, 184, 0.28)',
+                        padding: 'clamp(0.45rem, 0.8vh, 0.85rem) clamp(0.9rem, 1.4vw, 1.75rem)',
+                        borderRadius: '12px',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <span style={{
+                        padding: '0.15rem 0.55rem',
+                        borderRadius: '7px',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        color: '#e2e8f0',
+                        fontWeight: 900,
+                        fontSize: 'clamp(0.82rem, 1vw, 1.4rem)',
+                      }}>
+                        #{rankNum}
+                      </span>
+                      <StartupLogo logo={s.logo} name={s.name} size="clamp(28px, 2.4vw, 46px)" fontSize="clamp(1.2rem, 1.7vw, 2.2rem)" rounded="8px" />
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 'clamp(0.88rem, 1.1vw, 1.55rem)', color: '#ffffff', whiteSpace: 'nowrap' }}>
+                          {s.name}
+                        </div>
+                        <div style={{ fontSize: 'clamp(0.68rem, 0.8vw, 1.1rem)', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                          {s.sector}
+                        </div>
+                      </div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(1rem, 1.3vw, 1.85rem)', color: '#ffd233', marginLeft: '0.35rem' }}>
+                        {s.compositeScore.toFixed(1)} <span style={{ fontSize: '0.72em', color: '#94a3b8' }}>PTS</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Wide "Our Proud Sponsors" Marquee Footer */}
         <div style={{
-          flexShrink: 0,
-          fontSize: 'clamp(0.75rem, 0.95vw, 1.35rem)',
-          fontWeight: 800,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-          color: '#ffd233',
-          paddingRight: 'clamp(0.75rem, 1.2vw, 1.75rem)',
-          borderRight: '1px solid rgba(255, 255, 255, 0.15)',
+          borderTop: '1px solid rgba(255, 210, 51, 0.3)',
+          paddingTop: 'clamp(0.65rem, 1.1vh, 1.3rem)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'clamp(1rem, 1.6vw, 2.25rem)',
+          overflow: 'hidden',
+          width: '100%',
         }}>
-          Our Proud Sponsors
-        </div>
+          <div style={{
+            flexShrink: 0,
+            fontSize: 'clamp(0.82rem, 1.05vw, 1.5rem)',
+            fontWeight: 800,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: '#ffd233',
+            paddingRight: 'clamp(0.85rem, 1.3vw, 1.85rem)',
+            borderRight: '1px solid rgba(255, 255, 255, 0.15)',
+            whiteSpace: 'nowrap',
+          }}>
+            Our Proud Sponsors
+          </div>
 
-        <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-          {sponsors.length > 0 ? (
-            <div className="sponsor-marquee-track">
-              {[...sponsors, ...sponsors].map((sp, idx) => (
-                <div
-                  key={`${sp.name}-${idx}`}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.65rem',
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    padding: 'clamp(0.25rem, 0.5vh, 0.6rem) clamp(0.7rem, 1vw, 1.35rem)',
-                    borderRadius: '10px',
-                    flexShrink: 0,
-                  }}
-                >
-                  <img
-                    src={sp.logoUrl}
-                    alt={sp.name}
-                    style={{ height: 'clamp(22px, 2.6vh, 48px)', maxWidth: 'clamp(70px, 7vw, 140px)', objectFit: 'contain' }}
-                  />
-                  <span style={{ color: '#0b2545', fontWeight: 700, fontSize: 'clamp(0.78rem, 0.95vw, 1.35rem)', whiteSpace: 'nowrap' }}>
-                    {sp.name}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ fontSize: 'clamp(0.78rem, 0.95vw, 1.35rem)', color: '#94a3b8' }}>
-              Partnering with leading organizations to empower student entrepreneurship at IMSciences Peshawar.
-            </div>
-          )}
+          <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+            {sponsors.length > 0 ? (
+              <div className="sponsor-marquee-track">
+                {[...sponsors, ...sponsors].map((sp, idx) => (
+                  <div
+                    key={`${sp.name}-${idx}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 'clamp(0.65rem, 1vw, 1.25rem)',
+                      background: 'rgba(255, 255, 255, 0.97)',
+                      padding: 'clamp(0.45rem, 0.85vh, 0.9rem) clamp(1.1rem, 1.8vw, 2.35rem)',
+                      minWidth: 'clamp(165px, 16vw, 300px)',
+                      borderRadius: '12px',
+                      flexShrink: 0,
+                      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)',
+                    }}
+                  >
+                    {sp.logoUrl && (
+                      <img
+                        src={sp.logoUrl}
+                        alt={sp.name}
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                        }}
+                        style={{
+                          height: 'clamp(34px, 4.4vh, 68px)',
+                          width: 'auto',
+                          maxWidth: 'clamp(110px, 13vw, 220px)',
+                          objectFit: 'contain',
+                        }}
+                      />
+                    )}
+                    <span style={{ color: '#0b2545', fontWeight: 800, fontSize: 'clamp(0.9rem, 1.2vw, 1.7rem)', whiteSpace: 'nowrap' }}>
+                      {sp.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ fontSize: 'clamp(0.82rem, 1vw, 1.4rem)', color: '#94a3b8' }}>
+                Partnering with leading organizations to empower student entrepreneurship at IMSciences Peshawar.
+              </div>
+            )}
+          </div>
         </div>
-
-        <span style={{ flexShrink: 0, fontSize: 'clamp(0.7rem, 0.8vw, 1.1rem)', color: '#64748b' }}>
-          Synced {lastUpdated || '...'}
-        </span>
       </div>
     </div>
   );

@@ -45,8 +45,8 @@ export default function StartupProfilePage() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Official progress & 10-Star Legacy Framework rating state
-  const [selectedStars, setSelectedStars] = useState<string[]>([]);
+  // Official progress & 10-Rubric x 10-Point (out of 100) state
+  const [rubricScores, setRubricScores] = useState<Record<string, number>>({});
   const [progressPercentage, setProgressPercentage] = useState<number>(0);
   const [feedback, setFeedback] = useState('');
   const [voteSubmitted, setVoteSubmitted] = useState(false);
@@ -72,7 +72,21 @@ export default function StartupProfilePage() {
         if (startupData.success) {
           setStartup(startupData.startup);
           setProgressPercentage(startupData.startup.progressPercentage ?? 0);
-          setSelectedStars(Array.isArray(startupData.startup.rubricStars) ? startupData.startup.rubricStars : []);
+          const loadedScores: Record<string, number> = {};
+          const existingMap = startupData.startup.rubricScores || {};
+          const existingStars: string[] = Array.isArray(startupData.startup.rubricStars)
+            ? startupData.startup.rubricStars
+            : [];
+          for (const r of LEGACY_RUBRICS) {
+            if (typeof existingMap[r.id] === 'number') {
+              loadedScores[r.id] = existingMap[r.id];
+            } else if (existingStars.includes(r.id)) {
+              loadedScores[r.id] = 10;
+            } else {
+              loadedScores[r.id] = 0;
+            }
+          }
+          setRubricScores(loadedScores);
         }
         if (invData.success) {
           setInvestments(invData.investments);
@@ -91,10 +105,13 @@ export default function StartupProfilePage() {
     loadStartupData();
   }, [id]);
 
-  const toggleRubricStar = (rubricId: string) => {
-    setSelectedStars((prev) =>
-      prev.includes(rubricId) ? prev.filter((item) => item !== rubricId) : [...prev, rubricId]
-    );
+  const totalRubricPoints = LEGACY_RUBRICS.reduce((sum, r) => sum + (rubricScores[r.id] || 0), 0);
+
+  const handleSetRubricScore = (rubricId: string, starValue: number) => {
+    setRubricScores((prev) => ({
+      ...prev,
+      [rubricId]: prev[rubricId] === starValue ? starValue - 1 : starValue,
+    }));
   };
 
   const handleVoteSubmit = async (e: React.FormEvent) => {
@@ -117,8 +134,8 @@ export default function StartupProfilePage() {
         body: JSON.stringify({
           startupId: id,
           voterToken: user?.id ? `sa_${user.id}` : voterToken,
-          rating: selectedStars.length,
-          rubricStars: selectedStars,
+          rating: totalRubricPoints,
+          rubricScores,
           progressPercentage,
           feedback,
           userRole: user?.role,
@@ -230,216 +247,237 @@ export default function StartupProfilePage() {
         </Link>
       </div>
 
-      {/* Profile Header Card */}
+      {/* Profile Header Card (Sketch Layout in Website UI/UX) */}
       <div className="card" style={{
-        padding: '2.5rem',
-        marginBottom: '2rem',
-        background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
-        position: 'relative',
+        padding: '1.75rem 2rem',
+        marginBottom: '1.75rem',
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        border: '1.5px solid var(--bf-border)',
       }}>
-        <div className="flex justify-between items-start flex-wrap gap-4" style={{ marginBottom: '1.5rem' }}>
-          <div className="flex items-center gap-4">
-            <div style={{
-              width: '80px',
-              height: '80px',
-              borderRadius: 'var(--bf-radius-md)',
-              background: '#f1f5f9',
-              border: '2px solid var(--bf-border)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              overflow: 'hidden',
-              flexShrink: 0,
-            }}>
-              <StartupLogo logo={startup.logo} name={startup.name} size={76} fontSize="3rem" rounded="10px" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2" style={{ marginBottom: '0.25rem' }}>
-                <h1 style={{ fontSize: '2.2rem', color: 'var(--bf-primary)' }}>{startup.name}</h1>
-                <span className="badge badge-approved">
-                  <CheckCircle size={12} /> Verified Exhibitor
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1.5rem',
+        }}>
+          {/* Left: Startup Name & Members */}
+          <div style={{ flex: '1 1 280px', minWidth: 0 }}>
+            <div className="flex items-center gap-2 flex-wrap" style={{ marginBottom: '0.45rem' }}>
+              <h1 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'var(--bf-primary)', margin: 0 }}>
+                {startup.name}
+              </h1>
+              <span className="badge badge-sector" style={{ fontSize: '0.78rem' }}>
+                {startup.sector}
+              </span>
+              {startup.programSemester && (
+                <span className="badge badge-gold" style={{ fontSize: '0.78rem' }}>
+                  {startup.programSemester}
                 </span>
-              </div>
-              <p style={{ fontSize: '1.15rem', color: 'var(--bf-text-secondary)', maxWidth: '750px', lineHeight: 1.4 }}>
-                {startup.tagline}
-              </p>
+              )}
+            </div>
+
+            <div style={{ fontSize: '0.95rem', color: 'var(--bf-text-secondary)', lineHeight: 1.55 }}>
+              <strong style={{ color: 'var(--bf-primary)' }}>Members:</strong>{' '}
+              {startup.founders.length > 0
+                ? startup.founders.map((f) => f.name).join(', ')
+                : startup.teamMembers || 'Student Team'}
             </div>
           </div>
 
-          {/* Quick Score Capsule */}
+          {/* Middle-Right: Current Points (out of 100) + Current Progress Bar */}
           <div style={{
-            background: 'var(--bf-primary)',
-            color: '#ffffff',
-            borderRadius: 'var(--bf-radius-md)',
-            padding: '1rem 1.5rem',
-            textAlign: 'center',
-            boxShadow: 'var(--bf-shadow-md)',
+            flex: '0 1 320px',
+            minWidth: '240px',
+            background: '#f8fafc',
+            border: '1px solid var(--bf-border)',
+            borderRadius: '12px',
+            padding: '0.85rem 1.15rem',
           }}>
-            <span style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Composite Rank
-            </span>
-            <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--bf-accent-gold)', fontFamily: 'var(--font-display)' }}>
-              #{startup.rank || '-'}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--bf-text-secondary)' }}>
+                Current Points:
+              </span>
+              <span style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--bf-primary)', fontFamily: 'var(--font-display)' }}>
+                {startup.compositeScore.toFixed(0)} / 100
+              </span>
             </div>
-            <span style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>
-              Score: {startup.compositeScore.toFixed(1)} / 100
-            </span>
-          </div>
-        </div>
 
-        {/* Metadata pills */}
-        <div className="flex gap-4 items-center flex-wrap" style={{ borderTop: '1px solid var(--bf-border)', paddingTop: '1.25rem' }}>
-          <div className="badge badge-sector" style={{ fontSize: '0.85rem' }}>
-            {startup.sector}
-          </div>
-          {startup.programSemester && (
-            <div className="badge badge-gold" style={{ fontSize: '0.85rem' }}>
-              {startup.programSemester}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--bf-text-secondary)' }}>
+                Current Progress:
+              </span>
+              <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--bf-accent-blue)' }}>
+                {startup.progressPercentage ?? 0}%
+              </span>
             </div>
-          )}
-          {startup.website && (
-            <a href={startup.website} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem', color: 'var(--bf-accent-blue)', fontWeight: 600 }}>
-              <Globe size={16} /> Official Website
-            </a>
-          )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem', color: 'var(--bf-text-secondary)' }}>
-            <Mail size={16} color="var(--bf-text-muted)" />
-            <span>{startup.contactEmail}</span>
+            <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+              <div
+                style={{
+                  width: `${Math.min(100, Math.max(0, startup.progressPercentage ?? 0))}%`,
+                  height: '100%',
+                  background: 'linear-gradient(90deg, #0047ff 0%, #3b82f6 100%)',
+                  borderRadius: '999px',
+                  transition: 'width 0.3s ease',
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Far Right: Startup Logo */}
+          <div style={{
+            width: '82px',
+            height: '82px',
+            borderRadius: 'var(--bf-radius-md)',
+            background: '#ffffff',
+            border: '2px solid var(--bf-border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            flexShrink: 0,
+            boxShadow: 'var(--bf-shadow-sm)',
+          }}>
+            <StartupLogo logo={startup.logo} name={startup.name} size={78} fontSize="2.8rem" rounded="10px" />
           </div>
         </div>
       </div>
 
-      {/* Main Grid: Details and Right-hand Scoring Sidebar */}
-      <div className="grid grid-cols-3 gap-8">
-        {/* Left Column (2 cols): Details */}
-        <div style={{ gridColumn: 'span 2' }}>
-          {/* Summary */}
-          <div className="card" style={{ marginBottom: '1.75rem' }}>
-            <h2 style={{ fontSize: '1.4rem', color: 'var(--bf-primary)', marginBottom: '0.75rem' }}>
-              Summary
-            </h2>
-            <p style={{ color: 'var(--bf-text-secondary)', lineHeight: 1.7, fontSize: '1rem' }}>
-              {startup.description}
-            </p>
+      {/* Main Split: 70% Evaluation Rubrics (Left) | 30% Summary & Progress Controls (Right) */}
+      <div className="home-split-grid">
+        {/* Left (70%): Evaluation Rubrics (10 Rubrics x 10 Stars = 100 Points) */}
+        <div className="card" style={{ padding: '1.5rem', border: '1.5px solid var(--bf-border)' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+            marginBottom: '1rem',
+            paddingBottom: '0.75rem',
+            borderBottom: '1px solid var(--bf-border)',
+          }}>
+            <div>
+              <h2 style={{ fontSize: '1.3rem', color: 'var(--bf-primary)', margin: 0 }}>
+                Evaluation Rubrics
+              </h2>
+              <span style={{ fontSize: '0.82rem', color: 'var(--bf-text-muted)' }}>
+                10 criteria × 10 points each — Total out of 100
+              </span>
+            </div>
+            <span className="badge badge-gold" style={{ fontSize: '0.92rem', fontWeight: 900, padding: '0.4rem 0.9rem' }}>
+              Total: {totalRubricPoints} / 100
+            </span>
           </div>
 
-          {/* Problem & Solution Grid */}
-          <div className="grid grid-cols-2 gap-6" style={{ marginBottom: '1.75rem' }}>
-            <div className="card" style={{ borderLeft: '4px solid var(--bf-accent-rose)' }}>
-              <h3 style={{ fontSize: '1.15rem', color: 'var(--bf-primary)', marginBottom: '0.6rem' }}>
-                The Problem Space
-              </h3>
-              <p style={{ color: 'var(--bf-text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                {startup.problem || 'Identified inefficiencies in regional market segments requiring localized technological interventions.'}
-              </p>
-            </div>
-
-            <div className="card" style={{ borderLeft: '4px solid var(--bf-accent-emerald)' }}>
-              <h3 style={{ fontSize: '1.15rem', color: 'var(--bf-primary)', marginBottom: '0.6rem' }}>
-                Value Proposition & Solution
-              </h3>
-              <p style={{ color: 'var(--bf-text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                {startup.solution || 'Proprietary product offering sustainable unit economics and rapid scalability across KPK.'}
-              </p>
-            </div>
-          </div>
-
-          {/* Founders & Team */}
-          <div className="card">
-            <div className="flex items-center gap-2" style={{ marginBottom: '1rem' }}>
-              <Users size={20} color="var(--bf-primary)" />
-              <h3 style={{ fontSize: '1.3rem', color: 'var(--bf-primary)' }}>Student Founders & Team</h3>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              {startup.founders.map((founder, i) => (
-                <div key={i} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  padding: '0.85rem',
-                  borderRadius: 'var(--bf-radius-sm)',
-                  background: '#f8fafc',
-                  border: '1px solid var(--bf-border)',
-                }}>
-                  <div style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '50%',
-                    background: 'var(--bf-primary)',
-                    color: '#ffffff',
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            {LEGACY_RUBRICS.map((rubric) => {
+              const score = rubricScores[rubric.id] || 0;
+              const canEdit = !!(user && (user.role === 'student_affairs' || user.role === 'admin') && !voteSubmitted);
+              return (
+                <div
+                  key={rubric.id}
+                  style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 700,
-                  }}>
-                    {founder.name.charAt(0)}
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '0.75rem',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '10px',
+                    background: '#f8fafc',
+                    border: '1px solid var(--bf-border)',
+                  }}
+                >
+                  {/* Rubric Name */}
+                  <div style={{ flex: '1 1 170px', minWidth: '150px' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--bf-accent-blue)', marginRight: '0.4rem' }}>
+                      {rubric.id}
+                    </span>
+                    <span style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--bf-primary)' }}>
+                      {rubric.label}
+                    </span>
                   </div>
-                  <div>
-                    <h4 style={{ fontSize: '0.98rem', color: 'var(--bf-primary)' }}>{founder.name}</h4>
-                    <span style={{ fontSize: '0.82rem', color: 'var(--bf-text-muted)' }}>{founder.role}</span>
+
+                  {/* 10 Stars Row */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.22rem', flexWrap: 'nowrap' }}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((starVal) => {
+                      const filled = score >= starVal;
+                      return (
+                        <button
+                          key={starVal}
+                          type="button"
+                          disabled={!canEdit}
+                          onClick={() => canEdit && handleSetRubricScore(rubric.id, starVal)}
+                          title={`${rubric.label}: ${starVal} / 10`}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            padding: '0.1rem',
+                            cursor: canEdit ? 'pointer' : 'default',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            transform: filled ? 'scale(1.05)' : 'scale(1)',
+                            transition: 'transform 0.1s',
+                          }}
+                        >
+                          <Star
+                            size={20}
+                            color={filled ? '#eab308' : '#cbd5e1'}
+                            fill={filled ? '#facc15' : '#e2e8f0'}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Score Pill: X / 10 */}
+                  <div style={{
+                    minWidth: '64px',
+                    textAlign: 'center',
+                    background: score > 0 ? 'var(--bf-primary)' : '#e2e8f0',
+                    color: score > 0 ? '#ffd233' : '#475569',
+                    fontWeight: 800,
+                    fontSize: '0.84rem',
+                    padding: '0.32rem 0.65rem',
+                    borderRadius: '8px',
+                    fontFamily: 'var(--font-display)',
+                  }}>
+                    {score} / 10
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Right Column (1 col): Progress Rating & Judge Links */}
-        <div>
-
-          {/* Progress Rating Box (Rate Access Restricted to Bfest's Officials Only) */}
-          <div className="card" style={{ marginBottom: '1.5rem', border: '1.5px solid var(--bf-border)' }}>
-            <div className="flex items-center gap-2" style={{ marginBottom: '0.5rem' }}>
-              <Star size={20} color="var(--bf-accent-gold)" fill="var(--bf-accent-gold)" />
-              <h3 style={{ fontSize: '1.25rem', color: 'var(--bf-primary)' }}>Progress Rating</h3>
-            </div>
-            <p style={{ fontSize: '0.88rem', color: 'var(--bf-text-secondary)', marginBottom: '1.25rem' }}>
-              Official progress percentage and rating recorded by Bfest&apos;s Officials.
+        {/* Right (30%): Summary, Team, & Progress Slider / Submit */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {/* Summary & Details Card */}
+          <div className="card" style={{ border: '1.5px solid var(--bf-border)' }}>
+            <h3 style={{ fontSize: '1.15rem', color: 'var(--bf-primary)', marginBottom: '0.6rem' }}>
+              Summary
+            </h3>
+            <p style={{ color: 'var(--bf-text-secondary)', lineHeight: 1.65, fontSize: '0.92rem', marginBottom: '1rem' }}>
+              {startup.description || startup.tagline}
             </p>
 
-            <div style={{
-              background: '#f8fafc',
-              border: '1px solid var(--bf-border)',
-              borderRadius: '8px',
-              padding: '0.85rem 1rem',
-              marginBottom: user && (user.role === 'student_affairs' || user.role === 'admin') ? '1.25rem' : '0',
-            }}>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '0.75rem',
-              }}>
-                <div>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)', display: 'block' }}>Official Rating</span>
-                  <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--bf-primary)' }}>
-                    {startup.publicRating.toFixed(1)} / 10
-                  </span>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--bf-text-muted)', display: 'block' }}>Progress</span>
-                  <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--bf-accent-blue)' }}>
-                    {startup.progressPercentage ?? 0}%
-                  </span>
-                </div>
+            <div style={{ borderTop: '1px solid var(--bf-border)', paddingTop: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.84rem', color: 'var(--bf-text-secondary)' }}>
+              <div>
+                <strong style={{ color: 'var(--bf-primary)' }}>Contact:</strong> {startup.contactEmail}
               </div>
-
-              {/* Visual Progress Bar */}
-              <div style={{ width: '100%', height: '10px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
-                <div
-                  style={{
-                    width: `${Math.min(100, Math.max(0, startup.progressPercentage ?? 0))}%`,
-                    height: '100%',
-                    background: 'linear-gradient(90deg, #0047ff 0%, #3b82f6 100%)',
-                    borderRadius: '999px',
-                    transition: 'width 0.3s ease',
-                  }}
-                />
-              </div>
+              {startup.website && (
+                <a href={startup.website} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: 'var(--bf-accent-blue)', fontWeight: 600 }}>
+                  <Globe size={14} /> Official Website
+                </a>
+              )}
             </div>
+          </div>
 
-            {user && (user.role === 'student_affairs' || user.role === 'admin') ? (
-              voteSubmitted ? (
+          {/* Official Progress & Submit Card (Visible to Bfest's Officials & Admin) */}
+          {user && (user.role === 'student_affairs' || user.role === 'admin') && (
+            <div className="card" style={{ border: '1.5px solid var(--bf-border)' }}>
+              {voteSubmitted ? (
                 <div style={{
                   background: 'rgba(16, 185, 129, 0.1)',
                   border: '1px solid rgba(16, 185, 129, 0.3)',
@@ -449,16 +487,16 @@ export default function StartupProfilePage() {
                   color: '#047857',
                 }}>
                   <CheckCircle size={28} style={{ margin: '0 auto 0.5rem' }} />
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700 }}>Progress &amp; Rating Recorded!</h4>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700 }}>Evaluation Recorded!</h4>
                   <p style={{ fontSize: '0.82rem', marginBottom: '0.75rem' }}>
-                    Official evaluation submitted for {startup.name}.
+                    Score ({startup.compositeScore.toFixed(0)} / 100) &amp; Progress ({startup.progressPercentage ?? 0}%) saved.
                   </p>
                   <button
                     type="button"
                     onClick={() => setVoteSubmitted(false)}
                     className="btn btn-secondary btn-sm"
                   >
-                    Update Rating / Progress
+                    Update Evaluation
                   </button>
                 </div>
               ) : (
@@ -477,79 +515,13 @@ export default function StartupProfilePage() {
                     </div>
                   )}
 
-                  <div style={{ marginBottom: '1.1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                      <div>
-                        <span style={{ display: 'block', fontSize: '0.86rem', fontWeight: 800, color: 'var(--bf-primary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                          The 10-Star Legacy Framework
-                        </span>
-                        <span style={{ fontSize: '0.74rem', color: 'var(--bf-text-muted)' }}>
-                          Award 1 star per fulfilled rubric
-                        </span>
-                      </div>
-                      <span className="badge badge-gold" style={{ fontSize: '0.8rem', fontWeight: 800 }}>
-                        {selectedStars.length} / 10 ★
-                      </span>
-                    </div>
-
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.35rem',
-                      background: '#0a0f1c',
-                      borderRadius: '10px',
-                      padding: '0.6rem',
-                      border: '1px solid rgba(212, 175, 55, 0.35)',
-                    }}>
-                      {LEGACY_RUBRICS.map((rubric) => {
-                        const isEarned = selectedStars.includes(rubric.id);
-                        return (
-                          <button
-                            key={rubric.id}
-                            type="button"
-                            onClick={() => toggleRubricStar(rubric.id)}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              gap: '0.5rem',
-                              width: '100%',
-                              textAlign: 'left',
-                              padding: '0.45rem 0.6rem',
-                              borderRadius: '7px',
-                              border: isEarned ? '1px solid rgba(255, 210, 51, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
-                              background: isEarned ? 'rgba(255, 210, 51, 0.12)' : 'rgba(255, 255, 255, 0.03)',
-                              cursor: 'pointer',
-                              transition: 'all 0.15s',
-                            }}
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0 }}>
-                              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', fontFamily: 'var(--font-display)', flexShrink: 0 }}>
-                                {rubric.id}
-                              </span>
-                              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: isEarned ? '#fef08a' : '#f8fafc', lineHeight: 1.25 }}>
-                                {rubric.label}
-                              </span>
-                            </div>
-                            <Star
-                              size={18}
-                              color="#f59e0b"
-                              fill={isEarned ? '#f59e0b' : 'transparent'}
-                              style={{ flexShrink: 0 }}
-                            />
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
                   <div style={{ marginBottom: '1rem' }}>
                     <div className="flex justify-between items-center" style={{ marginBottom: '0.4rem' }}>
-                      <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--bf-primary)' }}>
-                        Progress Percentage:
+                      <label style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--bf-primary)' }}>
+                        Progress Percentage
                       </label>
-                      <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--bf-accent-blue)' }}>
-                        {progressPercentage}%
+                      <span style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--bf-accent-blue)' }}>
+                        {progressPercentage} / 100%
                       </span>
                     </div>
                     <input
@@ -563,13 +535,13 @@ export default function StartupProfilePage() {
                     />
                   </div>
 
-                  <div style={{ marginBottom: '1.25rem' }}>
+                  <div style={{ marginBottom: '1.1rem' }}>
                     <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--bf-text-secondary)', marginBottom: '0.4rem' }}>
                       Official Remarks (Optional):
                     </label>
                     <textarea
                       rows={2}
-                      placeholder="Official remarks for the founding team..."
+                      placeholder="Official remarks for the team..."
                       value={feedback}
                       onChange={(e) => setFeedback(e.target.value)}
                       style={{
@@ -592,12 +564,12 @@ export default function StartupProfilePage() {
                     style={{ width: '100%' }}
                   >
                     <Send size={15} />
-                    {isSubmittingVote ? 'Submitting...' : 'Submit Progress & Rating'}
+                    {isSubmittingVote ? 'Submitting...' : `Submit Evaluation (${totalRubricPoints} / 100)`}
                   </button>
                 </form>
-              )
-            ) : null}
-          </div>
+              )}
+            </div>
+          )}
 
           {/* Quick Link for Official Judges (only shown if logged in as judge/admin) */}
           {user && (user.role === 'judge' || user.role === 'admin') && (

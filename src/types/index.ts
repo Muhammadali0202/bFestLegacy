@@ -64,7 +64,8 @@ export interface Startup {
   // Overall Composite & Ranking
   compositeScore: number;    // Weighted combination or Official points
   progressPercentage?: number; // 0-100 updated by Bfest's Officials / Student Affairs
-  rubricStars?: string[];    // 10-Star Legacy Framework criterion IDs earned
+  rubricStars?: string[];    // Legacy 10-star IDs
+  rubricScores?: Record<string, number>; // 10 rubrics x 0-10 points = 100 max
   isFirstSemester?: boolean; // 1st semester startups shown on Legacy Board TV
   rank?: number;
   submittedBy?: string;      // Student User ID

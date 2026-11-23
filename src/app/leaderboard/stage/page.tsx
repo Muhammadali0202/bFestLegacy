@@ -425,6 +425,10 @@ export default function StageLeaderboardPage() {
           0% { transform: translateX(0); }
           100% { transform: translateX(-100%); }
         }
+        @keyframes teamsContinuousMarquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
         .top3-rank-changed {
           animation: top3RankPulse 1.4s ease-out;
         }
@@ -445,14 +449,15 @@ export default function StageLeaderboardPage() {
           width: max-content;
           padding-left: 100%;
           animation: sponsorMarquee 26s linear infinite;
+          will-change: transform;
         }
         .teams-marquee-track {
           display: flex;
           align-items: center;
-          gap: clamp(1rem, 1.8vw, 2.5rem);
+          gap: clamp(0.75rem, 1.2vw, 1.5rem);
           width: max-content;
-          padding-left: 100%;
-          animation: sponsorMarquee 30s linear infinite;
+          animation: teamsContinuousMarquee 28s linear infinite;
+          will-change: transform;
         }
       `}</style>
 
@@ -663,47 +668,52 @@ export default function StageLeaderboardPage() {
 
             <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
               <div className="teams-marquee-track">
-                {items.slice(3).map((s, idx) => {
-                  const rankNum = idx + 4;
-                  return (
-                    <div
-                      key={`${s.id}-${idx}`}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 'clamp(0.6rem, 0.9vw, 1.25rem)',
-                        background: 'rgba(15, 29, 52, 0.9)',
-                        border: '1px solid rgba(148, 163, 184, 0.28)',
-                        padding: 'clamp(0.45rem, 0.8vh, 0.85rem) clamp(0.9rem, 1.4vw, 1.75rem)',
-                        borderRadius: '12px',
-                        flexShrink: 0,
-                      }}
-                    >
-                      <span style={{
-                        padding: '0.15rem 0.55rem',
-                        borderRadius: '7px',
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        color: '#e2e8f0',
-                        fontWeight: 900,
-                        fontSize: 'clamp(0.82rem, 1vw, 1.4rem)',
-                      }}>
-                        #{rankNum}
-                      </span>
-                      <StartupLogo logo={s.logo} name={s.name} size="clamp(28px, 2.4vw, 46px)" fontSize="clamp(1.2rem, 1.7vw, 2.2rem)" rounded="8px" />
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: 'clamp(0.88rem, 1.1vw, 1.55rem)', color: '#ffffff', whiteSpace: 'nowrap' }}>
-                          {s.name}
+                {(() => {
+                  const restTeams = items.slice(3);
+                  const repeatCount = restTeams.length === 1 ? 6 : restTeams.length <= 3 ? 4 : 2;
+                  const loopList = Array.from({ length: repeatCount }, () => restTeams).flat();
+                  return loopList.map((s, idx) => {
+                    const rankNum = (idx % restTeams.length) + 4;
+                    return (
+                      <div
+                        key={`${s.id}-${idx}`}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 'clamp(0.5rem, 0.75vw, 1rem)',
+                          background: 'rgba(15, 29, 52, 0.9)',
+                          border: '1px solid rgba(148, 163, 184, 0.28)',
+                          padding: 'clamp(0.4rem, 0.7vh, 0.75rem) clamp(0.8rem, 1.1vw, 1.4rem)',
+                          borderRadius: '12px',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <span style={{
+                          padding: '0.15rem 0.5rem',
+                          borderRadius: '7px',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          color: '#e2e8f0',
+                          fontWeight: 900,
+                          fontSize: 'clamp(0.78rem, 0.95vw, 1.3rem)',
+                        }}>
+                          #{rankNum}
+                        </span>
+                        <StartupLogo logo={s.logo} name={s.name} size="clamp(26px, 2.1vw, 42px)" fontSize="clamp(1.1rem, 1.5vw, 2rem)" rounded="8px" />
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: 'clamp(0.84rem, 1vw, 1.4rem)', color: '#ffffff', whiteSpace: 'nowrap' }}>
+                            {s.name}
+                          </div>
+                          <div style={{ fontSize: 'clamp(0.66rem, 0.75vw, 1.05rem)', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                            {s.sector}
+                          </div>
                         </div>
-                        <div style={{ fontSize: 'clamp(0.68rem, 0.8vw, 1.1rem)', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                          {s.sector}
+                        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(0.95rem, 1.2vw, 1.7rem)', color: '#ffd233', marginLeft: '0.25rem' }}>
+                          {s.compositeScore.toFixed(1)} <span style={{ fontSize: '0.72em', color: '#94a3b8' }}>PTS</span>
                         </div>
                       </div>
-                      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(1rem, 1.3vw, 1.85rem)', color: '#ffd233', marginLeft: '0.35rem' }}>
-                        {s.compositeScore.toFixed(1)} <span style={{ fontSize: '0.72em', color: '#94a3b8' }}>PTS</span>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
               </div>
             </div>
           </div>

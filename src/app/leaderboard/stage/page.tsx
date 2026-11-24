@@ -6,7 +6,7 @@ import { ArrowLeft, Maximize2, Minimize2, Clock, Lock, MonitorPlay, ShieldCheck,
 import { useAuth } from '@/context/AuthContext';
 import StartupLogo from '@/components/StartupLogo';
 
-const BFEST_TARGET_DATE = new Date('2026-12-19T09:00:00+05:00').getTime();
+const BFEST_TARGET_DATE = new Date('2026-12-17T09:00:00+05:00').getTime();
 
 export default function StageLeaderboardPage() {
   const { user, login, loading: authLoading } = useAuth();
@@ -371,7 +371,7 @@ export default function StageLeaderboardPage() {
           }}>
             <Clock size={16} color="#ffd233" />
             <span style={{ fontSize: 'clamp(0.72rem, 0.85vw, 1.2rem)', color: '#ffd233', fontWeight: 700, textTransform: 'uppercase' }}>
-              19 Dec:
+              17 Dec:
             </span>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(0.88rem, 1.1vw, 1.55rem)', color: '#ffffff' }}>
               {eventTimeLeft.days}d : {pad(eventTimeLeft.hours)}h : {pad(eventTimeLeft.minutes)}m : {pad(eventTimeLeft.seconds)}s

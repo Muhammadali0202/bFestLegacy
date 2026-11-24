@@ -19,8 +19,8 @@ import { Startup } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import StartupLogo from '@/components/StartupLogo';
 
-// Target date for Business Fest (19 December 2026)
-const BFEST_TARGET_DATE = new Date('2026-12-19T09:00:00+05:00').getTime();
+// Target date for Business Fest (17 December 2026)
+const BFEST_TARGET_DATE = new Date('2026-12-17T09:00:00+05:00').getTime();
 
 export default function HomePage() {
   const { user, logout } = useAuth();
@@ -452,7 +452,7 @@ export default function HomePage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', fontSize: '0.82rem', color: '#334155', marginBottom: '1.15rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <Calendar size={15} color="#0047ff" />
-                    <span><strong>Main Event:</strong> 19 December 2026</span>
+                    <span><strong>Main Event:</strong> 17 December 2026</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <MapPin size={15} color="#0047ff" />

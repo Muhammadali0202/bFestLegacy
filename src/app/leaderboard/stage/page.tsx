@@ -559,7 +559,7 @@ export default function StageLeaderboardPage() {
                 letterSpacing: '0.08em',
                 whiteSpace: 'nowrap',
               }}>
-                🏆 EVENT LEADER
+                EVENT LEADER
               </div>
 
               <div style={{

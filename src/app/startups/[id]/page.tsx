@@ -324,22 +324,24 @@ export default function StartupProfilePage() {
             </div>
           </div>
 
-          {/* Far Right: Startup Logo */}
-          <div style={{
-            width: '82px',
-            height: '82px',
-            borderRadius: 'var(--bf-radius-md)',
-            background: '#ffffff',
-            border: '2px solid var(--bf-border)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-            flexShrink: 0,
-            boxShadow: 'var(--bf-shadow-sm)',
-          }}>
-            <StartupLogo logo={startup.logo} name={startup.name} size={78} fontSize="2.8rem" rounded="10px" />
-          </div>
+          {/* Far Right: Startup Logo (only shown when an image is uploaded) */}
+          {startup.logo && (startup.logo.startsWith('data:image/') || startup.logo.startsWith('http') || startup.logo.startsWith('/')) && (
+            <div style={{
+              width: '82px',
+              height: '82px',
+              borderRadius: 'var(--bf-radius-md)',
+              background: '#ffffff',
+              border: '2px solid var(--bf-border)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              flexShrink: 0,
+              boxShadow: 'var(--bf-shadow-sm)',
+            }}>
+              <StartupLogo logo={startup.logo} name={startup.name} size={78} fontSize="2.8rem" rounded="10px" />
+            </div>
+          )}
         </div>
       </div>
 

@@ -290,11 +290,11 @@ export default function StageLeaderboardPage() {
         minHeight: '100vh',
         background: 'radial-gradient(circle at 50% 0%, #0f294a 0%, #050b16 65%, #02050b 100%)',
         color: '#ffffff',
-        padding: 'clamp(0.75rem, 1.8vh, 2.5rem) clamp(1rem, 2.5vw, 4rem)',
+        padding: 'clamp(0.55rem, 1.3vh, 2rem) clamp(1rem, 2.5vw, 4rem)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        gap: 'clamp(0.75rem, 1.4vh, 2rem)',
+        gap: 'clamp(0.45rem, 1vh, 1.5rem)',
       }}
     >
       {/* TV Broadcast Header */}
@@ -497,37 +497,37 @@ export default function StageLeaderboardPage() {
               background: 'linear-gradient(180deg, #10213b 0%, #091424 100%)',
               border: '2px solid #cbd5e1',
               borderRadius: 'clamp(14px, 1.4vw, 26px)',
-              padding: 'clamp(0.85rem, 1.8vh, 2.25rem) clamp(0.75rem, 1.3vw, 2rem)',
+              padding: 'clamp(0.65rem, 1.3vh, 1.85rem) clamp(0.75rem, 1.3vw, 2rem)',
               textAlign: 'center',
               boxShadow: '0 10px 25px rgba(0,0,0,0.55)',
               transition: 'all 0.5s ease',
             }}>
               <div style={{
-                width: 'clamp(34px, 3vw, 64px)',
-                height: 'clamp(34px, 3vw, 64px)',
+                width: 'clamp(30px, 2.6vw, 56px)',
+                height: 'clamp(30px, 2.6vw, 56px)',
                 borderRadius: '50%',
                 background: '#e2e8f0',
                 color: '#06172e',
                 fontWeight: 900,
-                fontSize: 'clamp(1rem, 1.3vw, 2rem)',
+                fontSize: 'clamp(0.95rem, 1.2vw, 1.85rem)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto clamp(0.35rem, 0.8vh, 0.9rem)',
+                margin: '0 auto clamp(0.25rem, 0.6vh, 0.75rem)',
               }}>
                 2
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.2vh' }}>
-                <StartupLogo logo={top3[1].logo} name={top3[1].name} size="clamp(40px, 3.6vw, 72px)" fontSize="clamp(1.6rem, 2.5vw, 3.8rem)" rounded="14px" />
+                <StartupLogo logo={top3[1].logo} name={top3[1].name} size="clamp(36px, 3.2vw, 64px)" fontSize="clamp(1.5rem, 2.2vw, 3.4rem)" rounded="14px" />
               </div>
-              <h2 style={{ fontSize: 'clamp(1rem, 1.45vw, 2.25rem)', color: '#ffffff', marginBottom: '0.2vh', fontFamily: 'var(--font-display)' }}>
+              <h2 style={{ fontSize: 'clamp(0.95rem, 1.35vw, 2.1rem)', color: '#ffffff', marginBottom: '0.15vh', fontFamily: 'var(--font-display)' }}>
                 {top3[1].name}
               </h2>
-              <span style={{ color: '#94a3b8', fontSize: 'clamp(0.72rem, 0.9vw, 1.3rem)', display: 'block', marginBottom: 'clamp(0.35rem, 0.8vh, 0.9rem)' }}>
+              <span style={{ color: '#94a3b8', fontSize: 'clamp(0.7rem, 0.85vw, 1.25rem)', display: 'block', marginBottom: 'clamp(0.25rem, 0.6vh, 0.75rem)' }}>
                 {top3[1].sector}
               </span>
-              <div style={{ fontSize: 'clamp(1.5rem, 2.4vw, 3.6rem)', fontWeight: 900, color: '#e2e8f0', fontFamily: 'var(--font-display)' }}>
-                {top3[1].compositeScore.toFixed(1)} <span style={{ fontSize: 'clamp(0.75rem, 0.95vw, 1.35rem)', color: '#64748b' }}>PTS</span>
+              <div style={{ fontSize: 'clamp(1.35rem, 2.1vw, 3.2rem)', fontWeight: 900, color: '#e2e8f0', fontFamily: 'var(--font-display)' }}>
+                {top3[1].compositeScore.toFixed(1)} <span style={{ fontSize: 'clamp(0.72rem, 0.9vw, 1.3rem)', color: '#64748b' }}>PTS</span>
               </div>
             </div>
           )}
@@ -538,7 +538,7 @@ export default function StageLeaderboardPage() {
               background: 'linear-gradient(180deg, #18345c 0%, #0c1d36 100%)',
               border: '3px solid #ffd233',
               borderRadius: 'clamp(16px, 1.6vw, 30px)',
-              padding: 'clamp(1.1rem, 2.4vh, 2.85rem) clamp(0.9rem, 1.5vw, 2.25rem)',
+              padding: 'clamp(0.85rem, 1.7vh, 2.35rem) clamp(0.9rem, 1.5vw, 2.25rem)',
               textAlign: 'center',
               boxShadow: '0 0 40px rgba(255, 210, 51, 0.28)',
               position: 'relative',
@@ -546,14 +546,14 @@ export default function StageLeaderboardPage() {
             }}>
               <div style={{
                 position: 'absolute',
-                top: 'clamp(-16px, -1.2vh, -10px)',
+                top: 'clamp(-14px, -1vh, -9px)',
                 left: '50%',
                 transform: 'translateX(-50%)',
                 background: '#ffd233',
                 color: '#06172e',
                 fontWeight: 900,
-                fontSize: 'clamp(0.65rem, 0.8vw, 1.15rem)',
-                padding: 'clamp(0.2rem, 0.35vh, 0.45rem) clamp(0.8rem, 1.2vw, 1.6rem)',
+                fontSize: 'clamp(0.62rem, 0.78vw, 1.1rem)',
+                padding: 'clamp(0.18rem, 0.3vh, 0.4rem) clamp(0.75rem, 1.1vw, 1.5rem)',
                 borderRadius: '9999px',
                 letterSpacing: '0.08em',
                 whiteSpace: 'nowrap',
@@ -562,32 +562,32 @@ export default function StageLeaderboardPage() {
               </div>
 
               <div style={{
-                width: 'clamp(42px, 3.8vw, 80px)',
-                height: 'clamp(42px, 3.8vw, 80px)',
+                width: 'clamp(38px, 3.2vw, 72px)',
+                height: 'clamp(38px, 3.2vw, 72px)',
                 borderRadius: '50%',
                 background: 'linear-gradient(135deg, #ffe033 0%, #eab308 100%)',
                 color: '#06172e',
                 fontWeight: 900,
-                fontSize: 'clamp(1.2rem, 1.7vw, 2.5rem)',
+                fontSize: 'clamp(1.1rem, 1.5vw, 2.25rem)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0.3vh auto clamp(0.4rem, 1vh, 1.1rem)',
+                margin: '0.25vh auto clamp(0.3rem, 0.7vh, 0.9rem)',
                 boxShadow: '0 0 24px rgba(255, 210, 51, 0.45)',
               }}>
                 1
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.2vh' }}>
-                <StartupLogo logo={top3[0].logo} name={top3[0].name} size="clamp(48px, 4.4vw, 88px)" fontSize="clamp(2rem, 3.1vw, 4.6rem)" rounded="16px" />
+                <StartupLogo logo={top3[0].logo} name={top3[0].name} size="clamp(44px, 3.8vw, 78px)" fontSize="clamp(1.8rem, 2.8vw, 4.2rem)" rounded="16px" />
               </div>
-              <h2 style={{ fontSize: 'clamp(1.2rem, 1.8vw, 2.75rem)', color: '#ffffff', marginBottom: '0.2vh', fontFamily: 'var(--font-display)' }}>
+              <h2 style={{ fontSize: 'clamp(1.1rem, 1.65vw, 2.55rem)', color: '#ffffff', marginBottom: '0.15vh', fontFamily: 'var(--font-display)' }}>
                 {top3[0].name}
               </h2>
-              <span style={{ color: '#ffd233', fontSize: 'clamp(0.78rem, 0.95vw, 1.4rem)', fontWeight: 700, display: 'block', marginBottom: 'clamp(0.45rem, 1vh, 1.1rem)' }}>
+              <span style={{ color: '#ffd233', fontSize: 'clamp(0.74rem, 0.9vw, 1.35rem)', fontWeight: 700, display: 'block', marginBottom: 'clamp(0.35rem, 0.75vh, 0.95rem)' }}>
                 {top3[0].sector}
               </span>
-              <div style={{ fontSize: 'clamp(1.85rem, 3vw, 4.4rem)', fontWeight: 900, color: '#ffd233', fontFamily: 'var(--font-display)' }}>
-                {top3[0].compositeScore.toFixed(1)} <span style={{ fontSize: 'clamp(0.85rem, 1.1vw, 1.55rem)', color: '#94a3b8' }}>PTS</span>
+              <div style={{ fontSize: 'clamp(1.65rem, 2.65vw, 4rem)', fontWeight: 900, color: '#ffd233', fontFamily: 'var(--font-display)' }}>
+                {top3[0].compositeScore.toFixed(1)} <span style={{ fontSize: 'clamp(0.8rem, 1vw, 1.45rem)', color: '#94a3b8' }}>PTS</span>
               </div>
             </div>
           )}
@@ -598,37 +598,37 @@ export default function StageLeaderboardPage() {
               background: 'linear-gradient(180deg, #10213b 0%, #091424 100%)',
               border: '2px solid #cd7f32',
               borderRadius: 'clamp(14px, 1.4vw, 26px)',
-              padding: 'clamp(0.85rem, 1.8vh, 2.25rem) clamp(0.75rem, 1.3vw, 2rem)',
+              padding: 'clamp(0.65rem, 1.3vh, 1.85rem) clamp(0.75rem, 1.3vw, 2rem)',
               textAlign: 'center',
               boxShadow: '0 10px 25px rgba(0,0,0,0.55)',
               transition: 'all 0.5s ease',
             }}>
               <div style={{
-                width: 'clamp(34px, 3vw, 64px)',
-                height: 'clamp(34px, 3vw, 64px)',
+                width: 'clamp(30px, 2.6vw, 56px)',
+                height: 'clamp(30px, 2.6vw, 56px)',
                 borderRadius: '50%',
                 background: '#cd7f32',
                 color: '#ffffff',
                 fontWeight: 900,
-                fontSize: 'clamp(1rem, 1.3vw, 2rem)',
+                fontSize: 'clamp(0.95rem, 1.2vw, 1.85rem)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto clamp(0.35rem, 0.8vh, 0.9rem)',
+                margin: '0 auto clamp(0.25rem, 0.6vh, 0.75rem)',
               }}>
                 3
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.2vh' }}>
-                <StartupLogo logo={top3[2].logo} name={top3[2].name} size="clamp(40px, 3.6vw, 72px)" fontSize="clamp(1.6rem, 2.5vw, 3.8rem)" rounded="14px" />
+                <StartupLogo logo={top3[2].logo} name={top3[2].name} size="clamp(36px, 3.2vw, 64px)" fontSize="clamp(1.5rem, 2.2vw, 3.4rem)" rounded="14px" />
               </div>
-              <h2 style={{ fontSize: 'clamp(1rem, 1.45vw, 2.25rem)', color: '#ffffff', marginBottom: '0.2vh', fontFamily: 'var(--font-display)' }}>
+              <h2 style={{ fontSize: 'clamp(0.95rem, 1.35vw, 2.1rem)', color: '#ffffff', marginBottom: '0.15vh', fontFamily: 'var(--font-display)' }}>
                 {top3[2].name}
               </h2>
-              <span style={{ color: '#94a3b8', fontSize: 'clamp(0.72rem, 0.9vw, 1.3rem)', display: 'block', marginBottom: 'clamp(0.35rem, 0.8vh, 0.9rem)' }}>
+              <span style={{ color: '#94a3b8', fontSize: 'clamp(0.7rem, 0.85vw, 1.25rem)', display: 'block', marginBottom: 'clamp(0.25rem, 0.6vh, 0.75rem)' }}>
                 {top3[2].sector}
               </span>
-              <div style={{ fontSize: 'clamp(1.5rem, 2.4vw, 3.6rem)', fontWeight: 900, color: '#e2e8f0', fontFamily: 'var(--font-display)' }}>
-                {top3[2].compositeScore.toFixed(1)} <span style={{ fontSize: 'clamp(0.75rem, 0.95vw, 1.35rem)', color: '#64748b' }}>PTS</span>
+              <div style={{ fontSize: 'clamp(1.35rem, 2.1vw, 3.2rem)', fontWeight: 900, color: '#e2e8f0', fontFamily: 'var(--font-display)' }}>
+                {top3[2].compositeScore.toFixed(1)} <span style={{ fontSize: 'clamp(0.72rem, 0.9vw, 1.3rem)', color: '#64748b' }}>PTS</span>
               </div>
             </div>
           )}
@@ -639,7 +639,7 @@ export default function StageLeaderboardPage() {
       </div>
 
       {/* Bottom Stacked Marquees: 1) Teams Below 3rd Position (#4+)  2) Our Proud Sponsors */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(0.55rem, 1vh, 1rem)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(0.4rem, 0.75vh, 0.85rem)', flexShrink: 0 }}>
         {/* Teams Below 3rd Position Marquee */}
         {items.slice(3).length > 0 && (
           <div style={{
@@ -721,8 +721,8 @@ export default function StageLeaderboardPage() {
         {/* Wide "Our Proud Sponsors" Marquee Footer */}
         <div style={{
           borderTop: '1px solid rgba(255, 210, 51, 0.3)',
-          paddingTop: 'clamp(0.75rem, 1.3vh, 1.5rem)',
-          paddingBottom: 'clamp(0.25rem, 0.5vh, 0.6rem)',
+          paddingTop: 'clamp(0.45rem, 0.85vh, 1.1rem)',
+          paddingBottom: 'clamp(0.15rem, 0.3vh, 0.4rem)',
           display: 'flex',
           alignItems: 'center',
           gap: 'clamp(1rem, 1.6vw, 2.25rem)',
@@ -731,7 +731,7 @@ export default function StageLeaderboardPage() {
         }}>
           <div style={{
             flexShrink: 0,
-            fontSize: 'clamp(0.88rem, 1.15vw, 1.65rem)',
+            fontSize: 'clamp(0.85rem, 1.1vw, 1.6rem)',
             fontWeight: 800,
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
@@ -756,11 +756,11 @@ export default function StageLeaderboardPage() {
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: 'clamp(0.75rem, 1.1vw, 1.4rem)',
+                        gap: 'clamp(0.65rem, 1vw, 1.3rem)',
                         background: 'rgba(255, 255, 255, 0.97)',
-                        padding: 'clamp(0.55rem, 1vh, 1.1rem) clamp(1.25rem, 2vw, 2.6rem)',
-                        minWidth: 'clamp(185px, 18vw, 330px)',
-                        borderRadius: '14px',
+                        padding: 'clamp(0.35rem, 0.7vh, 0.9rem) clamp(1.1rem, 1.8vw, 2.4rem)',
+                        minWidth: 'clamp(170px, 17vw, 310px)',
+                        borderRadius: '12px',
                         flexShrink: 0,
                         boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)',
                       }}
@@ -774,14 +774,14 @@ export default function StageLeaderboardPage() {
                             (e.currentTarget as HTMLImageElement).style.display = 'none';
                           }}
                           style={{
-                            height: 'clamp(40px, 5.2vh, 78px)',
+                            height: 'clamp(30px, 4.1vh, 66px)',
                             width: 'auto',
-                            maxWidth: 'clamp(120px, 14vw, 240px)',
+                            maxWidth: 'clamp(110px, 13vw, 220px)',
                             objectFit: 'contain',
                           }}
                         />
                       )}
-                      <span style={{ color: '#0b2545', fontWeight: 800, fontSize: 'clamp(0.98rem, 1.3vw, 1.85rem)', whiteSpace: 'nowrap' }}>
+                      <span style={{ color: '#0b2545', fontWeight: 800, fontSize: 'clamp(0.92rem, 1.2vw, 1.75rem)', whiteSpace: 'nowrap' }}>
                         {sp.name}
                       </span>
                     </div>

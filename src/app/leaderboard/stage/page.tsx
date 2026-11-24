@@ -445,10 +445,9 @@ export default function StageLeaderboardPage() {
         .sponsor-marquee-track {
           display: flex;
           align-items: center;
-          gap: clamp(1.5rem, 2.5vw, 4rem);
+          gap: clamp(1.5rem, 2.5vw, 3.5rem);
           width: max-content;
-          padding-left: 100%;
-          animation: sponsorMarquee 26s linear infinite;
+          animation: teamsContinuousMarquee 32s linear infinite;
           will-change: transform;
         }
         .teams-marquee-track {
@@ -456,7 +455,7 @@ export default function StageLeaderboardPage() {
           align-items: center;
           gap: clamp(0.75rem, 1.2vw, 1.5rem);
           width: max-content;
-          animation: teamsContinuousMarquee 28s linear infinite;
+          animation: teamsContinuousMarquee 55s linear infinite;
           will-change: transform;
         }
       `}</style>
@@ -669,7 +668,7 @@ export default function StageLeaderboardPage() {
             <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
               <div className="teams-marquee-track">
                 {(() => {
-                  const restTeams = items.slice(3);
+                  const restTeams = items.slice(3, 18); // Next 15 startups (#4 to #18)
                   const repeatCount = restTeams.length === 1 ? 6 : restTeams.length <= 3 ? 4 : 2;
                   const loopList = Array.from({ length: repeatCount }, () => restTeams).flat();
                   return loopList.map((s, idx) => {
@@ -722,7 +721,8 @@ export default function StageLeaderboardPage() {
         {/* Wide "Our Proud Sponsors" Marquee Footer */}
         <div style={{
           borderTop: '1px solid rgba(255, 210, 51, 0.3)',
-          paddingTop: 'clamp(0.65rem, 1.1vh, 1.3rem)',
+          paddingTop: 'clamp(0.75rem, 1.3vh, 1.5rem)',
+          paddingBottom: 'clamp(0.25rem, 0.5vh, 0.6rem)',
           display: 'flex',
           alignItems: 'center',
           gap: 'clamp(1rem, 1.6vw, 2.25rem)',
@@ -731,7 +731,7 @@ export default function StageLeaderboardPage() {
         }}>
           <div style={{
             flexShrink: 0,
-            fontSize: 'clamp(0.82rem, 1.05vw, 1.5rem)',
+            fontSize: 'clamp(0.88rem, 1.15vw, 1.65rem)',
             fontWeight: 800,
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
@@ -746,43 +746,47 @@ export default function StageLeaderboardPage() {
           <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
             {sponsors.length > 0 ? (
               <div className="sponsor-marquee-track">
-                {sponsors.map((sp, idx) => (
-                  <div
-                    key={`${sp.name}-${idx}`}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 'clamp(0.65rem, 1vw, 1.25rem)',
-                      background: 'rgba(255, 255, 255, 0.97)',
-                      padding: 'clamp(0.45rem, 0.85vh, 0.9rem) clamp(1.1rem, 1.8vw, 2.35rem)',
-                      minWidth: 'clamp(165px, 16vw, 300px)',
-                      borderRadius: '12px',
-                      flexShrink: 0,
-                      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)',
-                    }}
-                  >
-                    {sp.logoUrl && (
-                      <img
-                        src={sp.logoUrl}
-                        alt={sp.name}
-                        referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
-                        }}
-                        style={{
-                          height: 'clamp(34px, 4.4vh, 68px)',
-                          width: 'auto',
-                          maxWidth: 'clamp(110px, 13vw, 220px)',
-                          objectFit: 'contain',
-                        }}
-                      />
-                    )}
-                    <span style={{ color: '#0b2545', fontWeight: 800, fontSize: 'clamp(0.9rem, 1.2vw, 1.7rem)', whiteSpace: 'nowrap' }}>
-                      {sp.name}
-                    </span>
-                  </div>
-                ))}
+                {(() => {
+                  const spRepeat = sponsors.length === 1 ? 8 : sponsors.length === 2 ? 6 : sponsors.length <= 4 ? 4 : 2;
+                  const repeatedSponsors = Array.from({ length: spRepeat }, () => sponsors).flat();
+                  return repeatedSponsors.map((sp, idx) => (
+                    <div
+                      key={`${sp.name}-${idx}`}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 'clamp(0.75rem, 1.1vw, 1.4rem)',
+                        background: 'rgba(255, 255, 255, 0.97)',
+                        padding: 'clamp(0.55rem, 1vh, 1.1rem) clamp(1.25rem, 2vw, 2.6rem)',
+                        minWidth: 'clamp(185px, 18vw, 330px)',
+                        borderRadius: '14px',
+                        flexShrink: 0,
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)',
+                      }}
+                    >
+                      {sp.logoUrl && (
+                        <img
+                          src={sp.logoUrl}
+                          alt={sp.name}
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).style.display = 'none';
+                          }}
+                          style={{
+                            height: 'clamp(40px, 5.2vh, 78px)',
+                            width: 'auto',
+                            maxWidth: 'clamp(120px, 14vw, 240px)',
+                            objectFit: 'contain',
+                          }}
+                        />
+                      )}
+                      <span style={{ color: '#0b2545', fontWeight: 800, fontSize: 'clamp(0.98rem, 1.3vw, 1.85rem)', whiteSpace: 'nowrap' }}>
+                        {sp.name}
+                      </span>
+                    </div>
+                  ));
+                })()}
               </div>
             ) : (
               <div style={{ fontSize: 'clamp(0.82rem, 1vw, 1.4rem)', color: '#94a3b8' }}>

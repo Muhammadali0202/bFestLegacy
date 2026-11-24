@@ -13,7 +13,7 @@ export const initialEventConfig: EventConfig = {
   publicWeight: 0.20,
   googleFormUrl: 'https://forms.gle/HJvwFsgCzGS8MK3d7',
   vendorFormUrl: 'https://forms.gle/PYNusAYuHRWPRhBw7',
-  googleSheetUrl: 'https://docs.google.com/spreadsheets/d/1Lys9DrF2n9Fos_gunDb686GM0cUjRGtTY1vazAMz_QI/edit?usp=sharing',
+  googleSheetUrl: 'https://docs.google.com/spreadsheets/d/1VnpkLRQ6DFhKKASL_SionnSs5YqDuqkJ8sFotpfeY4M/edit?gid=0#gid=0',
 };
 
 export const initialUsers: (User & { passwordHash: string })[] = [

@@ -153,7 +153,9 @@ export async function syncGoogleSheetToDatabase(options?: {
     }
 
     const spreadsheetId = match[1];
-    const exportUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`;
+    const gidMatch = String(targetSheetUrl).match(/gid=([0-9]+)/);
+    const gidParam = gidMatch ? `&gid=${gidMatch[1]}` : '';
+    const exportUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv${gidParam}`;
 
     const response = await fetch(exportUrl, { cache: 'no-store' });
     if (!response.ok) {
@@ -200,37 +202,55 @@ export async function syncGoogleSheetToDatabase(options?: {
     }
 
     const contactEmail =
-      pickColumn(row, ['email', 'contact']) ||
+      pickColumn(row, ['email']) ||
       `${name.toLowerCase().replace(/[^a-z0-9]/g, '')}@imsciences.edu.pk`;
-    const tagline =
-      pickColumn(row, ['tagline', 'one-liner', 'short pitch', 'idea', 'summary']) ||
+    const contactPhone = pickColumn(row, ['contact no', 'phone', 'mobile']);
+    const studentId = pickColumn(row, ['student id']);
+    const programSemester = pickColumn(row, ['program & semester', 'program', 'semester']);
+    const ideaSummary =
+      pickColumn(row, ['idea summary', 'summary', 'description', 'detail', 'about', 'overview']) ||
+      pickColumn(row, ['tagline', 'one-liner', 'short pitch', 'idea']) ||
       'Registered Stall at Business Fest 2027';
-    const description =
-      pickColumn(row, ['description', 'detail', 'about', 'overview']) || tagline;
+    const tagline =
+      ideaSummary.length > 110 ? `${ideaSummary.slice(0, 107)}...` : ideaSummary;
     const problem = pickColumn(row, ['problem', 'challenge']);
     const solution = pickColumn(row, ['solution', 'product']);
-    const sector = normalizeSector(pickColumn(row, ['sector', 'category', 'industry', 'domain', 'track']));
+    const sector = normalizeSector(pickColumn(row, ['sector', 'category', 'industry', 'domain', 'track']) || ideaSummary);
     const founderName =
-      pickColumn(row, ['founder', 'leader', 'student name', 'full name', 'owner', 'member']) ||
+      pickColumn(row, ['team lead', 'leader', 'founder', 'student name', 'full name', 'owner']) ||
       'Student Team Lead';
-    const department =
-      pickColumn(row, ['department', 'role', 'program', 'semester']) || 'Founder';
+    const teamMembersRaw = pickColumn(row, ['team members', 'members']);
+    const memberList = teamMembersRaw
+      ? teamMembersRaw
+          .split(/[\n,]+/)
+          .map((m) => m.trim())
+          .filter(Boolean)
+          .map((mName) => ({ name: mName, role: 'Team Member' }))
+      : [];
+    const department = programSemester || pickColumn(row, ['department', 'role']) || 'Founder';
     const boothNumber =
       pickColumn(row, ['stall no', 'booth', 'table']) || 'Allocated Stall';
+    const isFirstSem = programSemester.toLowerCase().includes('1st');
 
     const created = await StartupRepository.register({
       name: name.trim(),
       tagline,
-      description,
+      description: ideaSummary,
       problem,
       solution,
       sector,
-      logo: SECTOR_LOGOS[sector] || '🚀',
+      logo: '',
       website: pickColumn(row, ['website', 'link', 'url']),
       contactEmail,
-      founders: [{ name: founderName, role: department }],
+      contactPhone,
+      studentId,
+      programSemester,
+      teamMembers: teamMembersRaw,
+      founders: [{ name: founderName, role: `Team Lead (${department})` }, ...memberList],
       boothNumber,
       submittedBy: 'google-sheet-sync',
+      isFirstSemester: isFirstSem,
+      autoApprove: autoApprove,
     });
 
     if (autoApprove) {

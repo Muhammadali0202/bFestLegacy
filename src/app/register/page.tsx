@@ -814,7 +814,7 @@ export default function RegisterStartupPage() {
           {startups.length === 0 ? (
             <p style={{ fontSize: '0.9rem', color: 'var(--bf-text-muted)' }}>No startups registered yet.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '360px', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               {startups.map((s) => (
                 <div
                   key={s.id}
